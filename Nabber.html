@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home | SHMS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<style>
+ 
+ 
+/* ============ COLOR SCHEME ============ */
+  :root {
+    --primary-light: #8b9dc3; /* slate-400 - soft blue */
+    --primary-dark: #64748b; /* slate-500 - muted blue */
+    --hover-light: #e2e8f0; /* slate-100 - very light blue */
+    --bg-light: #f8fafc; /* slate-50 - almost white */
+    --text-dark: #475569; /* slate-600 - soft gray */
+    --text-white: #ffffff;
+    --text-danger: #ef4444; /* red-500 - softer red */
+  }
+</style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+<!-- Top Navbar -->
+<nav class="bg-slate-400 text-white px-6 py-4 flex justify-between items-center shadow-md sticky top-0 z-50">
+  <h1 class="text-2xl font-bold flex items-center space-x-2">
+    <span>SHMS</span>
+  </h1>
+  <span class="text-lg font-semibold flex items-center space-x-2">
+    <span>Hospital Admin</span>
+  </span>
+  <div class="relative">
+    <button id="menuBtn" class="text-white text-2xl focus:outline-none hover:bg-slate-500 rounded p-2">
+      <i class="ph ph-dots-three-vertical"></i>
+    </button>
+    <div id="menuDropdown" class="hidden absolute right-0 mt-2 w-36 bg-white text-gray-800 rounded shadow-lg">
+      <a href="#" class="block px-4 py-2 hover:bg-slate-100">Profile</a>
+      <a href="#" class="block px-4 py-2 hover:bg-slate-100">Report</a>
+      <a href="login.html" class="block px-4 py-2 hover:bg-slate-100 text-red-500">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Feature Navbar -->
+<nav class="bg-slate-500 text-white shadow-md sticky top-16 z-40">
+  <div class="container mx-auto flex flex-wrap justify-start items-center px-4 py-3 space-x-1">
+    <a href="Home.html" class="px-3 py-2 rounded hover:bg-slate-400">Home</a>
+
+    <div class="relative group">
+      <button class="px-3 py-2 rounded hover:bg-slate-400">Patient & Medical Record</button>
+      <div class="hidden group-hover:block absolute left-0 mt-0 bg-white text-gray-800 rounded shadow-lg">
+        <a href="Patients.html" class="block px-4 py-2 hover:bg-slate-100 whitespace-nowrap">Patient List</a>
+        <a href="MedicalRecords.html" class="block px-4 py-2 hover:bg-slate-100 whitespace-nowrap">Medical Records</a>
+      </div>
+    </div>
+
+    <div class="relative group">
+      <button class="px-3 py-2 rounded hover:bg-slate-400">Doctor & Appointment</button>
+      <div class="hidden group-hover:block absolute left-0 mt-0 bg-white text-gray-800 rounded shadow-lg">
+        <a href="Doctors.html" class="block px-4 py-2 hover:bg-slate-100 whitespace-nowrap">Doctors Directory</a>
+        <a href="Appointments.html" class="block px-4 py-2 hover:bg-slate-100 whitespace-nowrap">Appointments Management</a>
+      </div>
+    </div>
+
+    <div class="relative group">
+      <button class="px-3 py-2 rounded hover:bg-slate-400">Prescription & Investigation</button>
+      <div class="hidden group-hover:block absolute left-0 mt-0 bg-white text-gray-800 rounded shadow-lg">
+        <a href="Prescriptions.html" class="block px-4 py-2 hover:bg-slate-100 whitespace-nowrap">Prescriptions</a>
+        <a href="Investigations.html" class="block px-4 py-2 hover:bg-slate-100 whitespace-nowrap">Tests & Diagnostic Reports</a>
+      </div>
+    </div>
+
+    <div class="relative group">
+      <button class="px-3 py-2 rounded hover:bg-slate-400">Billing & Insurance</button>
+      <div class="hidden group-hover:block absolute left-0 mt-0 bg-white text-gray-800 rounded shadow-lg">
+        <a href="Billing.html" class="block px-4 py-2 hover:bg-slate-100 whitespace-nowrap">Bills & Payments</a>
+        <a href="InsuranceClaims.html" class="block px-4 py-2 hover:bg-slate-100 whitespace-nowrap">Insurance Claims</a>
+      </div>
+    </div>
+
+    <div class="relative group">
+      <button class="px-3 py-2 rounded hover:bg-slate-400">Disease Prediction</button>
+      <div class="hidden group-hover:block absolute left-0 mt-0 bg-white text-gray-800 rounded shadow-lg">
+        <a href="DiseasePredictions.html" class="block px-4 py-2 hover:bg-slate-100 whitespace-nowrap">Disease Predictions</a>
+        <a href="Symptoms.html" class="block px-4 py-2 hover:bg-slate-100 whitespace-nowrap">Symptom Assessments</a>
+      </div>
+    </div>
+
+    <div class="relative group">
+      <button class="px-3 py-2 rounded hover:bg-slate-400">Smart Recommendations</button>
+      <div class="hidden group-hover:block absolute left-0 mt-0 bg-white text-gray-800 rounded shadow-lg">
+        <a href="HealthReminders.html" class="block px-4 py-2 hover:bg-slate-100 whitespace-nowrap">Health Reminders</a>
+        <a href="Recommendations.html" class="block px-4 py-2 hover:bg-slate-100 whitespace-nowrap">Health Tips & Recommendations</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<script>
+  document.getElementById('menuBtn').addEventListener('click', () => {
+    document.getElementById('menuDropdown').classList.toggle('hidden');
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#menuBtn')) {
+      document.getElementById('menuDropdown').classList.add('hidden');
+    }
+  });
+</script>
+
+</body>
+</html>
