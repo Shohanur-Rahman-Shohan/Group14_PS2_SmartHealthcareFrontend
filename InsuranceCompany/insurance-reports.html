@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reports & Analytics | Smart Healthcare Insurance</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/phosphor-icons"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <style>
+    a, .card, button {
+      transition: all 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    }
+    .menu-enter {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+    .menu-open {
+      max-height: 500px;
+    }
+    .chart-container {
+      position: relative;
+      height: 300px;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 text-gray-800 min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="bg-blue-700 text-white shadow-md sticky top-0 z-40">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <h1 class="text-2xl font-semibold flex items-center gap-2">
+        <i class="ph ph-building-office text-white"></i> Insurance Company
+      </h1>
+
+      <!-- Mobile Toggle -->
+      <button id="menuBtn" class="sm:hidden text-2xl focus:outline-none">
+        <i class="ph ph-list"></i>
+      </button>
+
+      <!-- Desktop Nav -->
+      <div class="hidden sm:flex flex-wrap justify-center items-center space-x-2">
+        <a href="insurance-dashboard.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-gauge"></i> Dashboard</a>
+        <a href="view-claims.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-file-text"></i> View Claims</a>
+        <a href="approve-claims.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-check-square"></i> Approve / Reject Claims</a>
+        <a href="claim-history.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-clock-counter-clockwise"></i> Claim History</a>
+        <a href="policyholders.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-identification-badge"></i> Policyholder Info</a>
+        <a href="payments.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-credit-card"></i> Payment Records</a>
+        <a href="insurance-notifications.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-bell"></i> Notifications</a>
+        <a href="insurance-reports.html" class="px-3 py-2 rounded bg-blue-500 flex items-center gap-2 font-medium"><i class="ph ph-chart-bar"></i> Reports</a>
+        <a href="logout.html" class="px-3 py-2 rounded hover:bg-red-600 flex items-center gap-2"><i class="ph ph-sign-out"></i> Logout</a>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="menu-enter sm:hidden bg-blue-600">
+      <a href="insurance-dashboard.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-gauge"></i> Dashboard</a>
+      <a href="view-claims.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-file-text"></i> View Claims</a>
+      <a href="approve-claims.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-check-square"></i> Approve / Reject Claims</a>
+      <a href="claim-history.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-clock-counter-clockwise"></i> Claim History</a>
+      <a href="policyholders.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-identification-badge"></i> Policyholder Info</a>
+      <a href="payments.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-credit-card"></i> Payment Records</a>
+      <a href="insurance-notifications.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-bell"></i> Notifications</a>
+      <a href="insurance-reports.html" class="block px-4 py-2 bg-blue-500"><i class="ph ph-chart-bar"></i> Reports</a>
+      <a href="logout.html" class="block px-4 py-2 hover:bg-red-600"><i class="ph ph-sign-out"></i> Logout</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-10">
+
+    <div class="text-center mb-6">
+      <h1 class="text-4xl font-bold text-blue-700 mb-2 flex justify-center items-center gap-2">
+        <i class="ph ph-chart-bar"></i> Reports & Analytics
+      </h1>
+      <p class="text-gray-600">Visualize insurance claim and payment data for better decision-making.</p>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div class="card bg-white p-6 rounded-lg shadow text-center">
+        <i class="ph ph-file-text text-4xl text-blue-600 mb-3"></i>
+        <h2 class="text-lg font-semibold text-gray-700">Total Claims</h2>
+        <p class="text-2xl font-bold text-gray-800 mt-1">120</p>
+      </div>
+      <div class="card bg-white p-6 rounded-lg shadow text-center">
+        <i class="ph ph-check-square text-4xl text-green-600 mb-3"></i>
+        <h2 class="text-lg font-semibold text-gray-700">Approved Claims</h2>
+        <p class="text-2xl font-bold text-green-600 mt-1">85</p>
+      </div>
+      <div class="card bg-white p-6 rounded-lg shadow text-center">
+        <i class="ph ph-x-square text-4xl text-red-600 mb-3"></i>
+        <h2 class="text-lg font-semibold text-gray-700">Rejected Claims</h2>
+        <p class="text-2xl font-bold text-red-600 mt-1">20</p>
+      </div>
+      <div class="card bg-white p-6 rounded-lg shadow text-center">
+        <i class="ph ph-clock text-4xl text-yellow-600 mb-3"></i>
+        <h2 class="text-lg font-semibold text-gray-700">Pending Claims</h2>
+        <p class="text-2xl font-bold text-yellow-600 mt-1">15</p>
+      </div>
+    </div>
+
+    <!-- Export Buttons -->
+    <div class="flex justify-end gap-4 mb-6">
+      <button id="downloadCSV" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded flex items-center gap-2">
+        <i class="ph ph-download"></i> Download CSV
+      </button>
+      <button id="downloadExcel" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2">
+        <i class="ph ph-download"></i> Download Excel
+      </button>
+    </div>
+
+    <!-- Charts -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Pie Chart -->
+      <div class="card bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4 text-blue-700 flex items-center gap-2"><i class="ph ph-pie-chart"></i> Claim Status Distribution</h2>
+        <div class="chart-container">
+          <canvas id="claimPieChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Line Chart -->
+      <div class="card bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4 text-blue-700 flex items-center gap-2"><i class="ph ph-chart-line-up"></i> Monthly Claims Trend</h2>
+        <div class="chart-container">
+          <canvas id="monthlyClaimsChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="mt-16 text-center py-4 text-gray-500">
+    © 2025 Smart Healthcare Insurance Division. All Rights Reserved.
+  </footer>
+
+  <script>
+    const menuBtn = document.getElementById("menuBtn");
+    const mobileMenu = document.getElementById("mobileMenu");
+
+    menuBtn.addEventListener("click", () => {
+      mobileMenu.classList.toggle("menu-open");
+    });
+
+    // Chart.js Pie Chart for Claim Status
+    const claimPieCtx = document.getElementById('claimPieChart').getContext('2d');
+    const claimPieChart = new Chart(claimPieCtx, {
+      type: 'pie',
+      data: {
+        labels: ['Approved', 'Rejected', 'Pending'],
+        datasets: [{
+          data: [85, 20, 15],
+          backgroundColor: ['#16a34a', '#dc2626', '#facc15']
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' }
+        }
+      }
+    });
+
+    // Chart.js Line Chart for Monthly Claims
+    const monthlyClaimsCtx = document.getElementById('monthlyClaimsChart').getContext('2d');
+    const monthlyClaimsChart = new Chart(monthlyClaimsCtx, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'],
+        datasets: [{
+          label: 'Claims Submitted',
+          data: [5, 8, 12, 10, 15, 9, 14, 11, 13, 12, 8],
+          borderColor: '#2563eb',
+          backgroundColor: 'rgba(37, 99, 235, 0.2)',
+          tension: 0.3,
+          fill: true,
+          pointRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+
+    // Download CSV
+    document.getElementById('downloadCSV').addEventListener('click', () => {
+      const csvData = [
+        ['Claim Type', 'Count'],
+        ['Total Claims', 120],
+        ['Approved Claims', 85],
+        ['Rejected Claims', 20],
+        ['Pending Claims', 15]
+      ];
+      let csvContent = "data:text/csv;charset=utf-8," + csvData.map(e => e.join(",")).join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "claim_summary.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+
+    // Download Excel
+    document.getElementById('downloadExcel').addEventListener('click', () => {
+      const ws_data = [
+        ['Claim Type', 'Count'],
+        ['Total Claims', 120],
+        ['Approved Claims', 85],
+        ['Rejected Claims', 20],
+        ['Pending Claims', 15]
+      ];
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(ws_data);
+      XLSX.utils.book_append_sheet(wb, ws, "Claim Summary");
+      XLSX.writeFile(wb, "claim_summary.xlsx");
+    });
+  </script>
+</body>
+</html>
