@@ -23,7 +23,8 @@
     .menu-open {
       max-height: 500px;
     }
-    /* Toast animation */
+
+    /* ✅ Toast with animation + no click block */
     .toast {
       position: fixed;
       top: 20px;
@@ -38,10 +39,12 @@
       transform: translateY(-20px);
       transition: all 0.4s ease;
       z-index: 50;
+      pointer-events: none; /* 🩵 prevent blocking clicks */
     }
     .toast.show {
       opacity: 1;
       transform: translateY(0);
+      pointer-events: auto;
     }
   </style>
 </head>
@@ -49,7 +52,7 @@
 <body class="bg-gray-100 text-gray-800 min-h-screen">
 
   <!-- Navbar -->
-  <nav class="bg-sky-700 text-white shadow-md sticky top-0 z-50">
+  <nav class="bg-sky-700 text-white shadow-md sticky top-0 z-40">
     <div class="container mx-auto px-4 py-3 flex justify-between items-center">
       <h1 class="text-2xl font-semibold flex items-center gap-2">
         <i class="ph ph-heartbeat text-white"></i> Smart Healthcare
@@ -67,7 +70,7 @@
         <a href="my-doctors.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-stethoscope"></i> My Doctors</a>
         <a href="my-prescriptions.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-pill"></i> My Prescriptions</a>
         <a href="test-reports.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-flask"></i> My Test Reports</a>
-        <a href="billing.html" class="px-3 py-2 rounded bg-sky-500 flex items-center gap-2 font-medium"><i class="ph ph-credit-card"></i> Billing</a>
+        <a href="billing.html" class="px-3 py-2 rounded bg-sky-500 flex items-center gap-2 font-medium"><i class="ph ph-credit-card"></i> Billing & Insurance</a>
         <a href="notifications.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-bell"></i> Notifications</a>
       </div>
     </div>
@@ -168,7 +171,7 @@
       mobileMenu.classList.toggle("menu-open");
     });
 
-    // Show success toast when paying bill
+    // ✅ Show success toast when paying bill
     payBtn.addEventListener("click", () => {
       toast.classList.add("show");
       setTimeout(() => {
