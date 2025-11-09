@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Doctors | Smart Healthcare</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/phosphor-icons"></script>
+
+  <style>
+    /* Animations and transitions */
+    a, .card {
+      transition: all 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    .menu-enter {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+    .menu-open {
+      max-height: 500px;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 text-gray-800 min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="bg-sky-700 text-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <h1 class="text-2xl font-semibold flex items-center gap-2">
+        <i class="ph ph-heartbeat text-white"></i> Smart Healthcare
+      </h1>
+
+      <!-- Mobile Toggle -->
+      <button id="menuBtn" class="sm:hidden text-2xl focus:outline-none">
+        <i class="ph ph-list"></i>
+      </button>
+
+      <!-- Desktop Nav -->
+      <div class="hidden sm:flex flex-wrap justify-center items-center space-x-2">
+        <a href="dashboard.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-gauge"></i> Dashboard</a>
+        <a href="book-appointment.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-calendar-check"></i> Book Appointment</a>
+        <a href="my-doctors.html" class="px-3 py-2 rounded bg-sky-500 flex items-center gap-2 font-medium"><i class="ph ph-stethoscope"></i> My Doctors</a>
+        <a href="my-prescriptions.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-pill"></i> My Prescriptions</a>
+        <a href="test-reports.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-flask"></i> My Test Reports</a>
+        <a href="billing.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-credit-card"></i> Billing</a>
+        <a href="notifications.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-bell"></i> Notifications</a>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="menu-enter sm:hidden bg-sky-600">
+      <a href="dashboard.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-gauge"></i> Dashboard</a>
+      <a href="book-appointment.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-calendar-check"></i> Book Appointment</a>
+      <a href="my-doctors.html" class="block px-4 py-2 bg-sky-500"><i class="ph ph-stethoscope"></i> My Doctors</a>
+      <a href="my-prescriptions.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-pill"></i> My Prescriptions</a>
+      <a href="test-reports.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-flask"></i> My Test Reports</a>
+      <a href="billing.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-credit-card"></i> Billing</a>
+      <a href="notifications.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-bell"></i> Notifications</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-10">
+    <!-- Header -->
+    <div class="text-center mb-10">
+      <h1 class="text-4xl font-bold text-sky-700 mb-2 flex justify-center items-center gap-2">
+        <i class="ph ph-stethoscope"></i> My Doctors
+      </h1>
+      <p class="text-gray-600">Meet the healthcare professionals managing your treatment and wellness.</p>
+    </div>
+
+    <!-- Doctor Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Doctor Card 1 -->
+      <div class="card bg-white rounded-lg shadow p-6 text-center">
+        <img src="https://randomuser.me/api/portraits/men/10.jpg" alt="Doctor" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
+        <h2 class="text-xl font-semibold text-sky-700">Dr. Rahman</h2>
+        <p class="text-gray-600 mb-1">Cardiologist</p>
+        <p class="text-gray-500 text-sm mb-3">10+ years experience</p>
+        <div class="flex justify-center gap-3">
+          <a href="#" class="text-sky-600 hover:text-sky-700" title="Email"><i class="ph ph-envelope-simple text-xl"></i></a>
+          <a href="#" class="text-sky-600 hover:text-sky-700" title="Call"><i class="ph ph-phone text-xl"></i></a>
+          <a href="#" class="text-sky-600 hover:text-sky-700" title="Chat"><i class="ph ph-chat-circle-dots text-xl"></i></a>
+        </div>
+      </div>
+
+      <!-- Doctor Card 2 -->
+      <div class="card bg-white rounded-lg shadow p-6 text-center">
+        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Doctor" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
+        <h2 class="text-xl font-semibold text-sky-700">Dr. Afsana</h2>
+        <p class="text-gray-600 mb-1">Dermatologist</p>
+        <p class="text-gray-500 text-sm mb-3">8+ years experience</p>
+        <div class="flex justify-center gap-3">
+          <a href="#" class="text-sky-600 hover:text-sky-700"><i class="ph ph-envelope-simple text-xl"></i></a>
+          <a href="#" class="text-sky-600 hover:text-sky-700"><i class="ph ph-phone text-xl"></i></a>
+          <a href="#" class="text-sky-600 hover:text-sky-700"><i class="ph ph-chat-circle-dots text-xl"></i></a>
+        </div>
+      </div>
+
+      <!-- Doctor Card 3 -->
+      <div class="card bg-white rounded-lg shadow p-6 text-center">
+        <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="Doctor" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
+        <h2 class="text-xl font-semibold text-sky-700">Dr. Khan</h2>
+        <p class="text-gray-600 mb-1">Neurologist</p>
+        <p class="text-gray-500 text-sm mb-3">12+ years experience</p>
+        <div class="flex justify-center gap-3">
+          <a href="#" class="text-sky-600 hover:text-sky-700"><i class="ph ph-envelope-simple text-xl"></i></a>
+          <a href="#" class="text-sky-600 hover:text-sky-700"><i class="ph ph-phone text-xl"></i></a>
+          <a href="#" class="text-sky-600 hover:text-sky-700"><i class="ph ph-chat-circle-dots text-xl"></i></a>
+        </div>
+      </div>
+
+      <!-- Doctor Card 4 -->
+      <div class="card bg-white rounded-lg shadow p-6 text-center">
+        <img src="https://randomuser.me/api/portraits/women/31.jpg" alt="Doctor" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
+        <h2 class="text-xl font-semibold text-sky-700">Dr. Ahmed</h2>
+        <p class="text-gray-600 mb-1">Orthopedic Surgeon</p>
+        <p class="text-gray-500 text-sm mb-3">9+ years experience</p>
+        <div class="flex justify-center gap-3">
+          <a href="#" class="text-sky-600 hover:text-sky-700"><i class="ph ph-envelope-simple text-xl"></i></a>
+          <a href="#" class="text-sky-600 hover:text-sky-700"><i class="ph ph-phone text-xl"></i></a>
+          <a href="#" class="text-sky-600 hover:text-sky-700"><i class="ph ph-chat-circle-dots text-xl"></i></a>
+        </div>
+      </div>
+
+      <!-- Doctor Card 5 -->
+      <div class="card bg-white rounded-lg shadow p-6 text-center">
+        <img src="https://randomuser.me/api/portraits/men/37.jpg" alt="Doctor" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
+        <h2 class="text-xl font-semibold text-sky-700">Dr. Nayeem</h2>
+        <p class="text-gray-600 mb-1">General Physician</p>
+        <p class="text-gray-500 text-sm mb-3">7+ years experience</p>
+        <div class="flex justify-center gap-3">
+          <a href="#" class="text-sky-600 hover:text-sky-700"><i class="ph ph-envelope-simple text-xl"></i></a>
+          <a href="#" class="text-sky-600 hover:text-sky-700"><i class="ph ph-phone text-xl"></i></a>
+          <a href="#" class="text-sky-600 hover:text-sky-700"><i class="ph ph-chat-circle-dots text-xl"></i></a>
+        </div>
+      </div>
+
+      <!-- Doctor Card 6 -->
+      <div class="card bg-white rounded-lg shadow p-6 text-center">
+        <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Doctor" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
+        <h2 class="text-xl font-semibold text-sky-700">Dr. Rumi</h2>
+        <p class="text-gray-600 mb-1">Pediatrician</p>
+        <p class="text-gray-500 text-sm mb-3">11+ years experience</p>
+        <div class="flex justify-center gap-3">
+          <a href="#" class="text-sky-600 hover:text-sky-700"><i class="ph ph-envelope-simple text-xl"></i></a>
+          <a href="#" class="text-sky-600 hover:text-sky-700"><i class="ph ph-phone text-xl"></i></a>
+          <a href="#" class="text-sky-600 hover:text-sky-700"><i class="ph ph-chat-circle-dots text-xl"></i></a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="mt-16 text-center py-4 text-gray-500">
+    © 2025 Smart Healthcare. All Rights Reserved.
+  </footer>
+
+  <script>
+    const menuBtn = document.getElementById("menuBtn");
+    const mobileMenu = document.getElementById("mobileMenu");
+
+    menuBtn.addEventListener("click", () => {
+      mobileMenu.classList.toggle("menu-open");
+    });
+  </script>
+</body>
+</html>

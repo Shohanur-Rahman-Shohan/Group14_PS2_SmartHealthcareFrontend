@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | Smart Healthcare</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/phosphor-icons"></script>
+
+  <style>
+    /* Smooth transitions */
+    a, .card {
+      transition: all 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    }
+    .menu-enter {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+    .menu-open {
+      max-height: 500px; /* enough space for links */
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 text-gray-800 min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="bg-sky-700 text-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <h1 class="text-2xl font-semibold flex items-center gap-2">
+        <i class="ph ph-heartbeat text-white"></i> Smart Healthcare
+      </h1>
+
+      <!-- Mobile Toggle -->
+      <button id="menuBtn" class="sm:hidden text-2xl focus:outline-none">
+        <i class="ph ph-list"></i>
+      </button>
+
+      <!-- Nav Links (Desktop) -->
+      <div class="hidden sm:flex flex-wrap justify-center items-center space-x-2">
+        <a href="dashboard.html" class="px-3 py-2 rounded bg-sky-500 flex items-center gap-2 font-medium"><i class="ph ph-gauge"></i> Dashboard</a>
+        <a href="book-appointment.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-calendar-check"></i> Book Appointment</a>
+        <a href="my-doctors.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-stethoscope"></i> My Doctors</a>
+        <a href="my-prescriptions.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-pill"></i> My Prescriptions</a>
+        <a href="test-reports.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-flask"></i> My Test Reports</a>
+        <a href="billing.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-credit-card"></i> Billing & Insurance</a>
+        <a href="notifications.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-bell"></i> Notifications</a>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="menu-enter sm:hidden bg-sky-600">
+      <a href="dashboard.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-gauge"></i> Dashboard</a>
+      <a href="book-appointment.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-calendar-check"></i> Book Appointment</a>
+      <a href="my-doctors.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-stethoscope"></i> My Doctors</a>
+      <a href="my-prescriptions.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-pill"></i> My Prescriptions</a>
+      <a href="test-reports.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-flask"></i> My Test Reports</a>
+      <a href="billing.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-credit-card"></i> Billing & Insurance</a>
+      <a href="notifications.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-bell"></i> Notifications</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-10">
+    <!-- Title -->
+    <div class="mb-8 text-center">
+      <h1 class="text-4xl font-bold text-sky-700 mb-2 flex justify-center items-center gap-2"><i class="ph ph-gauge"></i> Patient Dashboard</h1>
+      <p class="text-gray-600">Welcome back! Here’s an overview of your health activity.</p>
+    </div>
+
+    <!-- Overview Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+      <div class="card bg-white p-5 rounded-lg shadow text-center">
+        <i class="ph ph-calendar-check text-sky-600 text-3xl mb-2"></i>
+        <h3 class="text-xl font-semibold">2</h3>
+        <p class="text-gray-600">Upcoming Appointments</p>
+      </div>
+      <div class="card bg-white p-5 rounded-lg shadow text-center">
+        <i class="ph ph-stethoscope text-sky-600 text-3xl mb-2"></i>
+        <h3 class="text-xl font-semibold">5</h3>
+        <p class="text-gray-600">Assigned Doctors</p>
+      </div>
+      <div class="card bg-white p-5 rounded-lg shadow text-center">
+        <i class="ph ph-pill text-sky-600 text-3xl mb-2"></i>
+        <h3 class="text-xl font-semibold">12</h3>
+        <p class="text-gray-600">Active Prescriptions</p>
+      </div>
+      <div class="card bg-white p-5 rounded-lg shadow text-center">
+        <i class="ph ph-bell text-sky-600 text-3xl mb-2"></i>
+        <h3 class="text-xl font-semibold">3</h3>
+        <p class="text-gray-600">New Notifications</p>
+      </div>
+    </div>
+
+    <!-- Upcoming Appointments -->
+    <div class="bg-white p-6 rounded-lg shadow mb-10 overflow-x-auto">
+      <h2 class="text-2xl font-semibold text-sky-700 mb-4 flex items-center gap-2"><i class="ph ph-calendar"></i> Upcoming Appointments</h2>
+      <table class="w-full text-left border-collapse min-w-[600px]">
+        <thead>
+          <tr class="bg-sky-100 text-sky-700">
+            <th class="px-4 py-2">Date</th>
+            <th class="px-4 py-2">Time</th>
+            <th class="px-4 py-2">Doctor</th>
+            <th class="px-4 py-2">Department</th>
+            <th class="px-4 py-2">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b hover:bg-gray-50 transition">
+            <td class="px-4 py-2">Nov 12, 2025</td>
+            <td class="px-4 py-2">10:30 AM</td>
+            <td class="px-4 py-2">Dr. Rahman</td>
+            <td class="px-4 py-2">Cardiology</td>
+            <td class="px-4 py-2 text-green-600 font-medium">Confirmed</td>
+          </tr>
+          <tr class="border-b hover:bg-gray-50 transition">
+            <td class="px-4 py-2">Nov 16, 2025</td>
+            <td class="px-4 py-2">03:00 PM</td>
+            <td class="px-4 py-2">Dr. Afsana</td>
+            <td class="px-4 py-2">Dermatology</td>
+            <td class="px-4 py-2 text-yellow-600 font-medium">Pending</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Health Insights -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="card bg-white p-5 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-2 flex items-center gap-2 text-sky-700"><i class="ph ph-heartbeat"></i> Health Summary</h2>
+        <ul class="text-gray-600 space-y-1">
+          <li>💓 Heart Rate: <span class="font-medium">76 bpm</span></li>
+          <li>🩸 Blood Pressure: <span class="font-medium">118/78 mmHg</span></li>
+          <li>⚖️ Weight: <span class="font-medium">68 kg</span></li>
+        </ul>
+      </div>
+      <div class="card bg-white p-5 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-2 flex items-center gap-2 text-sky-700"><i class="ph ph-flask"></i> Latest Test Reports</h2>
+        <p class="text-gray-600 mb-2">Your recent blood test and ECG results are available.</p>
+        <a href="test-reports.html" class="text-sky-600 font-medium hover:underline">View Reports →</a>
+      </div>
+      <div class="card bg-white p-5 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-2 flex items-center gap-2 text-sky-700"><i class="ph ph-brain"></i> Smart Health Tip</h2>
+        <p class="text-gray-600">Drink at least 2L of water daily and get 7–8 hours of sleep for optimal heart health ❤️</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="mt-16 text-center py-4 text-gray-500">
+    © 2025 Smart Healthcare. All Rights Reserved.
+  </footer>
+
+  <script>
+    const menuBtn = document.getElementById("menuBtn");
+    const mobileMenu = document.getElementById("mobileMenu");
+
+    menuBtn.addEventListener("click", () => {
+      mobileMenu.classList.toggle("menu-open");
+    });
+  </script>
+</body>
+</html>

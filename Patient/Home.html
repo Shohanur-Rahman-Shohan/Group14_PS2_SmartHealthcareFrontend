@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patient Dashboard | Smart Health Care</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <style>
+    /* Smooth dropdown animation */
+    .dropdown-content {
+      opacity: 0;
+      transform: translateY(-5px);
+      pointer-events: none;
+      transition: all 0.2s ease;
+    }
+    .group:hover .dropdown-content {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+  <!-- Top Navbar -->
+  <nav class="bg-sky-500 text-white px-6 py-4 flex justify-between items-center shadow-md sticky top-0 z-50">
+    <h1 class="text-2xl font-bold flex items-center space-x-2">
+      <i class="ph ph-heartbeat text-3xl"></i>
+      <span>Smart Health Care</span>
+    </h1>
+
+    <span class="hidden sm:flex text-lg font-medium space-x-2">
+      <span>Patient Panel</span>
+    </span>
+
+    <!-- Profile Menu -->
+    <div class="relative">
+      <button id="menuBtn" class="text-white text-2xl hover:bg-sky-600 rounded p-2">
+        <i class="ph ph-user-circle"></i>
+      </button>
+      <div id="menuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded shadow-lg">
+        <a href="#" class="block px-4 py-2 hover:bg-gray-100">Profile</a>
+        <a href="#" class="block px-4 py-2 hover:bg-gray-100">Settings</a>
+        <a href="login.html" class="block px-4 py-2 hover:bg-gray-100 text-red-500">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Patient Navbar -->
+  <nav id="patientNavbar" class="bg-sky-600 text-white shadow-md sticky top-[64px] z-40">
+    <div class="container mx-auto flex flex-col sm:flex-row flex-wrap justify-center items-start sm:items-center px-4 py-3 space-y-2 sm:space-y-0 sm:space-x-2">
+
+      <a href="dashboard.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2">
+        <i class="ph ph-gauge"></i> Dashboard
+      </a>
+
+    
+
+      <a href="book-appointment.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2">
+        <i class="ph ph-calendar-check"></i> Book Appointment
+      </a>
+
+      <a href="my-doctors.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2">
+        <i class="ph ph-stethoscope"></i> My Doctors
+      </a>
+
+      <a href="my-prescriptions.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2">
+        <i class="ph ph-pill"></i> My Prescriptions
+      </a>
+
+      <a href="test-reports.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2">
+        <i class="ph ph-flask"></i> My Test Reports
+      </a>
+
+      
+
+     
+
+      <a href="billing.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2">
+        <i class="ph ph-credit-card"></i> Billing & Insurance Info
+      </a>
+
+      <a href="notifications.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2">
+        <i class="ph ph-bell"></i> Notifications / Messages
+      </a>
+
+      
+
+    </div>
+  </nav>
+
+  <!-- JS for dropdown -->
+  <script>
+    const menuBtn = document.getElementById("menuBtn");
+    const menuDropdown = document.getElementById("menuDropdown");
+
+    menuBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      menuDropdown.classList.toggle("hidden");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest("#menuBtn")) menuDropdown.classList.add("hidden");
+    });
+  </script>
+</body>
+</html>
