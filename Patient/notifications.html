@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notifications | Smart Healthcare</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/phosphor-icons"></script>
+
+  <style>
+    a, button {
+      transition: all 0.3s ease;
+    }
+    .card {
+      transition: all 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    .menu-enter {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+    .menu-open {
+      max-height: 500px;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 text-gray-800 min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="bg-sky-700 text-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <h1 class="text-2xl font-semibold flex items-center gap-2">
+        <i class="ph ph-heartbeat text-white"></i> Smart Healthcare
+      </h1>
+
+      <!-- Mobile Toggle -->
+      <button id="menuBtn" class="sm:hidden text-2xl focus:outline-none">
+        <i class="ph ph-list"></i>
+      </button>
+
+      <!-- Desktop Nav -->
+      <div class="hidden sm:flex flex-wrap justify-center items-center space-x-2">
+        <a href="dashboard.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-gauge"></i> Dashboard</a>
+        <a href="book-appointment.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-calendar-check"></i> Book Appointment</a>
+        <a href="my-doctors.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-stethoscope"></i> My Doctors</a>
+        <a href="my-prescriptions.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-pill"></i> My Prescriptions</a>
+        <a href="test-reports.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-flask"></i> My Test Reports</a>
+        <a href="billing.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-credit-card"></i> Billing</a>
+        <a href="notifications.html" class="px-3 py-2 rounded bg-sky-500 flex items-center gap-2 font-medium"><i class="ph ph-bell"></i> Notifications</a>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="menu-enter sm:hidden bg-sky-600">
+      <a href="dashboard.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-gauge"></i> Dashboard</a>
+      <a href="book-appointment.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-calendar-check"></i> Book Appointment</a>
+      <a href="my-doctors.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-stethoscope"></i> My Doctors</a>
+      <a href="my-prescriptions.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-pill"></i> My Prescriptions</a>
+      <a href="test-reports.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-flask"></i> My Test Reports</a>
+      <a href="billing.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-credit-card"></i> Billing</a>
+      <a href="notifications.html" class="block px-4 py-2 bg-sky-500"><i class="ph ph-bell"></i> Notifications</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-10">
+
+    <!-- Header -->
+    <div class="text-center mb-10">
+      <h1 class="text-4xl font-bold text-sky-700 mb-2 flex justify-center items-center gap-2">
+        <i class="ph ph-bell"></i> Notifications
+      </h1>
+      <p class="text-gray-600">Stay updated with the latest alerts and messages from Smart Healthcare.</p>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex justify-end mb-6 gap-2">
+      <button id="markAllBtn" class="bg-sky-600 text-white px-4 py-2 rounded hover:bg-sky-700 flex items-center gap-2">
+        <i class="ph ph-check-circle"></i> Mark All as Read
+      </button>
+      <button id="clearAllBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 flex items-center gap-2">
+        <i class="ph ph-trash"></i> Clear All
+      </button>
+    </div>
+
+    <!-- Notification List -->
+    <div id="notificationList" class="space-y-4">
+
+      <!-- Notification Card -->
+      <div class="card bg-white p-5 rounded-lg shadow flex items-start gap-4 unread">
+        <div class="text-sky-600 text-3xl"><i class="ph ph-calendar-check"></i></div>
+        <div class="flex-1">
+          <h3 class="font-semibold text-lg">Appointment Confirmed</h3>
+          <p class="text-gray-600 text-sm">Your appointment with <strong>Dr. Rahman</strong> on <strong>Nov 10, 2025</strong> has been confirmed.</p>
+          <p class="text-gray-400 text-xs mt-1">5 minutes ago</p>
+        </div>
+        <button class="mark-read text-sky-600 hover:text-sky-800"><i class="ph ph-check"></i></button>
+      </div>
+
+      <div class="card bg-white p-5 rounded-lg shadow flex items-start gap-4 unread">
+        <div class="text-yellow-500 text-3xl"><i class="ph ph-credit-card"></i></div>
+        <div class="flex-1">
+          <h3 class="font-semibold text-lg">Payment Reminder</h3>
+          <p class="text-gray-600 text-sm">Your billing for the last consultation is pending. Please complete payment before <strong>Nov 12, 2025</strong>.</p>
+          <p class="text-gray-400 text-xs mt-1">2 hours ago</p>
+        </div>
+        <button class="mark-read text-sky-600 hover:text-sky-800"><i class="ph ph-check"></i></button>
+      </div>
+
+      <div class="card bg-white p-5 rounded-lg shadow flex items-start gap-4">
+        <div class="text-green-600 text-3xl"><i class="ph ph-pill"></i></div>
+        <div class="flex-1">
+          <h3 class="font-semibold text-lg">New Prescription Added</h3>
+          <p class="text-gray-600 text-sm">Dr. Afsana has issued a new prescription: <strong>Cetirizine 5mg</strong>.</p>
+          <p class="text-gray-400 text-xs mt-1">1 day ago</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="mt-16 text-center py-4 text-gray-500">
+    © 2025 Smart Healthcare. All Rights Reserved.
+  </footer>
+
+  <script>
+    const menuBtn = document.getElementById("menuBtn");
+    const mobileMenu = document.getElementById("mobileMenu");
+    const markAllBtn = document.getElementById("markAllBtn");
+    const clearAllBtn = document.getElementById("clearAllBtn");
+    const notifications = document.querySelectorAll("#notificationList .card");
+
+    // Toggle mobile menu
+    menuBtn.addEventListener("click", () => {
+      mobileMenu.classList.toggle("menu-open");
+    });
+
+    // Mark single notification as read
+    document.querySelectorAll(".mark-read").forEach(btn => {
+      btn.addEventListener("click", e => {
+        const card = e.target.closest(".card");
+        card.classList.remove("unread");
+        card.style.opacity = "0.7";
+      });
+    });
+
+    // Mark all as read
+    markAllBtn.addEventListener("click", () => {
+      notifications.forEach(card => {
+        card.classList.remove("unread");
+        card.style.opacity = "0.7";
+      });
+    });
+
+    // Clear all
+    clearAllBtn.addEventListener("click", () => {
+      document.getElementById("notificationList").innerHTML = `
+        <div class="text-center py-10 text-gray-500">
+          <i class="ph ph-bell-slash text-4xl mb-2"></i>
+          <p>No notifications available.</p>
+        </div>`;
+    });
+  </script>
+
+</body>
+</html>
