@@ -8,7 +8,7 @@
   <script src="https://unpkg.com/phosphor-icons"></script>
 
   <style>
-    a, .card, button {
+    a, .card, button, tr {
       transition: all 0.3s ease;
     }
     .card:hover {
@@ -23,9 +23,10 @@
     .menu-open {
       max-height: 500px;
     }
-    .status-approved { color: #16a34a; font-weight: 500; }
-    .status-rejected { color: #dc2626; font-weight: 500; }
-    .status-pending { color: #f59e0b; font-weight: 500; }
+    .status-approved { color: #16a34a; font-weight: 600; }
+    .status-rejected { color: #dc2626; font-weight: 600; }
+    .status-pending { color: #f59e0b; font-weight: 600; }
+    tr:hover { background-color: #f9fafb; }
   </style>
 </head>
 
@@ -45,57 +46,70 @@
 
       <!-- Desktop Nav -->
       <div class="hidden sm:flex flex-wrap justify-center items-center space-x-2">
-        <a href="insurance-dashboard.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-gauge"></i> Dashboard</a>
-        <a href="view-claims.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-file-text"></i> View Insurance Claims</a>
-        <a href="approve-claims.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-check-square"></i> Approve / Reject Claims</a>
-        <a href="claim-history.html" class="px-3 py-2 rounded bg-blue-500 flex items-center gap-2 font-medium"><i class="ph ph-clock-counter-clockwise"></i> Claim History</a>
-        <a href="policyholders.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-identification-badge"></i> Policyholder Info</a>
-        <a href="payments.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-credit-card"></i>  Payment Records</a>
-        <a href="insurance-notifications.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-bell"></i> Notifications</a>
-        <a href="insurance-reports.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-chart-bar"></i> Reports</a>
+        <a href="insurance-dashboard.html" class="px-3 py-2 rounded hover:bg-sky-600 flex items-center gap-2"><i class="ph ph-gauge"></i> Dashboard</a>
+        <a href="view-claims.html" class="px-3 py-2 rounded hover:bg-sky-600 flex items-center gap-2"><i class="ph ph-file-text"></i> View Claims</a>
+        <a href="approve-claims.html" class="px-3 py-2 rounded hover:bg-sky-600 flex items-center gap-2"><i class="ph ph-check-square"></i> Approve / Reject</a>
+        <a href="claim-history.html" class="px-3 py-2 rounded bg-sky-600 flex items-center gap-2 font-medium"><i class="ph ph-clock-counter-clockwise"></i> Claim History</a>
+        <a href="policyholders.html" class="px-3 py-2 rounded hover:bg-sky-600 flex items-center gap-2"><i class="ph ph-identification-badge"></i> Policyholder Info</a>
+        <a href="payments.html" class="px-3 py-2 rounded hover:bg-sky-600 flex items-center gap-2"><i class="ph ph-credit-card"></i> Payments</a>
+        <a href="insurance-notifications.html" class="px-3 py-2 rounded hover:bg-sky-600 flex items-center gap-2"><i class="ph ph-bell"></i> Notifications</a>
+        <a href="insurance-reports.html" class="px-3 py-2 rounded hover:bg-sky-600 flex items-center gap-2"><i class="ph ph-chart-bar"></i> Reports</a>
         <a href="logout.html" class="px-3 py-2 rounded hover:bg-red-600 flex items-center gap-2"><i class="ph ph-sign-out"></i> Logout</a>
       </div>
     </div>
 
     <!-- Mobile Menu -->
-    <div id="mobileMenu" class="menu-enter sm:hidden bg-blue-600">
-      <a href="insurance-dashboard.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-gauge"></i> Dashboard</a>
-      <a href="view-claims.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-file-text"></i> View Claims</a>
-      <a href="approve-claims.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-check-square"></i> Approve / Reject Claims</a>
-      <a href="claim-history.html" class="block px-4 py-2 bg-blue-500"><i class="ph ph-clock-counter-clockwise"></i> Claim History</a>
-      <a href="policyholders.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-identification-badge"></i> Policyholder Info</a>
-      <a href="payments.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-credit-card"></i> Payments</a>
-      <a href="insurance-notifications.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-bell"></i> Notifications</a>
-      <a href="insurance-reports.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-chart-bar"></i> Reports</a>
+    <div id="mobileMenu" class="menu-enter sm:hidden bg-sky-600">
+      <a href="insurance-dashboard.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-gauge"></i> Dashboard</a>
+      <a href="view-claims.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-file-text"></i> View Claims</a>
+      <a href="approve-claims.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-check-square"></i> Approve / Reject</a>
+      <a href="claim-history.html" class="block px-4 py-2 bg-sky-500"><i class="ph ph-clock-counter-clockwise"></i> Claim History</a>
+      <a href="policyholders.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-identification-badge"></i> Policyholders</a>
+      <a href="payments.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-credit-card"></i> Payments</a>
+      <a href="insurance-notifications.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-bell"></i> Notifications</a>
+      <a href="insurance-reports.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-chart-bar"></i> Reports</a>
       <a href="logout.html" class="block px-4 py-2 hover:bg-red-600"><i class="ph ph-sign-out"></i> Logout</a>
     </div>
   </nav>
 
   <!-- Main Content -->
   <main class="container mx-auto px-4 py-10">
-    <div class="text-center mb-10">
-      <h1 class="text-4xl font-bold text-blue-700 mb-2 flex justify-center items-center gap-2">
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-sky-700 mb-2 flex justify-center items-center gap-2">
         <i class="ph ph-clock-counter-clockwise"></i> Claim History
       </h1>
-      <p class="text-gray-600">All insurance claims with status and details.</p>
+      <p class="text-gray-600">All submitted insurance claims with their current status and history.</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+      <input id="searchInput" type="text" placeholder="🔍 Search by Policyholder or ID..."
+        class="border rounded-lg px-4 py-2 w-full sm:w-1/3 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+
+      <select id="statusFilter" class="border rounded-lg px-4 py-2 w-full sm:w-1/5 focus:outline-none focus:ring-2 focus:ring-sky-500">
+        <option value="all">All Status</option>
+        <option value="approved">Approved</option>
+        <option value="rejected">Rejected</option>
+        <option value="pending">Pending</option>
+      </select>
     </div>
 
     <!-- Claim History Table -->
     <div class="bg-white p-6 rounded-lg shadow overflow-x-auto">
-      <table class="min-w-full text-left border-collapse">
+      <table id="claimTable" class="min-w-full text-left border-collapse">
         <thead>
-          <tr class="bg-blue-100 text-blue-700">
+          <tr class="bg-sky-100 text-sky-700">
             <th class="px-4 py-2">Claim ID</th>
             <th class="px-4 py-2">Policyholder</th>
             <th class="px-4 py-2">Department</th>
             <th class="px-4 py-2">Doctor</th>
             <th class="px-4 py-2">Amount</th>
-            <th class="px-4 py-2">Date Submitted</th>
+            <th class="px-4 py-2">Date</th>
             <th class="px-4 py-2">Status</th>
           </tr>
         </thead>
         <tbody>
-          <tr class="border-b hover:bg-gray-50">
+          <tr class="border-b hover:bg-gray-50" data-status="approved">
             <td class="px-4 py-2">CLM001</td>
             <td class="px-4 py-2">Md. Rahman</td>
             <td class="px-4 py-2">Cardiology</td>
@@ -104,7 +118,7 @@
             <td class="px-4 py-2">Nov 01, 2025</td>
             <td class="px-4 py-2 status-approved">Approved</td>
           </tr>
-          <tr class="border-b hover:bg-gray-50">
+          <tr class="border-b hover:bg-gray-50" data-status="rejected">
             <td class="px-4 py-2">CLM002</td>
             <td class="px-4 py-2">Shamima Akter</td>
             <td class="px-4 py-2">Dermatology</td>
@@ -113,7 +127,7 @@
             <td class="px-4 py-2">Nov 03, 2025</td>
             <td class="px-4 py-2 status-rejected">Rejected</td>
           </tr>
-          <tr class="border-b hover:bg-gray-50">
+          <tr class="border-b hover:bg-gray-50" data-status="pending">
             <td class="px-4 py-2">CLM003</td>
             <td class="px-4 py-2">Kamal Hossain</td>
             <td class="px-4 py-2">Neurology</td>
@@ -122,7 +136,7 @@
             <td class="px-4 py-2">Nov 05, 2025</td>
             <td class="px-4 py-2 status-pending">Pending</td>
           </tr>
-          <tr class="border-b hover:bg-gray-50">
+          <tr class="border-b hover:bg-gray-50" data-status="approved">
             <td class="px-4 py-2">CLM004</td>
             <td class="px-4 py-2">Farhana Begum</td>
             <td class="px-4 py-2">Orthopedics</td>
@@ -143,10 +157,31 @@
   <script>
     const menuBtn = document.getElementById("menuBtn");
     const mobileMenu = document.getElementById("mobileMenu");
+    const searchInput = document.getElementById("searchInput");
+    const statusFilter = document.getElementById("statusFilter");
+    const tableRows = document.querySelectorAll("#claimTable tbody tr");
 
     menuBtn.addEventListener("click", () => {
       mobileMenu.classList.toggle("menu-open");
     });
+
+    // Search + Filter Logic
+    function filterTable() {
+      const search = searchInput.value.toLowerCase();
+      const status = statusFilter.value;
+
+      tableRows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        const rowStatus = row.dataset.status;
+        const matchesSearch = text.includes(search);
+        const matchesStatus = (status === "all" || rowStatus === status);
+
+        row.style.display = matchesSearch && matchesStatus ? "" : "none";
+      });
+    }
+
+    searchInput.addEventListener("input", filterTable);
+    statusFilter.addEventListener("change", filterTable);
   </script>
 </body>
 </html>
