@@ -12,8 +12,8 @@
       transition: all 0.3s ease;
     }
     .card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     }
     .menu-enter {
       max-height: 0;
@@ -37,8 +37,8 @@
       padding: 2px 8px;
       border-radius: 6px;
     }
-    .table-container {
-      overflow-x: auto;
+    ::-webkit-scrollbar {
+      display: none;
     }
   </style>
 </head>
@@ -51,36 +51,34 @@
       <h1 class="text-2xl font-semibold flex items-center gap-2">
         <i class="ph ph-building-office text-white"></i> Insurance Company
       </h1>
-
-      <!-- Mobile Toggle -->
       <button id="menuBtn" class="sm:hidden text-2xl focus:outline-none">
         <i class="ph ph-list"></i>
       </button>
+    </div>
 
-      <!-- Desktop Nav -->
-      <div class="hidden sm:flex flex-wrap justify-center items-center space-x-2">
-        <a href="insurance-dashboard.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-gauge"></i> Dashboard</a>
-        <a href="view-claims.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-file-text"></i> View Claims</a>
-        <a href="approve-claims.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-check-square"></i> Approve / Reject Claims</a>
-        <a href="claim-history.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-clock-counter-clockwise"></i> Claim History</a>
-        <a href="policyholders.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-identification-badge"></i> Policyholder Info</a>
-        <a href="payments.html" class="px-3 py-2 rounded bg-blue-500 flex items-center gap-2 font-medium"><i class="ph ph-credit-card"></i> Payment Records</a>
-        <a href="insurance-notifications.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-bell"></i> Notifications</a>
-        <a href="insurance-reports.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-chart-bar"></i> Reports / Analytics</a>
-        <a href="logout.html" class="px-3 py-2 rounded hover:bg-red-600 flex items-center gap-2"><i class="ph ph-sign-out"></i> Logout</a>
-      </div>
+    <!-- Desktop Nav -->
+    <div class="hidden sm:flex overflow-x-auto whitespace-nowrap bg-sky-600 px-2 py-2 space-x-2">
+      <a href="insurance-dashboard.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2 shrink-0"><i class="ph ph-gauge"></i> Dashboard</a>
+      <a href="view-claims.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2 shrink-0"><i class="ph ph-file-text"></i> View Claims</a>
+      <a href="approve-claims.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2 shrink-0"><i class="ph ph-check-square"></i> Approve / Reject Claims</a>
+      <a href="claim-history.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2 shrink-0"><i class="ph ph-clock-counter-clockwise"></i> Claim History</a>
+      <a href="policyholders.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2 shrink-0"><i class="ph ph-identification-badge"></i> Policyholder Info</a>
+      <a href="payments.html" class="px-3 py-2 rounded bg-sky-500 flex items-center gap-2 font-medium shrink-0"><i class="ph ph-credit-card"></i> Payment Records</a>
+      <a href="insurance-notifications.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2 shrink-0"><i class="ph ph-bell"></i> Notifications</a>
+      <a href="insurance-reports.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2 shrink-0"><i class="ph ph-chart-bar"></i> Reports / Analytics</a>
+      <a href="logout.html" class="px-3 py-2 rounded hover:bg-red-600 flex items-center gap-2 shrink-0"><i class="ph ph-sign-out"></i> Logout</a>
     </div>
 
     <!-- Mobile Menu -->
-    <div id="mobileMenu" class="menu-enter sm:hidden bg-blue-600">
-      <a href="insurance-dashboard.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-gauge"></i> Dashboard</a>
-      <a href="view-claims.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-file-text"></i> View Claims</a>
-      <a href="approve-claims.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-check-square"></i> Approve / Reject Claims</a>
-      <a href="claim-history.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-clock-counter-clockwise"></i> Claim History</a>
-      <a href="policyholders.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-identification-badge"></i> Policyholder Info</a>
-      <a href="payments.html" class="block px-4 py-2 bg-blue-500"><i class="ph ph-credit-card"></i> Payment Records</a>
-      <a href="insurance-notifications.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-bell"></i> Notifications</a>
-      <a href="insurance-reports.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-chart-bar"></i> Reports</a>
+    <div id="mobileMenu" class="menu-enter sm:hidden bg-sky-600">
+      <a href="insurance-dashboard.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-gauge"></i> Dashboard</a>
+      <a href="view-claims.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-file-text"></i> View Claims</a>
+      <a href="approve-claims.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-check-square"></i> Approve / Reject Claims</a>
+      <a href="claim-history.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-clock-counter-clockwise"></i> Claim History</a>
+      <a href="policyholders.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-identification-badge"></i> Policyholder Info</a>
+      <a href="payments.html" class="block px-4 py-2 bg-sky-500"><i class="ph ph-credit-card"></i> Payment Records</a>
+      <a href="insurance-notifications.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-bell"></i> Notifications</a>
+      <a href="insurance-reports.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-chart-bar"></i> Reports / Analytics</a>
       <a href="logout.html" class="block px-4 py-2 hover:bg-red-600"><i class="ph ph-sign-out"></i> Logout</a>
     </div>
   </nav>
@@ -97,20 +95,20 @@
 
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-      <div class="card bg-white p-6 rounded-lg shadow text-center">
-        <i class="ph ph-wallet text-4xl text-blue-600 mb-3"></i>
-        <h2 class="text-lg font-semibold text-gray-700">Total Payments</h2>
-        <p class="text-2xl font-bold text-green-600 mt-1">$4500.00</p>
+      <div class="card bg-gradient-to-r from-green-400 to-green-500 p-6 rounded-lg shadow text-center text-white">
+        <i class="ph ph-wallet text-4xl mb-3"></i>
+        <h2 class="text-lg font-semibold">Total Payments</h2>
+        <p class="text-2xl font-bold mt-1">$4500.00</p>
       </div>
-      <div class="card bg-white p-6 rounded-lg shadow text-center">
-        <i class="ph ph-clock text-4xl text-blue-600 mb-3"></i>
-        <h2 class="text-lg font-semibold text-gray-700">Pending Payments</h2>
-        <p class="text-2xl font-bold text-yellow-500 mt-1">$600.00</p>
+      <div class="card bg-gradient-to-r from-yellow-400 to-yellow-500 p-6 rounded-lg shadow text-center text-white">
+        <i class="ph ph-clock text-4xl mb-3"></i>
+        <h2 class="text-lg font-semibold">Pending Payments</h2>
+        <p class="text-2xl font-bold mt-1">$600.00</p>
       </div>
-      <div class="card bg-white p-6 rounded-lg shadow text-center">
-        <i class="ph ph-receipt text-4xl text-blue-600 mb-3"></i>
-        <h2 class="text-lg font-semibold text-gray-700">Last Payment</h2>
-        <p class="text-gray-600 mt-1">Nov 03, 2025 - $300.00</p>
+      <div class="card bg-gradient-to-r from-blue-400 to-blue-600 p-6 rounded-lg shadow text-center text-white">
+        <i class="ph ph-receipt text-4xl mb-3"></i>
+        <h2 class="text-lg font-semibold">Last Payment</h2>
+        <p class="mt-1 text-white/90">Nov 03, 2025 - $300.00</p>
       </div>
     </div>
 
@@ -125,7 +123,7 @@
     </div>
 
     <!-- Payment Table -->
-    <div class="bg-white p-6 rounded-lg shadow table-container">
+    <div class="bg-white p-6 rounded-lg shadow overflow-x-auto">
       <table class="min-w-full text-left border-collapse" id="paymentTable">
         <thead>
           <tr class="bg-blue-100 text-blue-700">
@@ -165,7 +163,6 @@
         </tbody>
       </table>
     </div>
-
   </main>
 
   <footer class="mt-16 text-center py-4 text-gray-500">
@@ -175,7 +172,6 @@
   <script>
     const menuBtn = document.getElementById("menuBtn");
     const mobileMenu = document.getElementById("mobileMenu");
-
     menuBtn.addEventListener("click", () => {
       mobileMenu.classList.toggle("menu-open");
     });
@@ -188,15 +184,12 @@
     function filterTable() {
       const searchValue = searchInput.value.toLowerCase();
       const statusValue = filterStatus.value;
-
       Array.from(table.rows).forEach(row => {
         const policyholder = row.cells[1].textContent.toLowerCase();
         const desc = row.cells[2].textContent.toLowerCase();
         const status = row.cells[5].textContent;
-
         const matchesSearch = policyholder.includes(searchValue) || desc.includes(searchValue);
         const matchesStatus = statusValue === "" || status.includes(statusValue);
-
         row.style.display = matchesSearch && matchesStatus ? "" : "none";
       });
     }
@@ -204,6 +197,5 @@
     searchInput.addEventListener("input", filterTable);
     filterStatus.addEventListener("change", filterTable);
   </script>
-
 </body>
 </html>

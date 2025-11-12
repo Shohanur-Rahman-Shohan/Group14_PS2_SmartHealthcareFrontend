@@ -27,6 +27,16 @@
     .status-rejected { color: #dc2626; font-weight: 600; }
     .status-pending { color: #f59e0b; font-weight: 600; }
     tr:hover { background-color: #f9fafb; }
+
+    /* Hide scrollbar globally */
+    ::-webkit-scrollbar {
+      width: 0px;
+      background: transparent;
+    }
+    html {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
   </style>
 </head>
 
@@ -43,19 +53,19 @@
       <button id="menuBtn" class="sm:hidden text-2xl focus:outline-none">
         <i class="ph ph-list"></i>
       </button>
+    </div>
 
-      <!-- Desktop Nav -->
-      <div class="hidden sm:flex flex-wrap justify-center items-center space-x-2">
-        <a href="insurance-dashboard.html" class="px-3 py-2 rounded hover:bg-sky-600 flex items-center gap-2"><i class="ph ph-gauge"></i> Dashboard</a>
-        <a href="view-claims.html" class="px-3 py-2 rounded hover:bg-sky-600 flex items-center gap-2"><i class="ph ph-file-text"></i> View Claims</a>
-        <a href="approve-claims.html" class="px-3 py-2 rounded hover:bg-sky-600 flex items-center gap-2"><i class="ph ph-check-square"></i> Approve / Reject</a>
-        <a href="claim-history.html" class="px-3 py-2 rounded bg-sky-600 flex items-center gap-2 font-medium"><i class="ph ph-clock-counter-clockwise"></i> Claim History</a>
-        <a href="policyholders.html" class="px-3 py-2 rounded hover:bg-sky-600 flex items-center gap-2"><i class="ph ph-identification-badge"></i> Policyholder Info</a>
-        <a href="payments.html" class="px-3 py-2 rounded hover:bg-sky-600 flex items-center gap-2"><i class="ph ph-credit-card"></i> Payments</a>
-        <a href="insurance-notifications.html" class="px-3 py-2 rounded hover:bg-sky-600 flex items-center gap-2"><i class="ph ph-bell"></i> Notifications</a>
-        <a href="insurance-reports.html" class="px-3 py-2 rounded hover:bg-sky-600 flex items-center gap-2"><i class="ph ph-chart-bar"></i> Reports</a>
-        <a href="logout.html" class="px-3 py-2 rounded hover:bg-red-600 flex items-center gap-2"><i class="ph ph-sign-out"></i> Logout</a>
-      </div>
+    <!-- Desktop Nav -->
+    <div class="hidden sm:flex overflow-x-auto whitespace-nowrap bg-sky-600 px-2 py-2 space-x-2">
+      <a href="insurance-dashboard.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2 shrink-0"><i class="ph ph-gauge"></i> Dashboard</a>
+      <a href="view-claims.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2 shrink-0"><i class="ph ph-file-text"></i> View Claims</a>
+      <a href="approve-claims.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2 shrink-0"><i class="ph ph-check-square"></i> Approve / Reject</a>
+      <a href="claim-history.html" class="px-3 py-2 rounded bg-sky-500 flex items-center gap-2 font-medium shrink-0"><i class="ph ph-clock-counter-clockwise"></i> Claim History</a>
+      <a href="policyholders.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2 shrink-0"><i class="ph ph-identification-badge"></i> Policyholder Info</a>
+      <a href="payments.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2 shrink-0"><i class="ph ph-credit-card"></i> Payment Records</a>
+      <a href="insurance-notifications.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2 shrink-0"><i class="ph ph-bell"></i> Notifications</a>
+      <a href="insurance-reports.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2 shrink-0"><i class="ph ph-chart-bar"></i> Reports / Analytics</a>
+      <a href="logout.html" class="px-3 py-2 rounded hover:bg-red-600 flex items-center gap-2 shrink-0"><i class="ph ph-sign-out"></i> Logout</a>
     </div>
 
     <!-- Mobile Menu -->
@@ -78,7 +88,7 @@
       <h1 class="text-4xl font-bold text-sky-700 mb-2 flex justify-center items-center gap-2">
         <i class="ph ph-clock-counter-clockwise"></i> Claim History
       </h1>
-      <p class="text-gray-600">All submitted insurance claims with their current status and history.</p>
+      <p class="text-gray-600">All submitted insurance claims with their current status and details.</p>
     </div>
 
     <!-- Filters -->
