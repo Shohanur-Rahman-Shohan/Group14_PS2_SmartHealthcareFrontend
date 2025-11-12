@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Health Recommendations | SHMS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  .animate-slideUp {
+    animation: slideUp 0.7s ease-out forwards;
+  }
+  .animate-pulse-slow {
+    animation: pulse 3s ease-in-out infinite;
+  }
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  .dropdownContent {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none;
+    position: absolute;
+    z-index: 50;
+    left: 0;
+  }
+  .dropdownContent.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .card-hover {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  .gradient-border {
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899) border-box;
+    border: 2px solid transparent;
+  }
+  .ai-chip {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 0.75rem;
+  }
+  .risk-low { background-color: #d1fae5; color: #065f46; }
+  .risk-medium { background-color: #fef3c7; color: #92400e; }
+  .risk-high { background-color: #fee2e2; color: #991b1b; }
+  .priority-high { background-color: #fee2e2; color: #991b1b; border-left: 4px solid #dc2626; }
+  .priority-medium { background-color: #fef3c7; color: #92400e; border-left: 4px solid #d97706; }
+  .priority-low { background-color: #d1fae5; color: #065f46; border-left: 4px solid #059669; }
+  .iot-connected { background-color: #dbeafe; color: #1e40af; }
+  .iot-offline { background-color: #f3f4f6; color: #6b7280; }
+  .recommendation-doctor { border-left: 4px solid #6366f1; }
+  .recommendation-test { border-left: 4px solid #10b981; }
+  .recommendation-lifestyle { border-left: 4px solid #f59e0b; }
+  .recommendation-medication { border-left: 4px solid #ec4899; }
+  .recommendation-preventive { border-left: 4px solid #8b5cf6; }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #6366f1;
+    border-radius: 4px;
+  }
+  
+  /* Health metric indicators */
+  .metric-normal { color: #059669; }
+  .metric-warning { color: #d97706; }
+  .metric-critical { color: #dc2626; }
+  
+  /* AI Thinking Animation */
+  @keyframes thinking {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+  .thinking-dots span {
+    animation: thinking 1.4s ease-in-out infinite both;
+  }
+  .thinking-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  .thinking-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+  
+  /* IoT device pulse */
+  @keyframes devicePulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+  }
+  .iot-pulse {
+    animation: devicePulse 2s infinite;
+  }
+</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen flex flex-col">
+
+<!-- Top Navbar -->
+<nav class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+  <h1 class="text-2xl font-bold tracking-wide flex items-center space-x-2">
+    <i class="ph ph-heartbeat text-3xl"></i>
+    <span>SHMS</span>
+  </h1>
+  <span class="text-xl font-bold flex items-center space-x-2">
+    <i class="ph ph-user-circle"></i>
+    <span>Hospital Administrator</span>
+  </span>
+  <div class="relative">
+    <button id="menuBtn" class="text-white text-2xl focus:outline-none hover:bg-indigo-600 rounded-full p-2 transition" aria-label="Menu">
+      <i class="ph ph-dots-three-vertical"></i>
+    </button>
+    <div id="menuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded-md shadow-lg z-50">
+      <a href="#" class="block px-4 py-2 hover:bg-indigo-100 rounded-t-md flex items-center space-x-2">
+        <i class="ph ph-user"></i>
+        <span>Profile</span>
+      </a>
+      <a href="#" class="block px-4 py-2 hover:bg-indigo-100 flex items-center space-x-2">
+        <i class="ph ph-chart-bar"></i>
+        <span>Report</span>
+      </a>
+      <a href="login.html" class="block px-4 py-2 hover:bg-indigo-100 text-red-600 rounded-b-md flex items-center space-x-2">
+        <i class="ph ph-sign-out"></i>
+        <span>Logout</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- Feature Navbar -->
+<nav id="featureNavbar" class="bg-indigo-800 text-white shadow-md sticky top-0 z-40 transition-transform duration-300" style="top: 64px;">
+  <div class="container mx-auto flex flex-wrap justify-center md:justify-start items-center px-4 py-2 space-x-2">
+    <div class="relative">
+      <a href="Home.html" class="px-3 py-2 rounded-md hover:bg-indigo-700 block transition">Home</a>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Patient & Medical Record</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Patients.html" class="block px-4 py-2 hover:bg-indigo-100 font-semibold">Patient List</a>
+        <a href="MedicalRecords.html" class="block px-4 py-2 hover:bg-indigo-100 font-semibold">Medical Records</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Doctor & Appointment</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Doctors.html" class="block px-4 py-2 hover:bg-indigo-100">Doctors Directory</a>
+        <a href="Appointments.html" class="block px-4 py-2 hover:bg-indigo-100">Appointments Management</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Prescription & Investigation</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Prescriptions.html" class="block px-4 py-2 hover:bg-indigo-100">Prescriptions</a>
+        <a href="Investigations.html" class="block px-4 py-2 hover:bg-indigo-100">Tests & Diagnostic Reports</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Billing & Insurance</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Billing.html" class="block px-4 py-2 hover:bg-indigo-100">Bills & Payments</a>
+        <a href="InsuranceClaims.html" class="block px-4 py-2 hover:bg-indigo-100">Insurance Claims</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Disease Prediction</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="DiseasePredictions.html" class="block px-4 py-2 hover:bg-indigo-100">Disease Predictions</a>
+        <a href="Symptoms.html" class="block px-4 py-2 hover:bg-indigo-100">Symptom Assessments</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md bg-indigo-600 font-semibold dropdownBtn transition">Smart Recommendations</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="HealthReminders.html" class="block px-4 py-2 hover:bg-indigo-100">Health Reminders</a>
+        <a href="Recommendations.html" class="block px-4 py-2 hover:bg-indigo-100">Health Tips & Recommendations</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Header -->
+<header class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white p-6 shadow-lg flex justify-center items-center relative">
+  <div class="text-center">
+    <h1 class="text-3xl font-bold mb-1">AI Health Recommendations</h1>
+    <p class="text-indigo-200 text-sm">Personalized suggestions based on patient data and IoT device monitoring</p>
+  </div>
+  <div class="absolute right-8 flex space-x-2">
+    <button id="generateRecommendations" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md font-medium shadow-md transition flex items-center space-x-2">
+      <i class="ph ph-magic-wand"></i>
+      <span>Generate AI Insights</span>
+    </button>
+    <button id="refreshData" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium shadow-md transition flex items-center space-x-2">
+      <i class="ph ph-arrows-clockwise"></i>
+      <span>Refresh IoT Data</span>
+    </button>
+  </div>
+</header>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-20 right-4 flex flex-col space-y-2 pointer-events-none z-50"></div>
+
+<!-- AI Processing Modal -->
+<div id="aiProcessingModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-md mx-4 p-6">
+    <div class="text-center">
+      <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="ph ph-brain text-indigo-500 text-2xl"></i>
+      </div>
+      <h3 class="text-xl font-bold text-gray-800 mb-2">AI Processing Data</h3>
+      <p class="text-gray-600 mb-4">Analyzing patient records and IoT device data to generate personalized recommendations</p>
+      <div class="thinking-dots flex justify-center space-x-1 mb-4">
+        <span class="w-2 h-2 bg-indigo-500 rounded-full"></span>
+        <span class="w-2 h-2 bg-indigo-500 rounded-full"></span>
+        <span class="w-2 h-2 bg-indigo-500 rounded-full"></span>
+      </div>
+      <div class="progress-bar bg-gray-200 rounded-full h-2 mb-4">
+        <div id="aiProgress" class="progress-fill bg-indigo-500 h-2 rounded-full" style="width: 0%"></div>
+      </div>
+      <p id="aiStatus" class="text-sm text-gray-500">Initializing AI models...</p>
+    </div>
+  </div>
+</div>
+
+<!-- Patient Selection Modal -->
+<div id="patientModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50 overflow-y-auto py-8">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-4xl mx-4">
+    <div class="bg-indigo-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+      <h3 class="text-xl font-bold">Select Patient for AI Analysis</h3>
+      <button id="closePatientModal" class="text-white hover:text-indigo-200 text-2xl">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+    <div class="p-6">
+      <div class="mb-4">
+        <input type="text" id="patientSearch" placeholder="Search patients by name or ID..." class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto" id="patientList">
+        <!-- Patient cards will be populated here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Dashboard -->
+<div class="container mx-auto mt-6 px-4">
+  <!-- Quick Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+    <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Active IoT Devices</p>
+          <p id="activeDevices" class="text-2xl font-bold text-gray-900">0</p>
+        </div>
+        <div class="bg-purple-100 p-3 rounded-full">
+          <i class="ph ph-device-mobile text-purple-600 text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex justify-between text-sm text-gray-500">
+          <span>Connected</span>
+          <span id="connectedDevices">0</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="text-sm font-medium text-gray-600">AI Recommendations</p>
+          <p id="totalRecommendations" class="text-2xl font-bold text-gray-900">0</p>
+        </div>
+        <div class="bg-green-100 p-3 rounded-full">
+          <i class="ph ph-lightbulb text-green-600 text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex justify-between text-sm text-gray-500">
+          <span>This Week</span>
+          <span id="weeklyRecommendations">0</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="text-sm font-medium text-gray-600">High Priority Alerts</p>
+          <p id="highPriorityAlerts" class="text-2xl font-bold text-gray-900">0</p>
+        </div>
+        <div class="bg-blue-100 p-3 rounded-full">
+          <i class="ph ph-warning text-blue-600 text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex justify-between text-sm text-gray-500">
+          <span>Require Attention</span>
+          <span id="attentionAlerts">0</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-orange-500">
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Patient Compliance</p>
+          <p id="patientCompliance" class="text-2xl font-bold text-gray-900">0%</p>
+        </div>
+        <div class="bg-orange-100 p-3 rounded-full">
+          <i class="ph ph-heart text-orange-600 text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex justify-between text-sm text-gray-500">
+          <span>Avg. Adherence</span>
+          <span id="avgAdherence">0%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Left Column: Patient IoT Data -->
+    <div class="lg:col-span-1 space-y-6">
+      <!-- IoT Devices Panel -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-bold text-gray-800">Connected IoT Devices</h3>
+          <span class="iot-pulse bg-indigo-500 w-3 h-3 rounded-full"></span>
+        </div>
+        <div class="space-y-4" id="iotDevicesList">
+          <!-- IoT devices will be populated here -->
+        </div>
+      </div>
+
+      <!-- Health Metrics Panel -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-bold text-gray-800 mb-4">Real-time Health Metrics</h3>
+        <div class="space-y-4" id="healthMetrics">
+          <!-- Health metrics will be populated here -->
+        </div>
+      </div>
+
+      <!-- Risk Assessment Panel -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-bold text-gray-800 mb-4">AI Risk Assessment</h3>
+        <div id="riskAssessment">
+          <!-- Risk assessment will be populated here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Middle Column: AI Recommendations -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Current Patient Info -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-bold text-gray-800">Current Patient Analysis</h3>
+          <button id="changePatient" class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1 rounded-md text-sm transition flex items-center space-x-2">
+            <i class="ph ph-swap"></i>
+            <span>Change Patient</span>
+          </button>
+        </div>
+        <div id="currentPatientInfo" class="text-center py-8 text-gray-500">
+          <i class="ph ph-user-circle text-4xl mb-2"></i>
+          <p>No patient selected</p>
+          <button id="selectPatient" class="mt-2 bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-md transition">
+            Select Patient for Analysis
+          </button>
+        </div>
+      </div>
+
+      <!-- AI Recommendations -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-bold text-gray-800">AI-Powered Recommendations</h3>
+          <span class="ai-chip px-2 py-1 rounded-full text-xs font-medium">AI GENERATED</span>
+        </div>
+        <div id="recommendationsList" class="space-y-4">
+          <div class="text-center py-12 text-gray-500">
+            <i class="ph ph-brain text-4xl mb-2"></i>
+            <p>No recommendations generated yet</p>
+            <p class="text-sm">Select a patient and generate AI insights</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preventive Actions -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-bold text-gray-800 mb-4">Preventive Health Actions</h3>
+        <div id="preventiveActions" class="space-y-3">
+          <div class="text-center py-8 text-gray-500">
+            <i class="ph ph-shield-check text-3xl mb-2"></i>
+            <p>No preventive actions suggested</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recommendation Detail Modal -->
+<div id="recommendationModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50 overflow-y-auto py-8">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl mx-4">
+    <div class="bg-indigo-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+      <h3 class="text-xl font-bold">Recommendation Details</h3>
+      <button id="closeRecommendationModal" class="text-white hover:text-indigo-200 text-2xl">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+    <div class="p-6 space-y-4" id="recommendationDetails">
+      <!-- Content will be populated by JavaScript -->
+    </div>
+  </div>
+</div>
+
+<script>
+  // Navigation scripts
+  const menuBtn = document.getElementById('menuBtn');
+  const menuDropdown = document.getElementById('menuDropdown');
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuDropdown.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+      menuDropdown.classList.add('hidden');
+    }
+  });
+
+  const dropdownButtons = document.querySelectorAll('.dropdownBtn');
+  let activeDropdown = null;
+
+  dropdownButtons.forEach(btn => {
+    const dropdown = btn.nextElementSibling;
+    if (!dropdown) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeDropdown && activeDropdown !== dropdown) {
+        activeDropdown.classList.remove('show');
+      }
+      if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        activeDropdown = null;
+      } else {
+        dropdown.classList.add('show');
+        activeDropdown = dropdown;
+      }
+    });
+
+    btn.addEventListener('mouseenter', () => dropdown.classList.add('show'));
+    btn.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!dropdown.matches(':hover')) {
+          dropdown.classList.remove('show');
+        }
+      }, 100);
+    });
+    
+    if (dropdown) {
+      dropdown.addEventListener('mouseleave', () => {
+        dropdown.classList.remove('show');
+        if (activeDropdown === dropdown) activeDropdown = null;
+      });
+    }
+  });
+
+  document.body.addEventListener('click', () => {
+    if (activeDropdown) {
+      activeDropdown.classList.remove('show');
+      activeDropdown = null;
+    }
+  });
+
+  let lastScroll = 0;
+  const featureNavbar = document.getElementById('featureNavbar');
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+    if (currentScroll > lastScroll && currentScroll > 100) {
+      featureNavbar.style.transform = 'translateY(-100%)';
+    } else {
+      featureNavbar.style.transform = 'translateY(0)';
+    }
+    lastScroll = currentScroll;
+  });
+
+  // Main application variables
+  const toastContainer = document.getElementById('toastContainer');
+  const aiProcessingModal = document.getElementById('aiProcessingModal');
+  const aiProgress = document.getElementById('aiProgress');
+  const aiStatus = document.getElementById('aiStatus');
+  const generateRecommendations = document.getElementById('generateRecommendations');
+  const refreshData = document.getElementById('refreshData');
+  const patientModal = document.getElementById('patientModal');
+  const closePatientModal = document.getElementById('closePatientModal');
+  const patientSearch = document.getElementById('patientSearch');
+  const patientList = document.getElementById('patientList');
+  const selectPatient = document.getElementById('selectPatient');
+  const changePatient = document.getElementById('changePatient');
+  const currentPatientInfo = document.getElementById('currentPatientInfo');
+  const recommendationsList = document.getElementById('recommendationsList');
+  const preventiveActions = document.getElementById('preventiveActions');
+  const iotDevicesList = document.getElementById('iotDevicesList');
+  const healthMetrics = document.getElementById('healthMetrics');
+  const riskAssessment = document.getElementById('riskAssessment');
+  const recommendationModal = document.getElementById('recommendationModal');
+  const closeRecommendationModal = document.getElementById('closeRecommendationModal');
+  const recommendationDetails = document.getElementById('recommendationDetails');
+
+  let currentPatient = null;
+  let iotDevices = [];
+  let healthData = [];
+  let recommendations = [];
+
+  // Sample patient data
+  const patients = [
+    {
+      id: "0001001",
+      name: "Ayesha Rahman",
+      age: 58,
+      gender: "Female",
+      conditions: ["Hypertension", "Type 2 Diabetes", "High Cholesterol"],
+      medications: ["Metformin", "Lisinopril", "Atorvastatin"],
+      lastVisit: "2024-01-15",
+      riskLevel: "medium"
+    },
+    {
+      id: "0001002", 
+      name: "Jamal Hossain",
+      age: 65,
+      gender: "Male",
+      conditions: ["Heart Disease", "Arthritis", "COPD"],
+      medications: ["Aspirin", "Metoprolol", "Ibuprofen"],
+      lastVisit: "2024-01-10",
+      riskLevel: "high"
+    },
+    {
+      id: "0001003",
+      name: "Mina Akter",
+      age: 42,
+      gender: "Female", 
+      conditions: ["Asthma", "Migraine"],
+      medications: ["Albuterol", "Sumatriptan"],
+      lastVisit: "2024-01-18",
+      riskLevel: "low"
+    },
+    {
+      id: "0001004",
+      name: "Rafiul Islam",
+      age: 8,
+      gender: "Male",
+      conditions: ["Asthma", "Allergies"],
+      medications: ["Fluticasone", "Loratadine"],
+      lastVisit: "2024-01-12",
+      riskLevel: "low"
+    },
+    {
+      id: "0001005",
+      name: "Tahmina Sultana",
+      age: 35,
+      gender: "Female",
+      conditions: ["Pregnancy", "Anemia"],
+      medications: ["Prenatal Vitamins", "Iron Supplement"],
+      lastVisit: "2024-01-20",
+      riskLevel: "medium"
+    }
+  ];
+
+  // Sample IoT devices data
+  const sampleIoTDevices = [
+    {
+      id: "IOT001",
+      type: "Smart Glucose Monitor",
+      patientId: "0001001",
+      status: "connected",
+      lastReading: "125 mg/dL",
+      lastUpdate: new Date(Date.now() - 5 * 60000).toISOString(),
+      battery: 85
+    },
+    {
+      id: "IOT002",
+      type: "Blood Pressure Monitor", 
+      patientId: "0001001",
+      status: "connected",
+      lastReading: "138/85 mmHg",
+      lastUpdate: new Date(Date.now() - 15 * 60000).toISOString(),
+      battery: 72
+    },
+    {
+      id: "IOT003",
+      type: "Smart Weight Scale",
+      patientId: "0001001", 
+      status: "connected",
+      lastReading: "68.5 kg",
+      lastUpdate: new Date(Date.now() - 2 * 3600000).toISOString(),
+      battery: 45
+    },
+    {
+      id: "IOT004",
+      type: "ECG Patch Monitor",
+      patientId: "0001002",
+      status: "connected", 
+      lastReading: "Normal Sinus Rhythm",
+      lastUpdate: new Date(Date.now() - 10 * 60000).toISOString(),
+      battery: 90
+    },
+    {
+      id: "IOT005",
+      type: "Oxygen Saturation Monitor",
+      patientId: "0001002",
+      status: "offline",
+      lastReading: "96%",
+      lastUpdate: new Date(Date.now() - 24 * 3600000).toISOString(),
+      battery: 15
+    }
+  ];
+
+  // Sample health metrics
+  const sampleHealthMetrics = [
+    { name: "Heart Rate", value: "72 bpm", status: "normal", trend: "stable" },
+    { name: "Blood Pressure", value: "138/85 mmHg", status: "warning", trend: "increasing" },
+    { name: "Blood Glucose", value: "125 mg/dL", status: "normal", trend: "stable" },
+    { name: "Oxygen Saturation", value: "97%", status: "normal", trend: "stable" },
+    { name: "Weight", value: "68.5 kg", status: "normal", trend: "decreasing" },
+    { name: "Activity Level", value: "4,285 steps", status: "warning", trend: "decreasing" }
+  ];
+
+  // Initialize the application
+  function initApp() {
+    renderPatientList();
+    updateDashboardStats();
+    simulateIoTData();
+  }
+
+  // Render patient list for selection
+  function renderPatientList(filter = '') {
+    patientList.innerHTML = '';
+    
+    const filteredPatients = patients.filter(patient => 
+      patient.name.toLowerCase().includes(filter.toLowerCase()) || 
+      patient.id.includes(filter)
+    );
+    
+    if (filteredPatients.length === 0) {
+      patientList.innerHTML = '<div class="col-span-2 text-center py-8 text-gray-500">No patients found</div>';
+      return;
+    }
+    
+    filteredPatients.forEach(patient => {
+      const patientCard = document.createElement('div');
+      patientCard.className = 'bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition cursor-pointer';
+      patientCard.innerHTML = `
+        <div class="flex justify-between items-start">
+          <div>
+            <h4 class="font-bold text-gray-800">${patient.name}</h4>
+            <p class="text-sm text-gray-600">ID: ${patient.id} | Age: ${patient.age} | ${patient.gender}</p>
+            <div class="flex flex-wrap gap-1 mt-2">
+              ${patient.conditions.map(condition => 
+                `<span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">${condition}</span>`
+              ).join('')}
+            </div>
+          </div>
+          <span class="badge ${patient.riskLevel === 'high' ? 'risk-high' : patient.riskLevel === 'medium' ? 'risk-medium' : 'risk-low'} px-2 py-1 rounded-full text-xs">
+            ${patient.riskLevel.toUpperCase()} RISK
+          </span>
+        </div>
+        <div class="mt-3 text-xs text-gray-500">
+          Last visit: ${formatDate(patient.lastVisit)}
+        </div>
+      `;
+      patientCard.addEventListener('click', () => selectPatientForAnalysis(patient));
+      patientList.appendChild(patientCard);
+    });
+  }
+
+  // Select patient for analysis
+  function selectPatientForAnalysis(patient) {
+    currentPatient = patient;
+    patientModal.classList.add('hidden');
+    updateCurrentPatientInfo();
+    loadPatientIoTData();
+    showToast(`Selected patient: ${patient.name}`, 'success');
+  }
+
+  // Update current patient info display
+  function updateCurrentPatientInfo() {
+    if (!currentPatient) return;
+    
+    currentPatientInfo.innerHTML = `
+      <div class="flex items-start space-x-4">
+        <div class="bg-indigo-100 p-3 rounded-full">
+          <i class="ph ph-user text-indigo-600 text-xl"></i>
+        </div>
+        <div class="text-left flex-1">
+          <h4 class="font-bold text-gray-800 text-lg">${currentPatient.name}</h4>
+          <div class="grid grid-cols-2 gap-x-4 gap-y-2 mt-2 text-sm">
+            <div><span class="font-medium">Patient ID:</span> ${currentPatient.id}</div>
+            <div><span class="font-medium">Age:</span> ${currentPatient.age}</div>
+            <div><span class="font-medium">Gender:</span> ${currentPatient.gender}</div>
+            <div><span class="font-medium">Last Visit:</span> ${formatDate(currentPatient.lastVisit)}</div>
+          </div>
+          <div class="mt-3">
+            <span class="font-medium">Conditions:</span>
+            <div class="flex flex-wrap gap-1 mt-1">
+              ${currentPatient.conditions.map(condition => 
+                `<span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">${condition}</span>`
+              ).join('')}
+            </div>
+          </div>
+          <div class="mt-2">
+            <span class="font-medium">Current Medications:</span>
+            <div class="flex flex-wrap gap-1 mt-1">
+              ${currentPatient.medications.map(med => 
+                `<span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">${med}</span>`
+              ).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Load patient IoT data
+  function loadPatientIoTData() {
+    if (!currentPatient) return;
+    
+    // Filter devices for current patient
+    iotDevices = sampleIoTDevices.filter(device => device.patientId === currentPatient.id);
+    
+    // Update IoT devices list
+    iotDevicesList.innerHTML = '';
+    if (iotDevices.length === 0) {
+      iotDevicesList.innerHTML = '<div class="text-center py-4 text-gray-500">No IoT devices connected</div>';
+    } else {
+      iotDevices.forEach(device => {
+        const deviceElement = document.createElement('div');
+        deviceElement.className = `flex justify-between items-center p-3 rounded-lg ${device.status === 'connected' ? 'iot-connected' : 'iot-offline'}`;
+        deviceElement.innerHTML = `
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+              <i class="ph ph-device-mobile ${device.status === 'connected' ? 'text-blue-500' : 'text-gray-400'}"></i>
+            </div>
+            <div>
+              <div class="font-medium">${device.type}</div>
+              <div class="text-xs">${device.lastReading}</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs ${device.status === 'connected' ? 'text-blue-600' : 'text-gray-500'}">${device.status === 'connected' ? 'Connected' : 'Offline'}</div>
+            <div class="text-xs text-gray-500">Battery: ${device.battery}%</div>
+          </div>
+        `;
+        iotDevicesList.appendChild(deviceElement);
+      });
+    }
+    
+    // Update health metrics
+    updateHealthMetrics();
+    
+    // Update risk assessment
+    updateRiskAssessment();
+  }
+
+  // Update health metrics display
+  function updateHealthMetrics() {
+    healthMetrics.innerHTML = '';
+    sampleHealthMetrics.forEach(metric => {
+      const metricElement = document.createElement('div');
+      metricElement.className = 'flex justify-between items-center';
+      metricElement.innerHTML = `
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+            <i class="ph ph-heart text-gray-600"></i>
+          </div>
+          <div>
+            <div class="font-medium text-sm">${metric.name}</div>
+            <div class="text-xs text-gray-500">${metric.trend}</div>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="font-bold ${metric.status === 'normal' ? 'metric-normal' : metric.status === 'warning' ? 'metric-warning' : 'metric-critical'}">${metric.value}</div>
+          <div class="text-xs ${metric.status === 'normal' ? 'text-green-500' : metric.status === 'warning' ? 'text-yellow-500' : 'text-red-500'}">${metric.status}</div>
+        </div>
+      `;
+      healthMetrics.appendChild(metricElement);
+    });
+  }
+
+  // Update risk assessment
+  function updateRiskAssessment() {
+    if (!currentPatient) return;
+    
+    let riskHTML = '';
+    if (currentPatient.riskLevel === 'high') {
+      riskHTML = `
+        <div class="risk-high p-4 rounded-lg mb-4">
+          <div class="flex items-center space-x-2 mb-2">
+            <i class="ph ph-warning-circle"></i>
+            <span class="font-bold">High Risk Patient</span>
+          </div>
+          <p class="text-sm">This patient has multiple chronic conditions requiring close monitoring and proactive interventions.</p>
+        </div>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span>Cardiovascular Risk:</span>
+            <span class="font-bold metric-critical">High</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Diabetes Control:</span>
+            <span class="font-bold metric-warning">Moderate</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Medication Adherence:</span>
+            <span class="font-bold metric-warning">76%</span>
+          </div>
+        </div>
+      `;
+    } else if (currentPatient.riskLevel === 'medium') {
+      riskHTML = `
+        <div class="risk-medium p-4 rounded-lg mb-4">
+          <div class="flex items-center space-x-2 mb-2">
+            <i class="ph ph-info"></i>
+            <span class="font-bold">Medium Risk Patient</span>
+          </div>
+          <p class="text-sm">This patient requires regular monitoring and preventive care to avoid complications.</p>
+        </div>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span>Cardiovascular Risk:</span>
+            <span class="font-bold metric-warning">Moderate</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Diabetes Control:</span>
+            <span class="font-bold metric-normal">Good</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Medication Adherence:</span>
+            <span class="font-bold metric-normal">88%</span>
+          </div>
+        </div>
+      `;
+    } else {
+      riskHTML = `
+        <div class="risk-low p-4 rounded-lg mb-4">
+          <div class="flex items-center space-x-2 mb-2">
+            <i class="ph ph-check-circle"></i>
+            <span class="font-bold">Low Risk Patient</span>
+          </div>
+          <p class="text-sm">This patient is generally healthy with well-managed conditions.</p>
+        </div>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span>Overall Health:</span>
+            <span class="font-bold metric-normal">Good</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Condition Management:</span>
+            <span class="font-bold metric-normal">Excellent</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Medication Adherence:</span>
+            <span class="font-bold metric-normal">94%</span>
+          </div>
+        </div>
+      `;
+    }
+    
+    riskAssessment.innerHTML = riskHTML;
+  }
+
+  // Generate AI recommendations
+  function generateAIRecommendations() {
+    if (!currentPatient) {
+      showToast('Please select a patient first', 'warning');
+      patientModal.classList.remove('hidden');
+      return;
+    }
+    
+    aiProcessingModal.classList.remove('hidden');
+    let progress = 0;
+    
+    const progressInterval = setInterval(() => {
+      progress += Math.random() * 15;
+      if (progress > 100) progress = 100;
+      aiProgress.style.width = `${progress}%`;
+      
+      if (progress < 30) {
+        aiStatus.textContent = "Analyzing patient medical history...";
+      } else if (progress < 60) {
+        aiStatus.textContent = "Processing IoT device data...";
+      } else if (progress < 90) {
+        aiStatus.textContent = "Running predictive algorithms...";
+      } else {
+        aiStatus.textContent = "Finalizing recommendations...";
+      }
+      
+      if (progress === 100) {
+        clearInterval(progressInterval);
+        setTimeout(() => {
+          aiProcessingModal.classList.add('hidden');
+          createRecommendations();
+          showToast('AI recommendations generated successfully!', 'success');
+        }, 1000);
+      }
+    }, 300);
+  }
+
+  // Create sample recommendations based on patient data
+  function createRecommendations() {
+    if (!currentPatient) return;
+    
+    recommendations = [];
+    
+    // Doctor recommendations
+    if (currentPatient.conditions.includes("Hypertension") || currentPatient.conditions.includes("Heart Disease")) {
+      recommendations.push({
+        id: "REC001",
+        type: "doctor",
+        title: "Cardiology Consultation",
+        description: "Schedule follow-up with cardiologist for blood pressure management",
+        priority: "high",
+        reason: "Elevated blood pressure readings from IoT monitor",
+        suggestedDoctor: "Dr. Omar Faruq",
+        timeframe: "Within 2 weeks",
+        confidence: 92
+      });
+    }
+    
+    if (currentPatient.conditions.includes("Type 2 Diabetes")) {
+      recommendations.push({
+        id: "REC002", 
+        type: "test",
+        title: "HbA1c Test",
+        description: "Perform quarterly hemoglobin A1c test for diabetes control assessment",
+        priority: "medium",
+        reason: "Routine diabetes monitoring required",
+        suggestedTests: ["HbA1c", "Fasting Blood Glucose", "Lipid Profile"],
+        timeframe: "Within 1 month",
+        confidence: 88
+      });
+    }
+    
+    // Lifestyle recommendations
+    recommendations.push({
+      id: "REC003",
+      type: "lifestyle", 
+      title: "Increase Physical Activity",
+      description: "Gradually increase daily steps to 7,000-8,000 for better cardiovascular health",
+      priority: "medium",
+      reason: "Low activity level detected from IoT devices",
+      actions: ["Walk 30 minutes daily", "Use stairs instead of elevator", "Join light exercise class"],
+      timeframe: "Ongoing",
+      confidence: 85
+    });
+    
+    // Medication recommendations
+    if (currentPatient.medications.includes("Lisinopril")) {
+      recommendations.push({
+        id: "REC004",
+        type: "medication",
+        title: "Medication Timing Adjustment", 
+        description: "Consider taking blood pressure medication in evening for better nocturnal control",
+        priority: "low",
+        reason: "IoT data shows higher nighttime blood pressure",
+        currentMedication: "Lisinopril 10mg daily",
+        suggestedChange: "Take in evening instead of morning",
+        timeframe: "Discuss at next appointment",
+        confidence: 78
+      });
+    }
+    
+    // Preventive actions
+    recommendations.push({
+      id: "REC005",
+      type: "preventive",
+      title: "Fall Risk Assessment",
+      description: "Conduct fall risk assessment and home safety evaluation",
+      priority: "medium", 
+      reason: "Age and medication side effects increase fall risk",
+        actions: ["Remove home hazards", "Install grab bars", "Wear non-slip footwear"],
+      timeframe: "Within 1 month",
+      confidence: 82
+    });
+    
+    // Display recommendations
+    displayRecommendations();
+    displayPreventiveActions();
+    updateDashboardStats();
+  }
+
+  // Display recommendations
+  function displayRecommendations() {
+    recommendationsList.innerHTML = '';
+    
+    if (recommendations.length === 0) {
+      recommendationsList.innerHTML = `
+        <div class="text-center py-8 text-gray-500">
+          <i class="ph ph-lightbulb text-4xl mb-2"></i>
+          <p>No recommendations available</p>
+        </div>
+      `;
+      return;
+    }
+    
+    recommendations.forEach(rec => {
+      const recElement = document.createElement('div');
+      recElement.className = `recommendation-${rec.type} bg-white border-l-4 rounded-lg p-4 shadow-sm hover:shadow-md transition cursor-pointer`;
+      recElement.innerHTML = `
+        <div class="flex justify-between items-start mb-2">
+          <div>
+            <span class="ai-chip px-2 py-1 rounded-full text-xs font-medium mb-1 inline-block">AI SUGGESTION</span>
+            <h4 class="font-bold text-gray-800">${rec.title}</h4>
+          </div>
+          <span class="badge ${rec.priority === 'high' ? 'priority-high' : rec.priority === 'medium' ? 'priority-medium' : 'priority-low'} px-2 py-1 rounded-full text-xs">
+            ${rec.priority.toUpperCase()} PRIORITY
+          </span>
+        </div>
+        <p class="text-sm text-gray-600 mb-3">${rec.description}</p>
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-gray-500">Confidence: ${rec.confidence}%</span>
+          <button class="text-indigo-600 hover:text-indigo-800 font-medium">View Details →</button>
+        </div>
+      `;
+      
+      recElement.addEventListener('click', () => showRecommendationDetails(rec));
+      recommendationsList.appendChild(recElement);
+    });
+  }
+
+  // Display preventive actions
+  function displayPreventiveActions() {
+    preventiveActions.innerHTML = '';
+    
+    const preventiveRecs = recommendations.filter(rec => rec.type === 'preventive' || rec.type === 'lifestyle');
+    
+    if (preventiveRecs.length === 0) {
+      preventiveActions.innerHTML = `
+        <div class="text-center py-4 text-gray-500">
+          <i class="ph ph-shield-check text-2xl mb-1"></i>
+          <p class="text-sm">No preventive actions</p>
+        </div>
+      `;
+      return;
+    }
+    
+    preventiveRecs.forEach(rec => {
+      const actionElement = document.createElement('div');
+      actionElement.className = 'flex items-start space-x-3 p-3 bg-gray-50 rounded-lg';
+      actionElement.innerHTML = `
+        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+          <i class="ph ph-check-circle text-green-600"></i>
+        </div>
+        <div>
+          <h5 class="font-medium text-gray-800 text-sm">${rec.title}</h5>
+          <p class="text-xs text-gray-600 mt-1">${rec.timeframe}</p>
+        </div>
+      `;
+      preventiveActions.appendChild(actionElement);
+    });
+  }
+
+  // Show recommendation details
+  function showRecommendationDetails(recommendation) {
+    let detailsHTML = '';
+    
+    switch(recommendation.type) {
+      case 'doctor':
+        detailsHTML = `
+          <div class="mb-4">
+            <h4 class="font-bold text-lg text-gray-800">${recommendation.title}</h4>
+            <p class="text-gray-600 mt-2">${recommendation.description}</p>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Priority</label>
+              <p class="mt-1">
+                <span class="badge ${recommendation.priority === 'high' ? 'priority-high' : recommendation.priority === 'medium' ? 'priority-medium' : 'priority-low'} px-2 py-1 rounded-full text-xs">
+                  ${recommendation.priority.toUpperCase()}
+                </span>
+              </p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Timeframe</label>
+              <p class="mt-1 font-medium">${recommendation.timeframe}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">AI Confidence</label>
+              <p class="mt-1 font-medium">${recommendation.confidence}%</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Suggested Specialist</label>
+              <p class="mt-1 font-medium">${recommendation.suggestedDoctor}</p>
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Recommendation</label>
+            <p class="text-gray-600">${recommendation.reason}</p>
+          </div>
+          
+          <div class="bg-blue-50 p-4 rounded-lg">
+            <div class="flex items-center space-x-2 mb-2">
+              <i class="ph ph-info text-blue-600"></i>
+              <span class="font-medium text-blue-800">Next Steps</span>
+            </div>
+            <ul class="text-sm text-blue-700 list-disc list-inside space-y-1">
+              <li>Schedule appointment with ${recommendation.suggestedDoctor}</li>
+              <li>Bring recent blood pressure logs from IoT device</li>
+              <li>Discuss medication adjustments if needed</li>
+            </ul>
+          </div>
+        `;
+        break;
+        
+      case 'test':
+        detailsHTML = `
+          <div class="mb-4">
+            <h4 class="font-bold text-lg text-gray-800">${recommendation.title}</h4>
+            <p class="text-gray-600 mt-2">${recommendation.description}</p>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Priority</label>
+              <p class="mt-1">
+                <span class="badge ${recommendation.priority === 'high' ? 'priority-high' : recommendation.priority === 'medium' ? 'priority-medium' : 'priority-low'} px-2 py-1 rounded-full text-xs">
+                  ${recommendation.priority.toUpperCase()}
+                </span>
+              </p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Timeframe</label>
+              <p class="mt-1 font-medium">${recommendation.timeframe}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">AI Confidence</label>
+              <p class="mt-1 font-medium">${recommendation.confidence}%</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Tests Required</label>
+              <div class="mt-1 flex flex-wrap gap-1">
+                ${recommendation.suggestedTests.map(test => 
+                  `<span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">${test}</span>`
+                ).join('')}
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Recommendation</label>
+            <p class="text-gray-600">${recommendation.reason}</p>
+          </div>
+        `;
+        break;
+        
+      default:
+        detailsHTML = `
+          <div class="mb-4">
+            <h4 class="font-bold text-lg text-gray-800">${recommendation.title}</h4>
+            <p class="text-gray-600 mt-2">${recommendation.description}</p>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Priority</label>
+              <p class="mt-1">
+                <span class="badge ${recommendation.priority === 'high' ? 'priority-high' : recommendation.priority === 'medium' ? 'priority-medium' : 'priority-low'} px-2 py-1 rounded-full text-xs">
+                  ${recommendation.priority.toUpperCase()}
+                </span>
+              </p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Timeframe</label>
+              <p class="mt-1 font-medium">${recommendation.timeframe}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">AI Confidence</label>
+              <p class="mt-1 font-medium">${recommendation.confidence}%</p>
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Recommendation</label>
+            <p class="text-gray-600">${recommendation.reason}</p>
+          </div>
+          
+          ${recommendation.actions ? `
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Suggested Actions</label>
+              <ul class="list-disc list-inside text-gray-600 space-y-1">
+                ${recommendation.actions.map(action => `<li>${action}</li>`).join('')}
+              </ul>
+            </div>
+          ` : ''}
+        `;
+    }
+    
+    recommendationDetails.innerHTML = detailsHTML;
+    recommendationModal.classList.remove('hidden');
+  }
+
+  // Update dashboard statistics
+  function updateDashboardStats() {
+    // Update active devices count
+    const activeDevicesCount = iotDevices.filter(d => d.status === 'connected').length;
+    document.getElementById('activeDevices').textContent = iotDevices.length;
+    document.getElementById('connectedDevices').textContent = activeDevicesCount;
+    
+    // Update recommendations count
+    document.getElementById('totalRecommendations').textContent = recommendations.length;
+    document.getElementById('weeklyRecommendations').textContent = Math.floor(recommendations.length * 0.7);
+    
+    // Update alerts count
+    const highPriorityCount = recommendations.filter(r => r.priority === 'high').length;
+    document.getElementById('highPriorityAlerts').textContent = highPriorityCount;
+    document.getElementById('attentionAlerts').textContent = highPriorityCount;
+    
+    // Update compliance (simulated)
+    const complianceRate = currentPatient ? 
+      (currentPatient.riskLevel === 'high' ? 76 : 
+       currentPatient.riskLevel === 'medium' ? 88 : 94) : 0;
+    document.getElementById('patientCompliance').textContent = complianceRate + '%';
+    document.getElementById('avgAdherence').textContent = complianceRate + '%';
+  }
+
+  // Simulate IoT data updates
+  function simulateIoTData() {
+    // Randomly update device status and readings
+    setInterval(() => {
+      if (iotDevices.length > 0) {
+        const randomDevice = iotDevices[Math.floor(Math.random() * iotDevices.length)];
+        if (randomDevice.status === 'connected') {
+          randomDevice.lastUpdate = new Date().toISOString();
+          randomDevice.battery = Math.max(10, randomDevice.battery - Math.floor(Math.random() * 3));
+          
+          if (randomDevice.battery < 20) {
+            showToast(`Low battery alert: ${randomDevice.type}`, 'warning');
+          }
+        }
+        loadPatientIoTData();
+      }
+    }, 30000); // Update every 30 seconds
+  }
+
+  // Format date
+  function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+  }
+
+  // Toast notification system
+  function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    const colors = {
+      success: 'bg-green-500',
+      error: 'bg-red-500',
+      warning: 'bg-yellow-500',
+      info: 'bg-blue-500'
+    };
+    const icons = {
+      success: 'check-circle',
+      error: 'x-circle',
+      warning: 'warning',
+      info: 'info'
+    };
+    
+    toast.className = `${colors[type]} text-white px-6 py-4 rounded-lg shadow-2xl font-medium flex items-center space-x-3 pointer-events-auto transform transition-all duration-300 mb-2`;
+    toast.style.animation = 'slideInRight 0.3s ease-out';
+    toast.innerHTML = `
+      <i class="ph ph-${icons[type]} text-xl"></i>
+      <span>${message}</span>
+    `;
+    
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.animation = 'slideOutRight 0.3s ease-in';
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+
+  // Add animation keyframes
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideInRight {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    @keyframes slideOutRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Event listeners
+  selectPatient.addEventListener('click', () => {
+    patientModal.classList.remove('hidden');
+  });
+
+  changePatient.addEventListener('click', () => {
+    patientModal.classList.remove('hidden');
+  });
+
+  closePatientModal.addEventListener('click', () => {
+    patientModal.classList.add('hidden');
+  });
+
+  generateRecommendations.addEventListener('click', generateAIRecommendations);
+
+  refreshData.addEventListener('click', () => {
+    if (currentPatient) {
+      loadPatientIoTData();
+      showToast('IoT data refreshed successfully', 'info');
+    } else {
+      showToast('Please select a patient first', 'warning');
+    }
+  });
+
+  closeRecommendationModal.addEventListener('click', () => {
+    recommendationModal.classList.add('hidden');
+  });
+
+  patientSearch.addEventListener('input', (e) => {
+    renderPatientList(e.target.value);
+  });
+
+  // Initialize the application
+  document.addEventListener('DOMContentLoaded', initApp);
+</script>
+</body>
+</html>

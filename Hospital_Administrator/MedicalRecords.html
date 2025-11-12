@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medical Records | SHMS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  .animate-slideUp {
+    animation: slideUp 0.7s ease-out forwards;
+  }
+  .animate-pulse-slow {
+    animation: pulse 3s ease-in-out infinite;
+  }
+  .dropdownContent {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none;
+    position: absolute;
+    z-index: 50;
+    left: 0;
+  }
+  .dropdownContent.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .card-hover {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  .stat-number {
+    font-feature-settings: 'tnum';
+    font-variant-numeric: tabular-nums;
+  }
+  .gradient-border {
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899) border-box;
+    border: 2px solid transparent;
+  }
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #6366f1;
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+  }
+
+  /* Floating animation for icons */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  .float-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Chart containers */
+  .chart-container {
+    position: relative;
+    height: 300px;
+  }
+  
+  /* Status indicators */
+  .status-chronic {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+  .status-acute {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+  
+  /* Priority indicators */
+  .priority-high {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+  .priority-medium {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+  .priority-low {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+  
+  /* Compact table rows */
+  .compact-row {
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .compact-row:hover {
+    background-color: #f8fafc;
+  }
+  .compact-cell {
+    padding: 8px 10px;
+    font-size: 0.875rem;
+  }
+  .compact-header {
+    padding: 10px 10px;
+    font-size: 0.875rem;
+  }
+  
+  /* Optimized column widths */
+  .col-patient-id {
+    width: 100px;
+  }
+  .col-patient-name {
+    width: 140px;
+  }
+  .col-diagnosis {
+    width: 150px;
+  }
+  .col-treatment {
+    width: 180px;
+  }
+  .col-prescription {
+    width: 140px;
+  }
+  .col-lab-summary {
+    width: 180px;
+  }
+  .col-condition {
+    width: 100px;
+  }
+  .col-actions {
+    width: 90px;
+  }
+  
+  /* Badge styles */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  
+  /* Action buttons container */
+  .actions-container {
+    width: 75%;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+  }
+  
+  /* Action buttons */
+  .action-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+  }
+  
+  .action-btn:hover {
+    transform: scale(1.1);
+  }
+  
+  .view-btn {
+    background-color: #3b82f6;
+    color: white;
+  }
+  
+  .view-btn:hover {
+    background-color: #2563eb;
+  }
+  
+  .edit-btn {
+    background-color: #f59e0b;
+    color: white;
+  }
+  
+  .edit-btn:hover {
+    background-color: #d97706;
+  }
+  
+  .delete-btn {
+    background-color: #ef4444;
+    color: white;
+  }
+  
+  .delete-btn:hover {
+    background-color: #dc2626;
+  }
+</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen flex flex-col">
+
+<!-- Top Navbar -->
+<nav class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+  <h1 class="text-2xl font-bold tracking-wide flex items-center space-x-2">
+    <i class="ph ph-heartbeat text-3xl"></i>
+    <span>SHMS</span>
+  </h1>
+  <span class="text-xl font-bold flex items-center space-x-2">
+    <i class="ph ph-user-circle"></i>
+    <span>Hospital Administrator</span>
+  </span>
+  <div class="relative">
+    <button id="menuBtn" class="text-white text-2xl focus:outline-none hover:bg-indigo-600 rounded-full p-2 transition" aria-label="Menu">
+      <i class="ph ph-dots-three-vertical"></i>
+    </button>
+    <div id="menuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded-md shadow-lg z-50">
+      <a href="#" class="block px-4 py-2 hover:bg-indigo-100 rounded-t-md flex items-center space-x-2">
+        <i class="ph ph-user"></i>
+        <span>Profile</span>
+      </a>
+      <a href="#" class="block px-4 py-2 hover:bg-indigo-100 flex items-center space-x-2">
+        <i class="ph ph-chart-bar"></i>
+        <span>Report</span>
+      </a>
+      <a href="login.html" class="block px-4 py-2 hover:bg-indigo-100 text-red-600 rounded-b-md flex items-center space-x-2">
+        <i class="ph ph-sign-out"></i>
+        <span>Logout</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- Feature Navbar -->
+<nav id="featureNavbar" class="bg-indigo-800 text-white shadow-md sticky top-0 z-40 transition-transform duration-300" style="top: 64px;">
+  <div class="container mx-auto flex flex-wrap justify-center md:justify-start items-center px-4 py-2 space-x-2">
+    <div class="relative">
+      <a href="Home.html" class="px-3 py-2 rounded-md hover:bg-indigo-700 block transition">Home</a>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md bg-indigo-600 font-semibold dropdownBtn transition">Patient & Medical Record</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Patients.html" class="block px-4 py-2 hover:bg-indigo-100 font-semibold">Patient List</a>
+        <a href="MedicalRecords.html" class="block px-4 py-2 hover:bg-indigo-100 font-semibold">Medical Records</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Doctor & Appointment</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Doctors.html" class="block px-4 py-2 hover:bg-indigo-100">Doctors Directory</a>
+        <a href="Appointments.html" class="block px-4 py-2 hover:bg-indigo-100">Appointments Management</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Prescription & Investigation</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Prescriptions.html" class="block px-4 py-2 hover:bg-indigo-100">Prescriptions</a>
+        <a href="Investigations.html" class="block px-4 py-2 hover:bg-indigo-100">Tests & Diagnostic Reports</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Billing & Insurance</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Billing.html" class="block px-4 py-2 hover:bg-indigo-100">Bills & Payments</a>
+        <a href="InsuranceClaims.html" class="block px-4 py-2 hover:bg-indigo-100">Insurance Claims</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Disease Prediction</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="DiseasePredictions.html" class="block px-4 py-2 hover:bg-indigo-100">Disease Predictions</a>
+        <a href="Symptoms.html" class="block px-4 py-2 hover:bg-indigo-100">Symptom Assessments</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Smart Recommendations</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="HealthReminders.html" class="block px-4 py-2 hover:bg-indigo-100">Health Reminders</a>
+        <a href="Recommendations.html" class="block px-4 py-2 hover:bg-indigo-100">Health Tips & Recommendations</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Header -->
+<header class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white p-6 shadow-lg flex justify-center items-center relative">
+  <div class="text-center">
+    <h1 class="text-3xl font-bold mb-1">Patient Medical History</h1>
+    <p class="text-indigo-200 text-sm">Comprehensive patient records and medical data</p>
+  </div>
+  <div class="absolute right-8 flex space-x-2">
+    <button id="exportBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium shadow-md transition flex items-center space-x-2 no-print">
+      <i class="ph ph-download-simple"></i>
+      <span>Export</span>
+    </button>
+    <button id="printBtn" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md font-medium shadow-md transition flex items-center space-x-2 no-print">
+      <i class="ph ph-printer"></i>
+      <span>Print</span>
+    </button>
+    <a href="add-history.html" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md font-medium shadow-md transition flex items-center space-x-2">
+      <i class="ph ph-plus-circle"></i>
+      <span>Add Record</span>
+    </a>
+  </div>
+</header>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-20 right-4 flex flex-col space-y-2 pointer-events-none z-50"></div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50 fade-in">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-md mx-4">
+    <div class="bg-red-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+      <h3 class="text-xl font-bold">Confirm Record Deletion</h3>
+      <button id="closeConfirmModal" class="text-white hover:text-red-200 text-2xl">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+    <div class="p-6">
+      <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="ph ph-warning text-red-500 text-3xl"></i>
+      </div>
+      <p id="confirmText" class="mb-4 text-gray-600 text-center"></p>
+      
+      <div class="mb-4">
+        <label for="deleteReason" class="block text-sm font-medium text-gray-700 mb-2">Reason for deletion <span class="text-red-500">*</span></label>
+        <select id="deleteReason" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" required>
+          <option value="">Select a reason</option>
+          <option value="incorrect_entry">Incorrect Entry</option>
+          <option value="patient_request">Patient Request</option>
+          <option value="doctor_request">Doctor Request</option>
+          <option value="duplicate">Duplicate Record</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      
+      <div id="otherReasonContainer" class="mb-4 hidden">
+        <label for="otherReason" class="block text-sm font-medium text-gray-700 mb-2">Please specify reason</label>
+        <textarea id="otherReason" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Enter specific reason for deletion"></textarea>
+      </div>
+      
+      <div class="mb-4">
+        <label for="deletionNotes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
+        <textarea id="deletionNotes" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Any additional information about this deletion"></textarea>
+      </div>
+      
+      <div class="flex justify-center space-x-4">
+        <button id="confirmYes" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md transition transform hover:scale-105 flex items-center space-x-2">
+          <i class="ph ph-trash"></i>
+          <span>Delete Record</span>
+        </button>
+        <button id="confirmNo" class="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-md transition transform hover:scale-105">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- View Record Modal -->
+<div id="viewRecordModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50 fade-in overflow-y-auto py-8">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-3xl mx-4">
+    <div class="bg-indigo-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+      <h3 class="text-xl font-bold">Medical Record Details</h3>
+      <button id="closeViewModal" class="text-white hover:text-indigo-200 text-2xl">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+    <div class="p-6 space-y-4" id="recordDetails">
+      <!-- Content will be populated by JavaScript -->
+    </div>
+  </div>
+</div>
+
+<!-- Controls -->
+<div class="container mx-auto mt-6 px-4">
+  <div class="bg-white rounded-lg shadow-md p-4 space-y-4">
+    <!-- Top row: Search and Sort -->
+    <div class="flex flex-wrap justify-between items-center gap-4">
+      <div class="flex items-center space-x-2 flex-1 max-w-md">
+        <i class="ph ph-magnifying-glass text-gray-400 text-xl"></i>
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Search by ID, name, diagnosis, treatment..." 
+          class="border border-gray-300 rounded-md px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+        />
+        <button id="clearSearch" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-md transition hidden">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-2">
+          <label for="sort" class="font-medium text-gray-700">Sort by:</label>
+          <select id="sort" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+            <option value="id">Patient ID</option>
+            <option value="name">Name</option>
+            <option value="diagnosis">Diagnosis</option>
+            <option value="condition">Condition Type</option>
+          </select>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <label for="perPage" class="font-medium text-gray-700">Show:</label>
+          <select id="perPage" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="50">50</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter chips -->
+    <div class="flex flex-wrap gap-2">
+      <button class="filter-chip bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="all">
+        All Records (<span id="countAll">0</span>)
+      </button>
+      <button class="filter-chip bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="chronic">
+        Chronic Conditions (<span id="countChronic">0</span>)
+      </button>
+      <button class="filter-chip bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="acute">
+        Acute Conditions (<span id="countAcute">0</span>)
+      </button>
+      <button class="filter-chip bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="high-priority">
+        High Priority (<span id="countHighPriority">0</span>)
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+      <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+        <div class="text-blue-600 text-sm font-medium">Total Records</div>
+        <div id="statTotal" class="text-2xl font-bold text-blue-700">0</div>
+      </div>
+      <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+        <div class="text-green-600 text-sm font-medium">Showing</div>
+        <div id="statShowing" class="text-2xl font-bold text-green-700">0</div>
+      </div>
+      <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+        <div class="text-purple-600 text-sm font-medium">Current Page</div>
+        <div id="statPage" class="text-2xl font-bold text-purple-700">1</div>
+      </div>
+      <div class="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-lg border border-orange-200">
+        <div class="text-orange-600 text-sm font-medium">Total Pages</div>
+        <div id="statPages" class="text-2xl font-bold text-orange-700">1</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="container mx-auto mt-6 px-4 pb-6 overflow-x-auto">
+  <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <table id="historyTable" class="min-w-full">
+      <thead class="bg-indigo-600 text-white">
+        <tr>
+          <th class="compact-header text-left font-semibold col-patient-id">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-identification-card"></i>
+              <span>Patient ID</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-patient-name">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-user"></i>
+              <span>Name</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-diagnosis">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-heartbeat"></i>
+              <span>Diagnosis</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-treatment">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-first-aid-kit"></i>
+              <span>Treatment</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-prescription">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-pill"></i>
+              <span>Prescription</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-lab-summary">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-flask"></i>
+              <span>Lab Summary</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-condition">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-activity"></i>
+              <span>Condition</span>
+            </div>
+          </th>
+          <th class="compact-header text-center font-semibold no-print col-actions">
+            <div class="flex items-center justify-center space-x-2">
+              <i class="ph ph-gear"></i>
+              <span>Actions</span>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div id="noResults" class="hidden py-12 text-center text-gray-500">
+      <i class="ph ph-magnifying-glass text-5xl mb-4"></i>
+      <p class="text-lg font-medium">No records found</p>
+      <p class="text-sm">Try adjusting your search or filters</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div id="paginationContainer" class="mt-6 flex justify-center items-center space-x-2">
+    <button id="firstPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-double-left"></i>
+    </button>
+    <button id="prevPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-left"></i>
+    </button>
+    <div id="pageNumbers" class="flex space-x-2"></div>
+    <button id="nextPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-right"></i>
+    </button>
+    <button id="lastPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-double-right"></i>
+    </button>
+  </div>
+</div>
+
+<script>
+  // Navigation scripts
+  const menuBtn = document.getElementById('menuBtn');
+  const menuDropdown = document.getElementById('menuDropdown');
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuDropdown.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+      menuDropdown.classList.add('hidden');
+    }
+  });
+
+  const dropdownButtons = document.querySelectorAll('.dropdownBtn');
+  let activeDropdown = null;
+
+  dropdownButtons.forEach(btn => {
+    const dropdown = btn.nextElementSibling;
+    if (!dropdown) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeDropdown && activeDropdown !== dropdown) {
+        activeDropdown.classList.remove('show');
+      }
+      if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        activeDropdown = null;
+      } else {
+        dropdown.classList.add('show');
+        activeDropdown = dropdown;
+      }
+    });
+
+    btn.addEventListener('mouseenter', () => dropdown.classList.add('show'));
+    btn.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!dropdown.matches(':hover')) {
+          dropdown.classList.remove('show');
+        }
+      }, 100);
+    });
+    
+    if (dropdown) {
+      dropdown.addEventListener('mouseleave', () => {
+        dropdown.classList.remove('show');
+        if (activeDropdown === dropdown) activeDropdown = null;
+      });
+    }
+  });
+
+  document.body.addEventListener('click', () => {
+    if (activeDropdown) {
+      activeDropdown.classList.remove('show');
+      activeDropdown = null;
+    }
+  });
+
+  let lastScroll = 0;
+  const featureNavbar = document.getElementById('featureNavbar');
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+    if (currentScroll > lastScroll && currentScroll > 100) {
+      featureNavbar.style.transform = 'translateY(-100%)';
+    } else {
+      featureNavbar.style.transform = 'translateY(0)';
+    }
+    lastScroll = currentScroll;
+  });
+
+  // Main application
+  const tbody = document.getElementById('tableBody');
+  const searchInput = document.getElementById('searchInput');
+  const clearSearch = document.getElementById('clearSearch');
+  const sortSelect = document.getElementById('sort');
+  const perPageSelect = document.getElementById('perPage');
+  const confirmModal = document.getElementById('confirmModal');
+  const confirmText = document.getElementById('confirmText');
+  const confirmYes = document.getElementById('confirmYes');
+  const confirmNo = document.getElementById('confirmNo');
+  const closeConfirmModal = document.getElementById('closeConfirmModal');
+  const deleteReason = document.getElementById('deleteReason');
+  const otherReasonContainer = document.getElementById('otherReasonContainer');
+  const otherReason = document.getElementById('otherReason');
+  const deletionNotes = document.getElementById('deletionNotes');
+  const toastContainer = document.getElementById('toastContainer');
+  const noResults = document.getElementById('noResults');
+  const exportBtn = document.getElementById('exportBtn');
+  const printBtn = document.getElementById('printBtn');
+  const viewRecordModal = document.getElementById('viewRecordModal');
+  const closeViewModal = document.getElementById('closeViewModal');
+  const recordDetails = document.getElementById('recordDetails');
+
+  let deleteRecordId = null;
+  let deleteRecordInfo = "";
+  let currentPage = 1;
+  let recordsPerPage = 20;
+  let currentFilter = 'all';
+
+  // Enhanced medical history data with additional fields
+  const medicalHistory = [
+    ["0001001", "Ayesha Rahman", "Asthma", "Inhaler therapy, allergy control", "Salbutamol Inhaler", "Pulmonary test: mild obstruction", "chronic", "Medium", "2024-01-15", "Dr. Omar Faruq"],
+    ["0001002", "Jamal Hossain", "Diabetes Type II", "Insulin & diet control", "Metformin 500mg", "Fasting glucose: 140 mg/dL", "chronic", "High", "2024-01-14", "Dr. Rahat Chowdhury"],
+    ["0001003", "Mina Akter", "Hypertension", "Lifestyle change & medication", "Losartan 50mg", "BP: 145/90 mmHg", "chronic", "Medium", "2024-01-16", "Dr. Marium Rahman"],
+    ["0001004", "Rafiul Islam", "Allergic Rhinitis", "Antihistamines", "Cetirizine 10mg", "Allergy test: Positive (Dust)", "chronic", "Low", "2024-01-13", "Dr. Ayesha Rahman"],
+    ["0001005", "Tahmina Sultana", "Thyroid Disorder", "Thyroxine Replacement", "Levothyroxine 50mcg", "TSH level: 8.2 mIU/L", "chronic", "Medium", "2024-01-17", "Dr. Tareq Mahmud"],
+    ["0001006", "Arif Chowdhury", "High Cholesterol", "Low-fat diet & statins", "Atorvastatin 20mg", "LDL: 190 mg/dL", "chronic", "High", "2024-01-12", "Dr. Omar Faruq"],
+    ["0001007", "Nasrin Jahan", "Migraine", "Pain management", "Sumatriptan 50mg", "MRI: Normal", "chronic", "Low", "2024-01-18", "Dr. Fatima Begum"],
+    ["0001008", "Sabbir Ahmed", "Gastritis", "Proton pump inhibitor", "Omeprazole 20mg", "Endoscopy: mild inflammation", "acute", "Medium", "2024-01-11", "Dr. Rahim Ahmed"],
+    ["0001009", "Tania Rahman", "Anemia", "Iron supplementation", "Ferrous Sulfate 325mg", "Hemoglobin: 10.1 g/dL", "acute", "Low", "2024-01-19", "Dr. Sabrina Islam"],
+    ["0001010", "Mahmud Hasan", "Arthritis", "Physical therapy & pain meds", "Ibuprofen 400mg", "X-ray: mild joint inflammation", "chronic", "Medium", "2024-01-10", "Dr. Kamal Hossain"]
+  ];
+
+  function getFilteredData() {
+    const term = searchInput.value.toLowerCase();
+    let filtered = medicalHistory.filter(m => {
+      const matchesSearch = m.slice(0, 6).some(field => 
+        String(field).toLowerCase().includes(term)
+      );
+      
+      let matchesFilter = true;
+      if (currentFilter === 'chronic') matchesFilter = m[6] === 'chronic';
+      else if (currentFilter === 'acute') matchesFilter = m[6] === 'acute';
+      else if (currentFilter === 'high-priority') matchesFilter = m[7] === 'High';
+      
+      return matchesSearch && matchesFilter;
+    });
+    return filtered;
+  }
+
+  function updateStats() {
+    const filtered = getFilteredData();
+    const totalPages = recordsPerPage === 'all' ? 1 : Math.ceil(filtered.length / recordsPerPage);
+    
+    document.getElementById('statTotal').textContent = medicalHistory.length;
+    document.getElementById('statShowing').textContent = filtered.length;
+    document.getElementById('statPage').textContent = currentPage;
+    document.getElementById('statPages').textContent = totalPages;
+
+    // Update filter counts
+    document.getElementById('countAll').textContent = medicalHistory.length;
+    document.getElementById('countChronic').textContent = medicalHistory.filter(m => m[6] === 'chronic').length;
+    document.getElementById('countAcute').textContent = medicalHistory.filter(m => m[6] === 'acute').length;
+    document.getElementById('countHighPriority').textContent = medicalHistory.filter(m => m[7] === 'High').length;
+  }
+
+  function highlightText(text, searchTerm) {
+    if (!searchTerm) return text;
+    
+    const regex = new RegExp(`(${searchTerm})`, 'gi');
+    return text.replace(regex, '<span class="highlight">$1</span>');
+  }
+
+  function renderTable() {
+    const filtered = getFilteredData();
+    const startIndex = recordsPerPage === 'all' ? 0 : (currentPage - 1) * recordsPerPage;
+    const endIndex = recordsPerPage === 'all' ? filtered.length : startIndex + recordsPerPage;
+    const paginatedData = filtered.slice(startIndex, endIndex);
+    const searchTerm = searchInput.value.toLowerCase();
+
+    tbody.innerHTML = "";
+    
+    if (paginatedData.length === 0) {
+      noResults.classList.remove('hidden');
+      document.getElementById('paginationContainer').classList.add('hidden');
+    } else {
+      noResults.classList.add('hidden');
+      document.getElementById('paginationContainer').classList.remove('hidden');
+      
+      paginatedData.forEach((m, index) => {
+        const conditionClass = m[6] === 'chronic' ? 'status-chronic' : 'status-acute';
+        const conditionIcon = m[6] === 'chronic' ? 'ph-clock' : 'ph-lightning';
+        
+        const priorityClass = m[7] === 'High' ? 'priority-high' : 
+                             m[7] === 'Medium' ? 'priority-medium' : 'priority-low';
+        const priorityIcon = m[7] === 'High' ? 'ph-warning' : 
+                            m[7] === 'Medium' ? 'ph-info' : 'ph-check';
+        
+        tbody.innerHTML += `
+          <tr class="compact-row transition-all duration-200" style="animation: fadeIn 0.3s ease ${index * 0.05}s both">
+            <td class="compact-cell font-mono text-sm col-patient-id">${highlightText(m[0], searchTerm)}</td>
+            <td class="compact-cell font-medium col-patient-name">${highlightText(m[1], searchTerm)}</td>
+            <td class="compact-cell text-sm col-diagnosis">${highlightText(m[2], searchTerm)}</td>
+            <td class="compact-cell text-sm text-gray-600 col-treatment">${highlightText(m[3], searchTerm)}</td>
+            <td class="compact-cell col-prescription">
+              <span class="inline-flex items-center px-2 py-1 bg-green-50 text-green-700 rounded-md text-sm">
+                <i class="ph ph-pill mr-1"></i>
+                ${m[4]}
+              </span>
+            </td>
+            <td class="compact-cell text-sm text-gray-600 col-lab-summary">${highlightText(m[5], searchTerm)}</td>
+            <td class="compact-cell col-condition">
+              <div class="flex flex-col space-y-1">
+                <span class="badge ${conditionClass} px-2 py-1 rounded-md text-xs font-medium flex items-center space-x-1 w-fit">
+                  <i class="ph ${conditionIcon}"></i>
+                  <span>${m[6] === 'chronic' ? 'Chronic' : 'Acute'}</span>
+                </span>
+                <span class="badge ${priorityClass} px-2 py-1 rounded-md text-xs font-medium flex items-center space-x-1 w-fit">
+                  <i class="ph ${priorityIcon}"></i>
+                  <span>${m[7]}</span>
+                </span>
+              </div>
+            </td>
+            <td class="compact-cell text-center no-print col-actions">
+              <div class="actions-container">
+                <button class="action-btn view-btn viewBtn" title="View Details" data-id="${m[0]}">
+                  <i class="ph ph-eye"></i>
+                </button>
+                <button class="action-btn edit-btn editBtn" title="Edit Record" data-id="${m[0]}">
+                  <i class="ph ph-pencil"></i>
+                </button>
+                <button class="action-btn delete-btn deleteBtn" title="Delete Record" data-id="${m[0]}" data-info="${m[1]} - ${m[2]}">
+                  <i class="ph ph-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+    }
+    
+    updatePagination();
+    updateStats();
+  }
+
+  function updatePagination() {
+    const filtered = getFilteredData();
+    const totalPages = recordsPerPage === 'all' ? 1 : Math.ceil(filtered.length / recordsPerPage);
+    const pageNumbers = document.getElementById('pageNumbers');
+    pageNumbers.innerHTML = '';
+
+    if (recordsPerPage !== 'all') {
+      let startPage = Math.max(1, currentPage - 2);
+      let endPage = Math.min(totalPages, startPage + 4);
+      
+      if (endPage - startPage < 4) {
+        startPage = Math.max(1, endPage - 4);
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.className = `pagination-btn px-4 py-2 rounded-md transition ${
+          i === currentPage 
+            ? 'bg-indigo-600 text-white' 
+            : 'bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300'
+        }`;
+        btn.onclick = () => {
+          currentPage = i;
+          renderTable();
+        };
+        pageNumbers.appendChild(btn);
+      }
+    }
+
+    document.getElementById('firstPage').disabled = currentPage === 1;
+    document.getElementById('prevPage').disabled = currentPage === 1;
+    document.getElementById('nextPage').disabled = currentPage === totalPages || recordsPerPage === 'all';
+    document.getElementById('lastPage').disabled = currentPage === totalPages || recordsPerPage === 'all';
+  }
+
+  // View record function
+  function viewRecord(id) {
+    const record = medicalHistory.find(m => m[0] === id);
+    if (!record) return;
+    
+    recordDetails.innerHTML = `
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Patient ID</label>
+          <p class="mt-1 font-mono">${record[0]}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Patient Name</label>
+          <p class="mt-1 font-medium">${record[1]}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Diagnosis</label>
+          <p class="mt-1">${record[2]}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Condition Type</label>
+          <p class="mt-1">
+            <span class="badge ${record[6] === 'chronic' ? 'status-chronic' : 'status-acute'} px-2 py-1 rounded-md text-xs font-medium inline-flex items-center space-x-1">
+              <i class="ph ${record[6] === 'chronic' ? 'ph-clock' : 'ph-lightning'}"></i>
+              <span>${record[6] === 'chronic' ? 'Chronic' : 'Acute'}</span>
+            </span>
+          </p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Priority</label>
+          <p class="mt-1">
+            <span class="badge ${record[7] === 'High' ? 'priority-high' : record[7] === 'Medium' ? 'priority-medium' : 'priority-low'} px-2 py-1 rounded-md text-xs font-medium inline-flex items-center space-x-1">
+              <i class="ph ${record[7] === 'High' ? 'ph-warning' : record[7] === 'Medium' ? 'ph-info' : 'ph-check'}"></i>
+              <span>${record[7]}</span>
+            </span>
+          </p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Last Updated</label>
+          <p class="mt-1">${record[8]}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Attending Doctor</label>
+          <p class="mt-1">${record[9]}</p>
+        </div>
+      </div>
+      
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Treatment Plan</label>
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <p class="text-gray-600">${record[3]}</p>
+        </div>
+      </div>
+      
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Prescription</label>
+        <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+          <p class="text-green-800 font-medium">${record[4]}</p>
+        </div>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Lab Summary</label>
+        <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <p class="text-blue-800">${record[5]}</p>
+        </div>
+      </div>
+    `;
+    
+    viewRecordModal.classList.remove('hidden');
+  }
+
+  // Search functionality
+  searchInput.addEventListener('input', () => {
+    currentPage = 1;
+    renderTable();
+    clearSearch.classList.toggle('hidden', searchInput.value === '');
+  });
+
+  clearSearch.addEventListener('click', () => {
+    searchInput.value = '';
+    clearSearch.classList.add('hidden');
+    currentPage = 1;
+    renderTable();
+  });
+
+  // Sort functionality
+  sortSelect.addEventListener('change', () => {
+    const key = sortSelect.value;
+    let index;
+    
+    switch(key) {
+      case 'id': index = 0; break;
+      case 'name': index = 1; break;
+      case 'diagnosis': index = 2; break;
+      case 'condition': index = 6; break;
+      default: index = 0;
+    }
+    
+    medicalHistory.sort((a, b) => a[index].toString().localeCompare(b[index].toString()));
+    currentPage = 1;
+    renderTable();
+    showToast(`Sorted by ${key}`, 'info');
+  });
+
+  // Per page selector
+  perPageSelect.addEventListener('change', () => {
+    recordsPerPage = perPageSelect.value === 'all' ? 'all' : parseInt(perPageSelect.value);
+    currentPage = 1;
+    renderTable();
+  });
+
+  // Filter chips
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      currentFilter = chip.dataset.filter;
+      currentPage = 1;
+      
+      document.querySelectorAll('.filter-chip').forEach(c => {
+        c.classList.remove('ring-2', 'ring-indigo-500');
+      });
+      chip.classList.add('ring-2', 'ring-indigo-500');
+      
+      renderTable();
+      
+      const filterNames = {
+        all: 'all records',
+        chronic: 'chronic conditions',
+        acute: 'acute conditions',
+        'high-priority': 'high priority records'
+      };
+      showToast(`Showing ${filterNames[currentFilter]}`, 'info');
+    });
+  });
+
+  // Pagination buttons
+  document.getElementById('firstPage').addEventListener('click', () => {
+    currentPage = 1;
+    renderTable();
+  });
+
+  document.getElementById('prevPage').addEventListener('click', () => {
+    if (currentPage > 1) {
+      currentPage--;
+      renderTable();
+    }
+  });
+
+  document.getElementById('nextPage').addEventListener('click', () => {
+    const filtered = getFilteredData();
+    const totalPages = Math.ceil(filtered.length / recordsPerPage);
+    if (currentPage < totalPages) {
+      currentPage++;
+      renderTable();
+    }
+  });
+
+  document.getElementById('lastPage').addEventListener('click', () => {
+    const filtered = getFilteredData();
+    const totalPages = Math.ceil(filtered.length / recordsPerPage);
+    currentPage = totalPages;
+    renderTable();
+  });
+
+  // Table actions
+  tbody.addEventListener('click', (e) => {
+    const row = e.target.closest('tr');
+    if (!row) return;
+
+    const recordId = e.target.closest('.viewBtn')?.dataset.id || 
+                    e.target.closest('.editBtn')?.dataset.id || 
+                    e.target.closest('.deleteBtn')?.dataset.id;
+    const recordInfo = e.target.closest('.deleteBtn')?.dataset.info;
+
+    if (e.target.closest('.viewBtn')) {
+      viewRecord(recordId);
+    } else if (e.target.closest('.editBtn')) {
+      showToast(`Edit feature coming soon for record ${recordId}`, 'warning');
+    } else if (e.target.closest('.deleteBtn')) {
+      deleteRecordId = recordId;
+      deleteRecordInfo = recordInfo;
+      confirmText.textContent = `You are about to delete medical record ${deleteRecordId} (${deleteRecordInfo}). This action is irreversible. Please provide a reason for this deletion.`;
+      confirmModal.classList.remove('hidden');
+      
+      // Reset deletion form
+      deleteReason.value = '';
+      otherReasonContainer.classList.add('hidden');
+      otherReason.value = '';
+      deletionNotes.value = '';
+    }
+  });
+
+  // Delete reason change handler
+  deleteReason.addEventListener('change', () => {
+    if (deleteReason.value === 'other') {
+      otherReasonContainer.classList.remove('hidden');
+    } else {
+      otherReasonContainer.classList.add('hidden');
+    }
+  });
+
+  // Close modals
+  closeViewModal.addEventListener('click', () => {
+    viewRecordModal.classList.add('hidden');
+  });
+
+  closeConfirmModal.addEventListener('click', () => {
+    confirmModal.classList.add('hidden');
+  });
+
+  confirmNo.addEventListener('click', () => {
+    confirmModal.classList.add('hidden');
+  });
+
+  confirmYes.addEventListener('click', () => {
+    // Validate deletion reason
+    if (!deleteReason.value) {
+      showToast('Please select a reason for deletion', 'error');
+      return;
+    }
+    
+    if (deleteReason.value === 'other' && !otherReason.value.trim()) {
+      showToast('Please specify the deletion reason', 'error');
+      return;
+    }
+    
+    const finalReason = deleteReason.value === 'other' ? otherReason.value : deleteReason.options[deleteReason.selectedIndex].text;
+    const notes = deletionNotes.value;
+    
+    const index = medicalHistory.findIndex(m => m[0] === deleteRecordId);
+    if (index !== -1) {
+      // Log deletion for audit purposes
+      console.log(`Record deleted: ${deleteRecordId} (${deleteRecordInfo})`);
+      console.log(`Reason: ${finalReason}`);
+      console.log(`Notes: ${notes}`);
+      console.log(`Deleted by: Hospital Administrator`);
+      console.log(`Timestamp: ${new Date().toISOString()}`);
+      
+      medicalHistory.splice(index, 1);
+      
+      const filtered = getFilteredData();
+      const totalPages = recordsPerPage === 'all' ? 1 : Math.ceil(filtered.length / recordsPerPage);
+      if (currentPage > totalPages && totalPages > 0) {
+        currentPage = totalPages;
+      }
+      
+      renderTable();
+      confirmModal.classList.add('hidden');
+      showToast(`Record "${deleteRecordId}" deleted successfully! Reason: ${finalReason}`, 'success');
+    }
+  });
+
+  // Export functionality
+  exportBtn.addEventListener('click', () => {
+    const filtered = getFilteredData();
+    let csv = 'Patient ID,Name,Diagnosis,Treatment,Prescription,Lab Summary,Condition Type,Priority,Last Updated,Doctor\n';
+    filtered.forEach(row => {
+      csv += row.map(cell => `"${cell}"`).join(',') + '\n';
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `medical_records_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    showToast(`Exported ${filtered.length} records successfully!`, 'success');
+  });
+
+  // Print functionality
+  printBtn.addEventListener('click', () => {
+    window.print();
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      searchInput.focus();
+    }
+    
+    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+      e.preventDefault();
+      window.print();
+    }
+    
+    if (e.key === 'Escape') {
+      if (!confirmModal.classList.contains('hidden')) {
+        confirmModal.classList.add('hidden');
+      }
+      if (!viewRecordModal.classList.contains('hidden')) {
+        viewRecordModal.classList.add('hidden');
+      }
+    }
+  });
+
+  // Toast notification system
+  function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    const colors = {
+      success: 'bg-green-500',
+      error: 'bg-red-500',
+      warning: 'bg-yellow-500',
+      info: 'bg-blue-500'
+    };
+    const icons = {
+      success: 'check-circle',
+      error: 'x-circle',
+      warning: 'warning',
+      info: 'info'
+    };
+    
+    toast.className = `${colors[type]} text-white px-6 py-4 rounded-lg shadow-2xl font-medium flex items-center space-x-3 pointer-events-auto transform transition-all duration-300 mb-2`;
+    toast.style.animation = 'slideInRight 0.3s ease-out';
+    toast.innerHTML = `
+      <i class="ph ph-${icons[type]} text-xl"></i>
+      <span>${message}</span>
+    `;
+    
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.animation = 'slideOutRight 0.3s ease-in';
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+
+  // Add animation keyframes
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideInRight {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    @keyframes slideOutRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Initial render
+  renderTable();
+  
+  // Set first filter chip as active
+  document.querySelector('.filter-chip[data-filter="all"]').classList.add('ring-2', 'ring-indigo-500');
+
+  // Welcome message
+  setTimeout(() => {
+    showToast('Medical records loaded successfully!', 'success');
+  }, 500);
+</script>
+</body>
+</html>

@@ -1,0 +1,1850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Health Reminders & Preventive Care | SHMS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  .animate-slideUp {
+    animation: slideUp 0.7s ease-out forwards;
+  }
+  .animate-pulse-slow {
+    animation: pulse 3s ease-in-out infinite;
+  }
+  .dropdownContent {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none;
+    position: absolute;
+    z-index: 50;
+    left: 0;
+  }
+  .dropdownContent.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .card-hover {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  .stat-number {
+    font-feature-settings: 'tnum';
+    font-variant-numeric: tabular-nums;
+  }
+  .gradient-border {
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899) border-box;
+    border: 2px solid transparent;
+  }
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #6366f1;
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+  }
+
+  /* Floating animation for icons */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  .float-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Chart containers */
+  .chart-container {
+    position: relative;
+    height: 300px;
+  }
+  
+  /* Highlight search matches */
+  .highlight {
+    background-color: rgba(34, 211, 238, 0.3);
+    padding: 2px 4px;
+    border-radius: 4px;
+  }
+  
+  /* Status indicators */
+  .status-upcoming {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+  .status-due {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+  .status-overdue {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+  .status-completed {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+  .status-snoozed {
+    background-color: #f3f4f6;
+    color: #374151;
+  }
+  
+  /* Priority indicators */
+  .priority-high {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border-left: 4px solid #ef4444;
+  }
+  .priority-medium {
+    background-color: #fef3c7;
+    color: #92400e;
+    border-left: 4px solid #f59e0b;
+  }
+  .priority-low {
+    background-color: #d1fae5;
+    color: #065f46;
+    border-left: 4px solid #10b981;
+  }
+  
+  /* Reminder type styling */
+  .type-checkup {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+  .type-test {
+    background-color: #f0f9ff;
+    color: #0369a1;
+  }
+  .type-vaccination {
+    background-color: #f3e8ff;
+    color: #7c3aed;
+  }
+  .type-medication {
+    background-color: #f0fdf4;
+    color: #166534;
+  }
+  .type-followup {
+    background-color: #fffbeb;
+    color: #92400e;
+  }
+  .type-device {
+    background-color: #f8fafc;
+    color: #475569;
+  }
+  
+  /* IoT device status */
+  .device-connected {
+    background-color: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+  }
+  .device-disconnected {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+  }
+  .device-syncing {
+    background-color: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+  }
+  
+  /* Alert styles */
+  .alert-critical {
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    border-left: 4px solid #ef4444;
+  }
+  .alert-warning {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border-left: 4px solid #f59e0b;
+  }
+  .alert-info {
+    background: linear-gradient(135deg, #dbeafe, #93c5fd);
+    border-left: 4px solid #3b82f6;
+  }
+  
+  /* Compact table rows */
+  .compact-row {
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .compact-row:hover {
+    background-color: #f8fafc;
+  }
+  .compact-cell {
+    padding: 8px 10px;
+    font-size: 0.875rem;
+  }
+  .compact-header {
+    padding: 10px 10px;
+    font-size: 0.875rem;
+  }
+  
+  /* Optimized column widths */
+  .col-reminder-id {
+    width: 120px;
+  }
+  .col-patient-id {
+    width: 100px;
+  }
+  .col-patient-name {
+    width: 140px;
+  }
+  .col-reminder-type {
+    width: 140px;
+  }
+  .col-description {
+    width: 200px;
+  }
+  .col-due-date {
+    width: 120px;
+  }
+  .col-priority {
+    width: 100px;
+  }
+  .col-status {
+    width: 100px;
+  }
+  .col-actions {
+    width: 90px;
+  }
+  
+  /* IoT device card */
+  .device-card {
+    transition: all 0.3s ease;
+    border-left: 4px solid #6366f1;
+  }
+  .device-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Reminder card */
+  .reminder-card {
+    transition: all 0.3s ease;
+    border-radius: 8px;
+  }
+  .reminder-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Print styles */
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+    
+    body {
+      background: white !important;
+    }
+    
+    .bg-gradient-to-br {
+      background: white !important;
+    }
+    
+    .shadow-lg, .shadow-md, .shadow-2xl {
+      box-shadow: none !important;
+    }
+    
+    table {
+      border-collapse: collapse;
+    }
+    
+    th, td {
+      border: 1px solid #e5e7eb !important;
+    }
+  }
+</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen flex flex-col">
+
+<!-- Top Navbar -->
+<nav class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+  <h1 class="text-2xl font-bold tracking-wide flex items-center space-x-2">
+    <i class="ph ph-heartbeat text-3xl"></i>
+    <span>SHMS</span>
+  </h1>
+  <span class="text-xl font-bold flex items-center space-x-2">
+    <i class="ph ph-user-circle"></i>
+    <span>Hospital Administrator</span>
+  </span>
+  <div class="relative">
+    <button id="menuBtn" class="text-white text-2xl focus:outline-none hover:bg-indigo-600 rounded-full p-2 transition" aria-label="Menu">
+      <i class="ph ph-dots-three-vertical"></i>
+    </button>
+    <div id="menuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded-md shadow-lg z-50">
+      <a href="#" class="block px-4 py-2 hover:bg-indigo-100 rounded-t-md flex items-center space-x-2">
+        <i class="ph ph-user"></i>
+        <span>Profile</span>
+      </a>
+      <a href="#" class="block px-4 py-2 hover:bg-indigo-100 flex items-center space-x-2">
+        <i class="ph ph-chart-bar"></i>
+        <span>Report</span>
+      </a>
+      <a href="login.html" class="block px-4 py-2 hover:bg-indigo-100 text-red-600 rounded-b-md flex items-center space-x-2">
+        <i class="ph ph-sign-out"></i>
+        <span>Logout</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- Feature Navbar -->
+<nav id="featureNavbar" class="bg-indigo-800 text-white shadow-md sticky top-0 z-40 transition-transform duration-300" style="top: 64px;">
+  <div class="container mx-auto flex flex-wrap justify-center md:justify-start items-center px-4 py-2 space-x-2">
+    <div class="relative">
+      <a href="Home.html" class="px-3 py-2 rounded-md hover:bg-indigo-700 block transition">Home</a>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Patient & Medical Record</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Patients.html" class="block px-4 py-2 hover:bg-indigo-100 font-semibold">Patient List</a>
+        <a href="MedicalRecords.html" class="block px-4 py-2 hover:bg-indigo-100 font-semibold">Medical Records</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Doctor & Appointment</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Doctors.html" class="block px-4 py-2 hover:bg-indigo-100">Doctors Directory</a>
+        <a href="Appointments.html" class="block px-4 py-2 hover:bg-indigo-100">Appointments Management</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Prescription & Investigation</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Prescriptions.html" class="block px-4 py-2 hover:bg-indigo-100">Prescriptions</a>
+        <a href="Investigations.html" class="block px-4 py-2 hover:bg-indigo-100">Tests & Diagnostic Reports</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Billing & Insurance</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Billing.html" class="block px-4 py-2 hover:bg-indigo-100">Bills & Payments</a>
+        <a href="InsuranceClaims.html" class="block px-4 py-2 hover:bg-indigo-100">Insurance Claims</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Disease Prediction</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="DiseasePredictions.html" class="block px-4 py-2 hover:bg-indigo-100">Disease Predictions</a>
+        <a href="Symptoms.html" class="block px-4 py-2 hover:bg-indigo-100">Symptom Assessments</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md bg-indigo-600 font-semibold dropdownBtn transition">Smart Recommendations</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="HealthReminders.html" class="block px-4 py-2 hover:bg-indigo-100">Health Reminders</a>
+        <a href="Recommendations.html" class="block px-4 py-2 hover:bg-indigo-100">Health Tips & Recommendations</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Header -->
+<header class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white p-6 shadow-lg flex justify-center items-center relative">
+  <div class="text-center">
+    <h1 class="text-3xl font-bold mb-1">Health Reminders & Preventive Care</h1>
+    <p class="text-indigo-200 text-sm">Automated reminders for checkups, tests, and device maintenance</p>
+  </div>
+  <div class="absolute right-8 flex space-x-2">
+    <button id="exportBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium shadow-md transition flex items-center space-x-2 no-print">
+      <i class="ph ph-download-simple"></i>
+      <span>Export</span>
+    </button>
+    <button id="printBtn" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md font-medium shadow-md transition flex items-center space-x-2 no-print">
+      <i class="ph ph-printer"></i>
+      <span>Print</span>
+    </button>
+    <button id="addReminderBtn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md font-medium shadow-md transition flex items-center space-x-2">
+      <i class="ph ph-plus-circle"></i>
+      <span>Add Reminder</span>
+    </button>
+  </div>
+</header>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-20 right-4 flex flex-col space-y-2 pointer-events-none z-50"></div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50 fade-in">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-md mx-4">
+    <div class="bg-red-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+      <h3 class="text-xl font-bold">Confirm Reminder Deletion</h3>
+      <button id="closeConfirmModal" class="text-white hover:text-red-200 text-2xl">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+    <div class="p-6">
+      <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="ph ph-warning text-red-500 text-3xl"></i>
+      </div>
+      <p id="confirmText" class="mb-4 text-gray-600 text-center"></p>
+      
+      <div class="mb-4">
+        <label for="deleteReason" class="block text-sm font-medium text-gray-700 mb-2">Reason for deletion <span class="text-red-500">*</span></label>
+        <select id="deleteReason" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" required>
+          <option value="">Select a reason</option>
+          <option value="completed_elsewhere">Completed Elsewhere</option>
+          <option value="no_longer_needed">No Longer Needed</option>
+          <option value="patient_request">Patient Request</option>
+          <option value="duplicate">Duplicate Reminder</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      
+      <div id="otherReasonContainer" class="mb-4 hidden">
+        <label for="otherReason" class="block text-sm font-medium text-gray-700 mb-2">Please specify reason</label>
+        <textarea id="otherReason" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Enter specific reason for deletion"></textarea>
+      </div>
+      
+      <div class="mb-4">
+        <label for="deletionNotes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
+        <textarea id="deletionNotes" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Any additional information about this deletion"></textarea>
+      </div>
+      
+      <div class="flex justify-center space-x-4">
+        <button id="confirmYes" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md transition transform hover:scale-105 flex items-center space-x-2">
+          <i class="ph ph-trash"></i>
+          <span>Delete Reminder</span>
+        </button>
+        <button id="confirmNo" class="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-md transition transform hover:scale-105">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Reminder Modal -->
+<div id="reminderModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50 fade-in overflow-y-auto py-8">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-3xl mx-4">
+    <div class="bg-indigo-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+      <h3 id="modalTitle" class="text-xl font-bold">Add New Reminder</h3>
+      <button id="closeModal" class="text-white hover:text-indigo-200 text-2xl">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+    <form id="reminderForm" class="p-6 space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="reminderId" class="block text-sm font-medium text-gray-700 mb-1">Reminder ID</label>
+          <input type="text" id="reminderId" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="patientId" class="block text-sm font-medium text-gray-700 mb-1">Patient ID</label>
+          <input type="text" id="patientId" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="patientName" class="block text-sm font-medium text-gray-700 mb-1">Patient Name</label>
+          <input type="text" id="patientName" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="reminderType" class="block text-sm font-medium text-gray-700 mb-1">Reminder Type</label>
+          <select id="reminderType" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+            <option value="">Select Type</option>
+            <option value="Checkup">Checkup</option>
+            <option value="Test">Test</option>
+            <option value="Vaccination">Vaccination</option>
+            <option value="Medication">Medication</option>
+            <option value="Follow-up">Follow-up</option>
+            <option value="Device Maintenance">Device Maintenance</option>
+            <option value="Screening">Screening</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label for="dueDate" class="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+          <input type="date" id="dueDate" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="priority" class="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+          <select id="priority" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+          </select>
+        </div>
+        <div>
+          <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <select id="status" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+            <option value="Upcoming">Upcoming</option>
+            <option value="Due">Due</option>
+            <option value="Overdue">Overdue</option>
+            <option value="Completed">Completed</option>
+            <option value="Snoozed">Snoozed</option>
+          </select>
+        </div>
+        <div>
+          <label for="frequency" class="block text-sm font-medium text-gray-700 mb-1">Frequency</label>
+          <select id="frequency" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+            <option value="One-time">One-time</option>
+            <option value="Weekly">Weekly</option>
+            <option value="Monthly">Monthly</option>
+            <option value="Quarterly">Quarterly</option>
+            <option value="Yearly">Yearly</option>
+            <option value="Custom">Custom</option>
+          </select>
+        </div>
+      </div>
+      
+      <div>
+        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+        <textarea id="description" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Detailed description of the reminder" required></textarea>
+      </div>
+      
+      <div>
+        <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+        <textarea id="notes" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Any additional notes"></textarea>
+      </div>
+      
+      <div class="border-t pt-4">
+        <h4 class="text-lg font-medium text-gray-800 mb-3">IoT Device Integration</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="relatedDevice" class="block text-sm font-medium text-gray-700 mb-1">Related Device</label>
+            <select id="relatedDevice" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="">None</option>
+              <option value="Cardiac Monitor">Cardiac Monitor</option>
+              <option value="Glucose Monitor">Glucose Monitor</option>
+              <option value="Activity Tracker">Activity Tracker</option>
+              <option value="Blood Pressure Monitor">Blood Pressure Monitor</option>
+              <option value="Pacemaker">Pacemaker</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label for="deviceAlert" class="block text-sm font-medium text-gray-700 mb-1">Device Alert Trigger</label>
+            <select id="deviceAlert" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="">None</option>
+              <option value="Low Battery">Low Battery</option>
+              <option value="Irregular Reading">Irregular Reading</option>
+              <option value="Maintenance Due">Maintenance Due</option>
+              <option value="Calibration Needed">Calibration Needed</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <div class="flex justify-end space-x-3 pt-4">
+        <button type="button" id="cancelBtn" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md transition">Cancel</button>
+        <button type="submit" id="saveBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md transition">Save Reminder</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- View Reminder Modal -->
+<div id="viewReminderModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50 fade-in overflow-y-auto py-8">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl mx-4">
+    <div class="bg-indigo-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+      <h3 class="text-xl font-bold">Reminder Details</h3>
+      <button id="closeViewModal" class="text-white hover:text-indigo-200 text-2xl">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+    <div class="p-6 space-y-4" id="reminderDetails">
+      <!-- Content will be populated by JavaScript -->
+    </div>
+  </div>
+</div>
+
+<!-- Health Alerts Section -->
+<div class="container mx-auto mt-6 px-4">
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center space-x-2">
+      <i class="ph ph-warning-circle text-red-500"></i>
+      <span>Health Alerts & Notifications</span>
+    </h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="alert-critical p-4 rounded-lg">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+            <i class="ph ph-heart-break text-red-500 text-xl"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-red-800">Critical Alert</h3>
+            <p class="text-sm text-red-700">Irregular heart rhythm detected</p>
+          </div>
+        </div>
+        <div class="mt-3 text-xs text-red-600">
+          Patient: Ayesha Rahman • Device: Cardiac Monitor • Time: 2:30 PM
+        </div>
+      </div>
+      
+      <div class="alert-warning p-4 rounded-lg">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+            <i class="ph ph-battery-warning text-yellow-500 text-xl"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-yellow-800">Device Alert</h3>
+            <p class="text-sm text-yellow-700">Pacemaker battery low</p>
+          </div>
+        </div>
+        <div class="mt-3 text-xs text-yellow-600">
+          Patient: Jamal Hossain • Device: Pacemaker • Time: 1:15 PM
+        </div>
+      </div>
+      
+      <div class="alert-info p-4 rounded-lg">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+            <i class="ph ph-calendar-dots text-blue-500 text-xl"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-blue-800">Preventive Care</h3>
+            <p class="text-sm text-blue-700">Annual checkup due soon</p>
+          </div>
+        </div>
+        <div class="mt-3 text-xs text-blue-600">
+          12 patients due for checkups in next 7 days
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-gray-50 p-4 rounded-lg">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="font-medium text-gray-800">Upcoming Preventive Care Schedule</h3>
+        <button class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">View All</button>
+      </div>
+      <div class="space-y-3">
+        <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm">
+          <div>
+            <div class="font-medium">Diabetes Screening</div>
+            <div class="text-sm text-gray-600">5 patients due tomorrow</div>
+          </div>
+          <span class="status-due px-2 py-1 rounded-full text-xs font-medium">Due Soon</span>
+        </div>
+        <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm">
+          <div>
+            <div class="font-medium">Vaccination Boosters</div>
+            <div class="text-sm text-gray-600">8 patients due this week</div>
+          </div>
+          <span class="status-upcoming px-2 py-1 rounded-full text-xs font-medium">Upcoming</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- IoT Device Monitoring Section -->
+<div class="container mx-auto mt-6 px-4">
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center space-x-2">
+      <i class="ph ph-device-mobile-camera text-indigo-600"></i>
+      <span>IoT Health Monitoring Devices</span>
+    </h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="device-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div class="flex justify-between items-start mb-3">
+          <h3 class="font-bold text-gray-800">Cardiac Monitor Implant</h3>
+          <span class="device-connected px-2 py-1 rounded-full text-xs font-medium">Connected</span>
+        </div>
+        <div class="space-y-2">
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-600">Heart Rate</span>
+            <span class="text-sm font-medium" id="iotHeartRate">72 BPM</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-600">Last Sync</span>
+            <span class="text-sm font-medium">2 min ago</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-600">Battery</span>
+            <span class="text-sm font-medium text-green-600">87%</span>
+          </div>
+        </div>
+        <button class="mt-3 w-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 py-2 rounded-md text-sm font-medium transition">
+          View Detailed Data
+        </button>
+      </div>
+      
+      <div class="device-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div class="flex justify-between items-start mb-3">
+          <h3 class="font-bold text-gray-800">Glucose Monitor</h3>
+          <span class="device-connected px-2 py-1 rounded-full text-xs font-medium">Connected</span>
+        </div>
+        <div class="space-y-2">
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-600">Glucose Level</span>
+            <span class="text-sm font-medium" id="iotGlucose">98 mg/dL</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-600">Last Sync</span>
+            <span class="text-sm font-medium">5 min ago</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-600">Battery</span>
+            <span class="text-sm font-medium text-green-600">72%</span>
+          </div>
+        </div>
+        <button class="mt-3 w-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 py-2 rounded-md text-sm font-medium transition">
+          View Detailed Data
+        </button>
+      </div>
+      
+      <div class="device-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div class="flex justify-between items-start mb-3">
+          <h3 class="font-bold text-gray-800">Pacemaker</h3>
+          <span class="device-syncing px-2 py-1 rounded-full text-xs font-medium">Syncing</span>
+        </div>
+        <div class="space-y-2">
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-600">Pacing Rate</span>
+            <span class="text-sm font-medium" id="iotPacing">60 BPM</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-600">Last Sync</span>
+            <span class="text-sm font-medium">15 min ago</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-600">Battery</span>
+            <span class="text-sm font-medium text-yellow-600">42%</span>
+          </div>
+        </div>
+        <button class="mt-3 w-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 py-2 rounded-md text-sm font-medium transition">
+          View Detailed Data
+        </button>
+      </div>
+    </div>
+    
+    <div class="bg-gray-50 p-4 rounded-lg">
+      <h3 class="font-medium text-gray-800 mb-2">Device Maintenance Reminders</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white p-3 rounded-lg border border-gray-200">
+          <div class="flex justify-between items-center mb-2">
+            <span class="font-medium text-gray-800">Pacemaker Battery Replacement</span>
+            <span class="status-due px-2 py-1 rounded-full text-xs font-medium">Due in 30 days</span>
+          </div>
+          <div class="text-sm text-gray-600">Patient: Jamal Hossain • Device: Pacemaker v2.3</div>
+        </div>
+        <div class="bg-white p-3 rounded-lg border border-gray-200">
+          <div class="flex justify-between items-center mb-2">
+            <span class="font-medium text-gray-800">Glucose Monitor Calibration</span>
+            <span class="status-upcoming px-2 py-1 rounded-full text-xs font-medium">Due in 14 days</span>
+          </div>
+          <div class="text-sm text-gray-600">Patient: Ayesha Rahman • Device: GlucoCheck Pro</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Controls -->
+<div class="container mx-auto mt-6 px-4">
+  <div class="bg-white rounded-lg shadow-md p-4 space-y-4">
+    <!-- Top row: Search and Sort -->
+    <div class="flex flex-wrap justify-between items-center gap-4">
+      <div class="flex items-center space-x-2 flex-1 max-w-md">
+        <i class="ph ph-magnifying-glass text-gray-400 text-xl"></i>
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Search by reminder ID, patient name, description..." 
+          class="border border-gray-300 rounded-md px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+        />
+        <button id="clearSearch" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-md transition hidden">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-2">
+          <label for="sort" class="font-medium text-gray-700">Sort by:</label>
+          <select id="sort" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+            <option value="id">Reminder ID</option>
+            <option value="dueDate">Due Date</option>
+            <option value="patientId">Patient ID</option>
+            <option value="priority">Priority</option>
+            <option value="status">Status</option>
+          </select>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <label for="perPage" class="font-medium text-gray-700">Show:</label>
+          <select id="perPage" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="50">50</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter chips -->
+    <div class="flex flex-wrap gap-2">
+      <button class="filter-chip bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="all">
+        Total Reminders (<span id="countAll">0</span>)
+      </button>
+      <button class="filter-chip bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="upcoming">
+        Upcoming (<span id="countUpcoming">0</span>)
+      </button>
+      <button class="filter-chip bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="due">
+        Due (<span id="countDue">0</span>)
+      </button>
+      <button class="filter-chip bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="overdue">
+        Overdue (<span id="countOverdue">0</span>)
+      </button>
+      <button class="filter-chip bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="completed">
+        Completed (<span id="countCompleted">0</span>)
+      </button>
+      <button class="filter-chip bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="device">
+        Device-Related (<span id="countDevice">0</span>)
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+      <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+        <div class="text-blue-600 text-sm font-medium">Total Reminders</div>
+        <div id="statTotal" class="text-2xl font-bold text-blue-700">0</div>
+      </div>
+      <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+        <div class="text-green-600 text-sm font-medium">Showing</div>
+        <div id="statShowing" class="text-2xl font-bold text-green-700">0</div>
+      </div>
+      <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+        <div class="text-purple-600 text-sm font-medium">Current Page</div>
+        <div id="statPage" class="text-2xl font-bold text-purple-700">1</div>
+      </div>
+      <div class="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-lg border border-orange-200">
+        <div class="text-orange-600 text-sm font-medium">Total Pages</div>
+        <div id="statPages" class="text-2xl font-bold text-orange-700">1</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="container mx-auto mt-6 px-4 pb-6 overflow-x-auto">
+  <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <table id="reminderTable" class="min-w-full">
+      <thead class="bg-indigo-600 text-white">
+        <tr>
+          <th class="compact-header text-left font-semibold col-reminder-id">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-bell"></i>
+              <span>Reminder ID</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-patient-id">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-user"></i>
+              <span>Patient ID</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-patient-name">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-user"></i>
+              <span>Patient Name</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-reminder-type">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-first-aid-kit"></i>
+              <span>Type</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-description">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-note"></i>
+              <span>Description</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-due-date">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-calendar"></i>
+              <span>Due Date</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-priority">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-warning"></i>
+              <span>Priority</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-status">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-clock"></i>
+              <span>Status</span>
+            </div>
+          </th>
+          <th class="compact-header text-center font-semibold no-print col-actions">
+            <div class="flex items-center justify-center space-x-2">
+              <i class="ph ph-gear"></i>
+              <span>Actions</span>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div id="noResults" class="hidden py-12 text-center text-gray-500">
+      <i class="ph ph-magnifying-glass text-5xl mb-4"></i>
+      <p class="text-lg font-medium">No reminders found</p>
+      <p class="text-sm">Try adjusting your search or filters</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div id="paginationContainer" class="mt-6 flex justify-center items-center space-x-2">
+    <button id="firstPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-double-left"></i>
+    </button>
+    <button id="prevPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-left"></i>
+    </button>
+    <div id="pageNumbers" class="flex space-x-2"></div>
+    <button id="nextPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-right"></i>
+    </button>
+    <button id="lastPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-double-right"></i>
+    </button>
+  </div>
+</div>
+
+<script>
+  // Navigation scripts
+  const menuBtn = document.getElementById('menuBtn');
+  const menuDropdown = document.getElementById('menuDropdown');
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuDropdown.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+      menuDropdown.classList.add('hidden');
+    }
+  });
+
+  const dropdownButtons = document.querySelectorAll('.dropdownBtn');
+  let activeDropdown = null;
+
+  dropdownButtons.forEach(btn => {
+    const dropdown = btn.nextElementSibling;
+    if (!dropdown) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeDropdown && activeDropdown !== dropdown) {
+        activeDropdown.classList.remove('show');
+      }
+      if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        activeDropdown = null;
+      } else {
+        dropdown.classList.add('show');
+        activeDropdown = dropdown;
+      }
+    });
+
+    btn.addEventListener('mouseenter', () => dropdown.classList.add('show'));
+    btn.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!dropdown.matches(':hover')) {
+          dropdown.classList.remove('show');
+        }
+      }, 100);
+    });
+    
+    if (dropdown) {
+      dropdown.addEventListener('mouseleave', () => {
+        dropdown.classList.remove('show');
+        if (activeDropdown === dropdown) activeDropdown = null;
+      });
+    }
+  });
+
+  document.body.addEventListener('click', () => {
+    if (activeDropdown) {
+      activeDropdown.classList.remove('show');
+      activeDropdown = null;
+    }
+  });
+
+  let lastScroll = 0;
+  const featureNavbar = document.getElementById('featureNavbar');
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+    if (currentScroll > lastScroll && currentScroll > 100) {
+      featureNavbar.style.transform = 'translateY(-100%)';
+    } else {
+      featureNavbar.style.transform = 'translateY(0)';
+    }
+    lastScroll = currentScroll;
+  });
+
+  // Main application
+  const tbody = document.getElementById('tableBody');
+  const searchInput = document.getElementById('searchInput');
+  const clearSearch = document.getElementById('clearSearch');
+  const sortSelect = document.getElementById('sort');
+  const perPageSelect = document.getElementById('perPage');
+  const confirmModal = document.getElementById('confirmModal');
+  const confirmText = document.getElementById('confirmText');
+  const confirmYes = document.getElementById('confirmYes');
+  const confirmNo = document.getElementById('confirmNo');
+  const closeConfirmModal = document.getElementById('closeConfirmModal');
+  const deleteReason = document.getElementById('deleteReason');
+  const otherReasonContainer = document.getElementById('otherReasonContainer');
+  const otherReason = document.getElementById('otherReason');
+  const deletionNotes = document.getElementById('deletionNotes');
+  const toastContainer = document.getElementById('toastContainer');
+  const noResults = document.getElementById('noResults');
+  const exportBtn = document.getElementById('exportBtn');
+  const printBtn = document.getElementById('printBtn');
+  const addReminderBtn = document.getElementById('addReminderBtn');
+  const reminderModal = document.getElementById('reminderModal');
+  const reminderForm = document.getElementById('reminderForm');
+  const modalTitle = document.getElementById('modalTitle');
+  const closeModal = document.getElementById('closeModal');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const viewReminderModal = document.getElementById('viewReminderModal');
+  const closeViewModal = document.getElementById('closeViewModal');
+  const reminderDetails = document.getElementById('reminderDetails');
+
+  let deleteReminderId = null;
+  let deleteReminderInfo = "";
+  let currentPage = 1;
+  let recordsPerPage = 20;
+  let currentFilter = 'all';
+  let isEditing = false;
+  let editingReminderId = null;
+
+  // Format date
+  function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+  }
+
+  // Calculate days until due
+  function getDaysUntilDue(dueDateStr) {
+    const dueDate = new Date(dueDateStr);
+    const today = new Date();
+    const diffTime = dueDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  }
+
+  // Determine status based on due date
+  function calculateStatus(dueDateStr, currentStatus) {
+    if (currentStatus === 'Completed' || currentStatus === 'Snoozed') {
+      return currentStatus;
+    }
+    
+    const daysUntilDue = getDaysUntilDue(dueDateStr);
+    
+    if (daysUntilDue < 0) return 'Overdue';
+    if (daysUntilDue === 0) return 'Due';
+    if (daysUntilDue <= 7) return 'Due';
+    return 'Upcoming';
+  }
+
+  // Sample reminders data
+  const reminders = [
+    ["REM001", "0001001", "Ayesha Rahman", "Checkup", "Annual physical examination and health assessment", "2024-02-15", "Medium", "Upcoming", "Yearly", "Patient with history of hypertension", "Cardiac Monitor", ""],
+    ["REM002", "0001002", "Jamal Hossain", "Test", "Blood glucose level test for diabetes monitoring", "2024-01-25", "High", "Due", "Monthly", "Type 2 diabetes patient", "Glucose Monitor", ""],
+    ["REM003", "0001003", "Mina Akter", "Vaccination", "Influenza vaccine - seasonal flu prevention", "2024-01-20", "Medium", "Overdue", "Yearly", "Due for annual flu shot", "", ""],
+    ["REM004", "0001004", "Rafiul Islam", "Device Maintenance", "Pacemaker battery check and device diagnostics", "2024-03-10", "High", "Upcoming", "Quarterly", "Pacemaker implanted 2022", "Pacemaker", "Low Battery"],
+    ["REM005", "0001005", "Tahmina Sultana", "Screening", "Mammogram screening for breast cancer detection", "2024-02-28", "Medium", "Upcoming", "Yearly", "Family history of breast cancer", "", ""],
+    ["REM006", "0001006", "Arif Chowdhury", "Follow-up", "Post-surgery follow-up consultation", "2024-01-18", "High", "Overdue", "One-time", "Appendectomy performed Jan 5", "", ""],
+    ["REM007", "0001007", "Nasrin Jahan", "Test", "Lipid profile and cholesterol check", "2024-02-05", "Medium", "Upcoming", "Quarterly", "High cholesterol management", "", ""],
+    ["REM008", "0001008", "Sabbir Ahmed", "Medication", "Blood pressure medication refill", "2024-01-30", "High", "Due", "Monthly", "Hypertension treatment", "Blood Pressure Monitor", ""],
+    ["REM009", "0001009", "Tania Rahman", "Device Maintenance", "Glucose monitor sensor replacement", "2024-02-22", "Medium", "Upcoming", "Monthly", "Continuous glucose monitoring", "Glucose Monitor", "Calibration Needed"],
+    ["REM010", "0001010", "Mahmud Hasan", "Checkup", "Dental checkup and cleaning", "2024-03-15", "Low", "Upcoming", "Yearly", "Routine dental care", "", ""],
+    ["REM011", "0001011", "Rumana Akter", "Vaccination", "COVID-19 booster shot", "2024-02-10", "Medium", "Upcoming", "Yearly", "Last dose administered Feb 2023", "", ""],
+    ["REM012", "0001012", "Rashid Karim", "Test", "Liver function tests", "2024-01-22", "Medium", "Due", "Quarterly", "Medication side effect monitoring", "", ""],
+    ["REM013", "0001013", "Farzana Khan", "Screening", "Colon cancer screening", "2024-04-01", "Medium", "Upcoming", "Yearly", "Age-appropriate screening", "", ""],
+    ["REM014", "0001014", "Imran Hossain", "Device Maintenance", "Cardiac monitor data download and analysis", "2024-01-28", "High", "Due", "Monthly", "Arrhythmia monitoring", "Cardiac Monitor", "Irregular Reading"],
+    ["REM015", "0001015", "Sadia Afrin", "Follow-up", "Physical therapy progress evaluation", "2024-02-08", "Medium", "Upcoming", "One-time", "Knee rehabilitation", "", ""]
+  ];
+
+  function getFilteredData() {
+    const term = searchInput.value.toLowerCase();
+    let filtered = reminders.filter(p => {
+      const matchesSearch = p.some(field => {
+        return String(field).toLowerCase().includes(term);
+      });
+      
+      let matchesFilter = true;
+      if (currentFilter === 'upcoming') matchesFilter = p[7] === 'Upcoming';
+      else if (currentFilter === 'due') matchesFilter = p[7] === 'Due';
+      else if (currentFilter === 'overdue') matchesFilter = p[7] === 'Overdue';
+      else if (currentFilter === 'completed') matchesFilter = p[7] === 'Completed';
+      else if (currentFilter === 'device') matchesFilter = p[10] !== '';
+      
+      return matchesSearch && matchesFilter;
+    });
+    return filtered;
+  }
+
+  function updateStats() {
+    const filtered = getFilteredData();
+    const totalPages = recordsPerPage === 'all' ? 1 : Math.ceil(filtered.length / recordsPerPage);
+    
+    document.getElementById('statTotal').textContent = reminders.length;
+    document.getElementById('statShowing').textContent = filtered.length;
+    document.getElementById('statPage').textContent = currentPage;
+    document.getElementById('statPages').textContent = totalPages;
+
+    // Update filter counts
+    document.getElementById('countAll').textContent = reminders.length;
+    document.getElementById('countUpcoming').textContent = reminders.filter(p => p[7] === 'Upcoming').length;
+    document.getElementById('countDue').textContent = reminders.filter(p => p[7] === 'Due').length;
+    document.getElementById('countOverdue').textContent = reminders.filter(p => p[7] === 'Overdue').length;
+    document.getElementById('countCompleted').textContent = reminders.filter(p => p[7] === 'Completed').length;
+    document.getElementById('countDevice').textContent = reminders.filter(p => p[10] !== '').length;
+  }
+
+  function highlightText(text, searchTerm) {
+    if (!searchTerm) return text;
+    
+    const regex = new RegExp(`(${searchTerm})`, 'gi');
+    return text.replace(regex, '<span class="highlight">$1</span>');
+  }
+
+  function renderTable() {
+    const filtered = getFilteredData();
+    const startIndex = recordsPerPage === 'all' ? 0 : (currentPage - 1) * recordsPerPage;
+    const endIndex = recordsPerPage === 'all' ? filtered.length : startIndex + recordsPerPage;
+    const paginatedData = filtered.slice(startIndex, endIndex);
+    const searchTerm = searchInput.value.toLowerCase();
+
+    tbody.innerHTML = "";
+    
+    if (paginatedData.length === 0) {
+      noResults.classList.remove('hidden');
+      document.getElementById('paginationContainer').classList.add('hidden');
+    } else {
+      noResults.classList.add('hidden');
+      document.getElementById('paginationContainer').classList.remove('hidden');
+      
+      paginatedData.forEach((p, index) => {
+        // Update status based on due date
+        const currentStatus = calculateStatus(p[5], p[7]);
+        if (currentStatus !== p[7]) {
+          p[7] = currentStatus;
+        }
+        
+        const statusClass = p[7] === 'Upcoming' ? 'status-upcoming' : 
+                           p[7] === 'Due' ? 'status-due' : 
+                           p[7] === 'Overdue' ? 'status-overdue' : 
+                           p[7] === 'Completed' ? 'status-completed' : 'status-snoozed';
+        
+        const statusIcon = p[7] === 'Upcoming' ? 'ph-clock' : 
+                          p[7] === 'Due' ? 'ph-warning' : 
+                          p[7] === 'Overdue' ? 'ph-warning-circle' : 
+                          p[7] === 'Completed' ? 'ph-check-circle' : 'ph-clock-counter-clockwise';
+        
+        const priorityClass = p[6] === 'High' ? 'priority-high' : 
+                             p[6] === 'Medium' ? 'priority-medium' : 'priority-low';
+        
+        const typeClass = p[3] === 'Checkup' ? 'type-checkup' : 
+                         p[3] === 'Test' ? 'type-test' : 
+                         p[3] === 'Vaccination' ? 'type-vaccination' : 
+                         p[3] === 'Medication' ? 'type-medication' : 
+                         p[3] === 'Follow-up' ? 'type-followup' : 'type-device';
+        
+        // Calculate days until due for display
+        const daysUntilDue = getDaysUntilDue(p[5]);
+        let dueText = formatDate(p[5]);
+        if (p[7] === 'Overdue') {
+          dueText += ` <span class="text-red-600 font-medium">(${Math.abs(daysUntilDue)} days ago)</span>`;
+        } else if (p[7] === 'Due') {
+          dueText += ` <span class="text-yellow-600 font-medium">(Today)</span>`;
+        } else if (daysUntilDue <= 7) {
+          dueText += ` <span class="text-yellow-600 font-medium">(in ${daysUntilDue} days)</span>`;
+        }
+        
+        tbody.innerHTML += `
+          <tr class="compact-row transition-all duration-200 ${p[7] === 'Overdue' ? 'bg-red-50' : p[7] === 'Due' ? 'bg-yellow-50' : ''}" style="animation: fadeIn 0.3s ease ${index * 0.05}s both">
+            <td class="compact-cell font-mono text-sm col-reminder-id">${highlightText(p[0], searchTerm)}</td>
+            <td class="compact-cell font-mono text-sm col-patient-id">${highlightText(p[1], searchTerm)}</td>
+            <td class="compact-cell font-medium col-patient-name">${highlightText(p[2], searchTerm)}</td>
+            <td class="compact-cell col-reminder-type">
+              <span class="badge ${typeClass} px-2 py-1 rounded-md text-xs font-medium flex items-center space-x-1 w-fit">
+                <i class="ph ${p[3] === 'Checkup' ? 'ph-user' : p[3] === 'Test' ? 'ph-flask' : p[3] === 'Vaccination' ? 'ph-syringe' : p[3] === 'Medication' ? 'ph-pill' : p[3] === 'Follow-up' ? 'ph-arrow-clockwise' : 'ph-device-mobile'}"></i>
+                <span>${p[3]}</span>
+              </span>
+            </td>
+            <td class="compact-cell text-sm col-description">${highlightText(p[4], searchTerm)}</td>
+            <td class="compact-cell text-sm col-due-date" style="white-space: nowrap;">${dueText}</td>
+            <td class="compact-cell col-priority">
+              <span class="badge ${priorityClass} px-2 py-1 rounded-full text-xs font-medium flex items-center space-x-1 w-fit">
+                <i class="ph ${p[6] === 'High' ? 'ph-warning-circle' : p[6] === 'Medium' ? 'ph-warning' : 'ph-info'}"></i>
+                <span>${p[6]}</span>
+              </span>
+            </td>
+            <td class="compact-cell col-status">
+              <span class="badge ${statusClass} px-2 py-1 rounded-full text-xs font-medium flex items-center space-x-1 w-fit">
+                <i class="ph ${statusIcon}"></i>
+                <span>${p[7]}</span>
+              </span>
+            </td>
+            <td class="compact-cell text-center space-x-2 no-print col-actions">
+              <button class="bg-blue-400 hover:bg-blue-500 text-white px-2 py-1 rounded-md transition transform hover:scale-105 viewBtn" title="View Details" data-id="${p[0]}">
+                <i class="ph ph-eye"></i>
+              </button>
+              <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded-md transition transform hover:scale-105 editBtn" title="Edit Reminder" data-id="${p[0]}">
+                <i class="ph ph-pencil"></i>
+              </button>
+              <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded-md transition transform hover:scale-105 deleteBtn" title="Delete Reminder" data-id="${p[0]}" data-info="${p[2]} - ${p[3]}">
+                <i class="ph ph-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+    
+    updatePagination();
+    updateStats();
+  }
+
+  function updatePagination() {
+    const filtered = getFilteredData();
+    const totalPages = recordsPerPage === 'all' ? 1 : Math.ceil(filtered.length / recordsPerPage);
+    const pageNumbers = document.getElementById('pageNumbers');
+    pageNumbers.innerHTML = '';
+
+    if (recordsPerPage !== 'all') {
+      let startPage = Math.max(1, currentPage - 2);
+      let endPage = Math.min(totalPages, startPage + 4);
+      
+      if (endPage - startPage < 4) {
+        startPage = Math.max(1, endPage - 4);
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.className = `pagination-btn px-4 py-2 rounded-md transition ${
+          i === currentPage 
+            ? 'bg-indigo-600 text-white' 
+            : 'bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300'
+        }`;
+        btn.onclick = () => {
+          currentPage = i;
+          renderTable();
+        };
+        pageNumbers.appendChild(btn);
+      }
+    }
+
+    document.getElementById('firstPage').disabled = currentPage === 1;
+    document.getElementById('prevPage').disabled = currentPage === 1;
+    document.getElementById('nextPage').disabled = currentPage === totalPages || recordsPerPage === 'all';
+    document.getElementById('lastPage').disabled = currentPage === totalPages || recordsPerPage === 'all';
+  }
+
+  // Simulate IoT device data updates
+  function updateIoTData() {
+    // Generate random but realistic health metrics
+    const heartRate = Math.floor(Math.random() * 40) + 60; // 60-100 BPM
+    const glucose = Math.floor(Math.random() * 40) + 80; // 80-120 mg/dL
+    const pacing = Math.floor(Math.random() * 10) + 55; // 55-65 BPM
+    
+    // Update display
+    document.getElementById('iotHeartRate').textContent = `${heartRate} BPM`;
+    document.getElementById('iotGlucose').textContent = `${glucose} mg/dL`;
+    document.getElementById('iotPacing').textContent = `${pacing} BPM`;
+  }
+
+  // Update IoT data every 5 seconds
+  setInterval(updateIoTData, 5000);
+  // Initial update
+  updateIoTData();
+
+  // Search functionality
+  searchInput.addEventListener('input', () => {
+    currentPage = 1;
+    renderTable();
+    clearSearch.classList.toggle('hidden', searchInput.value === '');
+  });
+
+  clearSearch.addEventListener('click', () => {
+    searchInput.value = '';
+    clearSearch.classList.add('hidden');
+    currentPage = 1;
+    renderTable();
+  });
+
+  // Sort functionality
+  sortSelect.addEventListener('change', () => {
+    const key = sortSelect.value;
+    let index;
+    
+    switch(key) {
+      case 'id': index = 0; break;
+      case 'dueDate': index = 5; break;
+      case 'patientId': index = 1; break;
+      case 'priority': index = 6; break;
+      case 'status': index = 7; break;
+      default: index = 0;
+    }
+    
+    reminders.sort((a, b) => {
+      if (key === 'dueDate') {
+        return new Date(a[index]) - new Date(b[index]);
+      } else if (key === 'priority') {
+        const priorityOrder = { 'High': 3, 'Medium': 2, 'Low': 1 };
+        return priorityOrder[b[index]] - priorityOrder[a[index]];
+      } else if (key === 'status') {
+        const statusOrder = { 'Overdue': 5, 'Due': 4, 'Upcoming': 3, 'Snoozed': 2, 'Completed': 1 };
+        return statusOrder[b[index]] - statusOrder[a[index]];
+      }
+      return a[index].toString().localeCompare(b[index].toString());
+    });
+    
+    currentPage = 1;
+    renderTable();
+    showToast(`Sorted by ${key}`, 'info');
+  });
+
+  // Per page selector
+  perPageSelect.addEventListener('change', () => {
+    recordsPerPage = perPageSelect.value === 'all' ? 'all' : parseInt(perPageSelect.value);
+    currentPage = 1;
+    renderTable();
+  });
+
+  // Filter chips
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      currentFilter = chip.dataset.filter;
+      currentPage = 1;
+      
+      document.querySelectorAll('.filter-chip').forEach(c => {
+        c.classList.remove('ring-2', 'ring-indigo-500');
+      });
+      chip.classList.add('ring-2', 'ring-indigo-500');
+      
+      renderTable();
+      
+      const filterNames = {
+        all: 'all reminders',
+        upcoming: 'upcoming reminders',
+        due: 'due reminders',
+        overdue: 'overdue reminders',
+        completed: 'completed reminders',
+        device: 'device-related reminders'
+      };
+      showToast(`Showing ${filterNames[currentFilter]}`, 'info');
+    });
+  });
+
+  // Pagination buttons
+  document.getElementById('firstPage').addEventListener('click', () => {
+    currentPage = 1;
+    renderTable();
+  });
+
+  document.getElementById('prevPage').addEventListener('click', () => {
+    if (currentPage > 1) {
+      currentPage--;
+      renderTable();
+    }
+  });
+
+  document.getElementById('nextPage').addEventListener('click', () => {
+    const filtered = getFilteredData();
+    const totalPages = Math.ceil(filtered.length / recordsPerPage);
+    if (currentPage < totalPages) {
+      currentPage++;
+      renderTable();
+    }
+  });
+
+  document.getElementById('lastPage').addEventListener('click', () => {
+    const filtered = getFilteredData();
+    const totalPages = Math.ceil(filtered.length / recordsPerPage);
+    currentPage = totalPages;
+    renderTable();
+  });
+
+  // Table actions
+  tbody.addEventListener('click', (e) => {
+    const row = e.target.closest('tr');
+    if (!row) return;
+
+    const reminderId = e.target.closest('.viewBtn')?.dataset.id || 
+                      e.target.closest('.editBtn')?.dataset.id || 
+                      e.target.closest('.deleteBtn')?.dataset.id;
+    const reminderInfo = e.target.closest('.deleteBtn')?.dataset.info;
+
+    if (e.target.closest('.viewBtn')) {
+      viewReminder(reminderId);
+    } else if (e.target.closest('.editBtn')) {
+      editReminder(reminderId);
+    } else if (e.target.closest('.deleteBtn')) {
+      deleteReminderId = reminderId;
+      deleteReminderInfo = reminderInfo;
+      confirmText.textContent = `You are about to delete reminder ${deleteReminderId} (${deleteReminderInfo}). This action is irreversible. Please provide a reason for this deletion.`;
+      confirmModal.classList.remove('hidden');
+      
+      // Reset deletion form
+      deleteReason.value = '';
+      otherReasonContainer.classList.add('hidden');
+      otherReason.value = '';
+      deletionNotes.value = '';
+    }
+  });
+
+  // View reminder function
+  function viewReminder(id) {
+    const reminder = reminders.find(p => p[0] === id);
+    if (!reminder) return;
+    
+    // Calculate days until due
+    const daysUntilDue = getDaysUntilDue(reminder[5]);
+    
+    reminderDetails.innerHTML = `
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Reminder ID</label>
+          <p class="mt-1 font-mono">${reminder[0]}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Reminder Type</label>
+          <p class="mt-1">
+            <span class="badge ${reminder[3] === 'Checkup' ? 'type-checkup' : reminder[3] === 'Test' ? 'type-test' : reminder[3] === 'Vaccination' ? 'type-vaccination' : reminder[3] === 'Medication' ? 'type-medication' : reminder[3] === 'Follow-up' ? 'type-followup' : 'type-device'} px-2 py-1 rounded-md text-xs font-medium inline-flex items-center space-x-1">
+              <i class="ph ${reminder[3] === 'Checkup' ? 'ph-user' : reminder[3] === 'Test' ? 'ph-flask' : reminder[3] === 'Vaccination' ? 'ph-syringe' : reminder[3] === 'Medication' ? 'ph-pill' : reminder[3] === 'Follow-up' ? 'ph-arrow-clockwise' : 'ph-device-mobile'}"></i>
+              <span>${reminder[3]}</span>
+            </span>
+          </p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Patient</label>
+          <p class="mt-1">${reminder[2]} (ID: ${reminder[1]})</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Frequency</label>
+          <p class="mt-1">${reminder[8]}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Due Date</label>
+          <p class="mt-1 ${reminder[7] === 'Overdue' ? 'text-red-700 font-bold' : reminder[7] === 'Due' ? 'text-yellow-700 font-bold' : ''}">
+            ${formatDate(reminder[5])}
+            ${reminder[7] === 'Overdue' ? `<span class="ml-2 text-xs bg-red-200 text-red-800 px-2 py-1 rounded">${Math.abs(daysUntilDue)} days overdue</span>` : ''}
+            ${reminder[7] === 'Due' ? '<span class="ml-2 text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded">Due today</span>' : ''}
+            ${reminder[7] === 'Upcoming' && daysUntilDue <= 7 ? `<span class="ml-2 text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded">Due in ${daysUntilDue} days</span>` : ''}
+          </p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Priority</label>
+          <p class="mt-1">
+            <span class="badge ${reminder[6] === 'High' ? 'priority-high' : reminder[6] === 'Medium' ? 'priority-medium' : 'priority-low'} px-2 py-1 rounded-full text-xs font-medium inline-flex items-center space-x-1">
+              <i class="ph ${reminder[6] === 'High' ? 'ph-warning-circle' : reminder[6] === 'Medium' ? 'ph-warning' : 'ph-info'}"></i>
+              <span>${reminder[6]}</span>
+            </span>
+          </p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Status</label>
+          <p class="mt-1">
+            <span class="badge ${reminder[7] === 'Upcoming' ? 'status-upcoming' : reminder[7] === 'Due' ? 'status-due' : reminder[7] === 'Overdue' ? 'status-overdue' : reminder[7] === 'Completed' ? 'status-completed' : 'status-snoozed'} px-2 py-1 rounded-full text-xs font-medium inline-flex items-center space-x-1">
+              <i class="ph ${reminder[7] === 'Upcoming' ? 'ph-clock' : reminder[7] === 'Due' ? 'ph-warning' : reminder[7] === 'Overdue' ? 'ph-warning-circle' : reminder[7] === 'Completed' ? 'ph-check-circle' : 'ph-clock-counter-clockwise'}"></i>
+              <span>${reminder[7]}</span>
+            </span>
+          </p>
+        </div>
+        ${reminder[10] ? `
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Related Device</label>
+          <p class="mt-1">${reminder[10]}</p>
+        </div>
+        ` : ''}
+        ${reminder[11] ? `
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Device Alert</label>
+          <p class="mt-1">
+            <span class="badge bg-red-100 text-red-700 px-2 py-1 rounded-md text-xs font-medium">
+              ${reminder[11]}
+            </span>
+          </p>
+        </div>
+        ` : ''}
+      </div>
+      
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+        <p class="text-gray-600">${reminder[4]}</p>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+        <p class="text-gray-600">${reminder[9] || 'No additional notes provided.'}</p>
+      </div>
+      
+      <div class="mt-6 pt-4 border-t border-gray-200">
+        <h4 class="text-sm font-medium text-gray-700 mb-2">Reminder Timeline</h4>
+        <div class="flex justify-between items-center">
+          <div class="text-center">
+            <div class="text-sm font-medium">Created</div>
+            <div class="text-xs text-gray-500">${formatDate(new Date().toISOString().split('T')[0])}</div>
+          </div>
+          <div class="h-1 bg-gray-200 flex-1 mx-4"></div>
+          <div class="text-center">
+            <div class="text-sm font-medium ${reminder[7] === 'Overdue' ? 'text-red-700 font-bold' : reminder[7] === 'Due' ? 'text-yellow-700 font-bold' : ''}">Due</div>
+            <div class="text-xs text-gray-500">${formatDate(reminder[5])}</div>
+          </div>
+          <div class="h-1 bg-gray-200 flex-1 mx-4"></div>
+          <div class="text-center">
+            <div class="text-sm font-medium ${reminder[7] === 'Completed' ? 'text-green-700 font-bold' : 'text-gray-500'}">${reminder[7] === 'Completed' ? 'Completed' : 'Status'}</div>
+            <div class="text-xs text-gray-500">${reminder[7]}</div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    viewReminderModal.classList.remove('hidden');
+  }
+
+  // Delete reason change handler
+  deleteReason.addEventListener('change', () => {
+    if (deleteReason.value === 'other') {
+      otherReasonContainer.classList.remove('hidden');
+    } else {
+      otherReasonContainer.classList.add('hidden');
+    }
+  });
+
+  // Edit reminder function
+  function editReminder(id) {
+    const reminder = reminders.find(p => p[0] === id);
+    if (!reminder) return;
+    
+    isEditing = true;
+    editingReminderId = id;
+    modalTitle.textContent = 'Edit Reminder';
+    
+    // Fill form with reminder data
+    document.getElementById('reminderId').value = reminder[0];
+    document.getElementById('patientId').value = reminder[1];
+    document.getElementById('patientName').value = reminder[2];
+    document.getElementById('reminderType').value = reminder[3];
+    document.getElementById('description').value = reminder[4];
+    document.getElementById('dueDate').value = reminder[5];
+    document.getElementById('priority').value = reminder[6];
+    document.getElementById('status').value = reminder[7];
+    document.getElementById('frequency').value = reminder[8];
+    document.getElementById('notes').value = reminder[9] || '';
+    document.getElementById('relatedDevice').value = reminder[10] || '';
+    document.getElementById('deviceAlert').value = reminder[11] || '';
+    
+    reminderModal.classList.remove('hidden');
+  }
+
+  // Add reminder modal
+  addReminderBtn.addEventListener('click', () => {
+    isEditing = false;
+    editingReminderId = null;
+    modalTitle.textContent = 'Add New Reminder';
+    reminderForm.reset();
+    
+    // Set default dates
+    const nextWeek = new Date();
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    document.getElementById('dueDate').value = nextWeek.toISOString().split('T')[0];
+    
+    reminderModal.classList.remove('hidden');
+  });
+
+  // Close modals
+  closeModal.addEventListener('click', () => {
+    reminderModal.classList.add('hidden');
+  });
+
+  closeViewModal.addEventListener('click', () => {
+    viewReminderModal.classList.add('hidden');
+  });
+
+  closeConfirmModal.addEventListener('click', () => {
+    confirmModal.classList.add('hidden');
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    reminderModal.classList.add('hidden');
+  });
+
+  confirmNo.addEventListener('click', () => {
+    confirmModal.classList.add('hidden');
+  });
+
+  // Save reminder form
+  reminderForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const formData = {
+      id: document.getElementById('reminderId').value,
+      patientId: document.getElementById('patientId').value,
+      patientName: document.getElementById('patientName').value,
+      reminderType: document.getElementById('reminderType').value,
+      description: document.getElementById('description').value,
+      dueDate: document.getElementById('dueDate').value,
+      priority: document.getElementById('priority').value,
+      status: document.getElementById('status').value,
+      frequency: document.getElementById('frequency').value,
+      notes: document.getElementById('notes').value,
+      relatedDevice: document.getElementById('relatedDevice').value,
+      deviceAlert: document.getElementById('deviceAlert').value
+    };
+    
+    if (isEditing) {
+      // Update existing reminder
+      const index = reminders.findIndex(p => p[0] === editingReminderId);
+      if (index !== -1) {
+        reminders[index] = [
+          formData.id,
+          formData.patientId,
+          formData.patientName,
+          formData.reminderType,
+          formData.description,
+          formData.dueDate,
+          formData.priority,
+          formData.status,
+          formData.frequency,
+          formData.notes,
+          formData.relatedDevice,
+          formData.deviceAlert
+        ];
+        showToast(`Reminder ${formData.id} updated successfully!`, 'success');
+      }
+    } else {
+      // Add new reminder
+      // Check if ID already exists
+      if (reminders.some(p => p[0] === formData.id)) {
+        showToast(`Reminder ID ${formData.id} already exists!`, 'error');
+        return;
+      }
+      
+      reminders.push([
+        formData.id,
+        formData.patientId,
+        formData.patientName,
+        formData.reminderType,
+        formData.description,
+        formData.dueDate,
+        formData.priority,
+        formData.status,
+        formData.frequency,
+        formData.notes,
+        formData.relatedDevice,
+        formData.deviceAlert
+      ]);
+      showToast(`Reminder ${formData.id} added successfully!`, 'success');
+    }
+    
+    reminderModal.classList.add('hidden');
+    renderTable();
+  });
+
+  confirmYes.addEventListener('click', () => {
+    // Validate deletion reason
+    if (!deleteReason.value) {
+      showToast('Please select a reason for deletion', 'error');
+      return;
+    }
+    
+    if (deleteReason.value === 'other' && !otherReason.value.trim()) {
+      showToast('Please specify the deletion reason', 'error');
+      return;
+    }
+    
+    const finalReason = deleteReason.value === 'other' ? otherReason.value : deleteReason.options[deleteReason.selectedIndex].text;
+    const notes = deletionNotes.value;
+    
+    const index = reminders.findIndex(p => p[0] === deleteReminderId);
+    if (index !== -1) {
+      // Log deletion for audit purposes
+      console.log(`Reminder deleted: ${deleteReminderId} (${deleteReminderInfo})`);
+      console.log(`Reason: ${finalReason}`);
+      console.log(`Notes: ${notes}`);
+      console.log(`Deleted by: Hospital Administrator`);
+      console.log(`Timestamp: ${new Date().toISOString()}`);
+      
+      reminders.splice(index, 1);
+      
+      const filtered = getFilteredData();
+      const totalPages = recordsPerPage === 'all' ? 1 : Math.ceil(filtered.length / recordsPerPage);
+      if (currentPage > totalPages && totalPages > 0) {
+        currentPage = totalPages;
+      }
+      
+      renderTable();
+      confirmModal.classList.add('hidden');
+      showToast(`Reminder "${deleteReminderId}" deleted successfully! Reason: ${finalReason}`, 'success');
+    }
+  });
+
+  // Export functionality
+  exportBtn.addEventListener('click', () => {
+    const filtered = getFilteredData();
+    let csv = 'Reminder ID,Patient ID,Patient Name,Type,Description,Due Date,Priority,Status,Frequency,Notes,Related Device,Device Alert\n';
+    filtered.forEach(row => {
+      csv += `"${row[0]}","${row[1]}","${row[2]}","${row[3]}","${row[4]}","${row[5]}","${row[6]}","${row[7]}","${row[8]}","${row[9] || ''}","${row[10] || ''}","${row[11] || ''}"\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `health_reminders_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    showToast(`Exported ${filtered.length} reminders successfully!`, 'success');
+  });
+
+  // Print functionality
+  printBtn.addEventListener('click', () => {
+    window.print();
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      searchInput.focus();
+    }
+    
+    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+      e.preventDefault();
+      window.print();
+    }
+    
+    if (e.key === 'Escape') {
+      if (!confirmModal.classList.contains('hidden')) {
+        confirmModal.classList.add('hidden');
+      }
+      if (!reminderModal.classList.contains('hidden')) {
+        reminderModal.classList.add('hidden');
+      }
+      if (!viewReminderModal.classList.contains('hidden')) {
+        viewReminderModal.classList.add('hidden');
+      }
+    }
+  });
+
+  // Toast notification system
+  function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    const colors = {
+      success: 'bg-green-500',
+      error: 'bg-red-500',
+      warning: 'bg-yellow-500',
+      info: 'bg-blue-500'
+    };
+    const icons = {
+      success: 'check-circle',
+      error: 'x-circle',
+      warning: 'warning',
+      info: 'info'
+    };
+    
+    toast.className = `${colors[type]} text-white px-6 py-4 rounded-lg shadow-2xl font-medium flex items-center space-x-3 pointer-events-auto transform transition-all duration-300 mb-2`;
+    toast.style.animation = 'slideInRight 0.3s ease-out';
+    toast.innerHTML = `
+      <i class="ph ph-${icons[type]} text-xl"></i>
+      <span>${message}</span>
+    `;
+    
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.animation = 'slideOutRight 0.3s ease-in';
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+
+  // Add animation keyframes
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideInRight {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    @keyframes slideOutRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Initial render
+  renderTable();
+  
+  // Set first filter chip as active
+  document.querySelector('.filter-chip[data-filter="all"]').classList.add('ring-2', 'ring-indigo-500');
+
+  // Welcome message
+  setTimeout(() => {
+    showToast('Health reminders system loaded successfully!', 'success');
+  }, 500);
+</script>
+</body>
+</html>

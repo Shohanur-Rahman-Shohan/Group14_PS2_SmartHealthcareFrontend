@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Billing Management | SHMS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  .animate-slideUp {
+    animation: slideUp 0.7s ease-out forwards;
+  }
+  .animate-pulse-slow {
+    animation: pulse 3s ease-in-out infinite;
+  }
+  .dropdownContent {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none;
+    position: absolute;
+    z-index: 50;
+    left: 0;
+  }
+  .dropdownContent.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .card-hover {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  .stat-number {
+    font-feature-settings: 'tnum';
+    font-variant-numeric: tabular-nums;
+  }
+  .gradient-border {
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899) border-box;
+    border: 2px solid transparent;
+  }
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #6366f1;
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+  }
+
+  /* Floating animation for icons */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  .float-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Chart containers */
+  .chart-container {
+    position: relative;
+    height: 300px;
+  }
+  
+  /* Highlight search matches */
+  .highlight {
+    background-color: rgba(34, 211, 238, 0.3);
+    padding: 2px 4px;
+    border-radius: 4px;
+  }
+  
+  /* Status indicators */
+  .status-paid {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+  .status-pending {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+  .status-overdue {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+  .status-partial {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+  
+  /* Payment method styling */
+  .payment-cash {
+    background-color: #f3f4f6;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+  }
+  .payment-card {
+    background-color: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #93c5fd;
+  }
+  .payment-insurance {
+    background-color: #f0f9ff;
+    color: #0369a1;
+    border: 1px solid #7dd3fc;
+  }
+  .payment-online {
+    background-color: #f3e8ff;
+    color: #7c3aed;
+    border: 1px solid #c4b5fd;
+  }
+  
+  /* Amount styling */
+  .amount-positive {
+    color: #065f46;
+    font-weight: 600;
+  }
+  .amount-negative {
+    color: #991b1b;
+    font-weight: 600;
+  }
+  
+  /* Compact table rows */
+  .compact-row {
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .compact-row:hover {
+    background-color: #f8fafc;
+  }
+  .compact-cell {
+    padding: 8px 10px;
+    font-size: 0.875rem;
+  }
+  .compact-header {
+    padding: 10px 10px;
+    font-size: 0.875rem;
+  }
+  
+  /* Optimized column widths */
+  .col-invoice-id {
+    width: 120px;
+  }
+  .col-patient-id {
+    width: 100px;
+  }
+  .col-patient-name {
+    width: 140px;
+  }
+  .col-service-description {
+    width: 180px;
+  }
+  .col-amount {
+    width: 100px;
+  }
+  .col-date {
+    width: 120px;
+  }
+  .col-due-date {
+    width: 120px;
+  }
+  .col-payment-mode {
+    width: 120px;
+  }
+  .col-status {
+    width: 100px;
+  }
+  .col-actions {
+    width: 90px;
+  }
+  
+  /* Print styles */
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+    
+    body {
+      background: white !important;
+    }
+    
+    .bg-gradient-to-br {
+      background: white !important;
+    }
+    
+    .shadow-lg, .shadow-md, .shadow-2xl {
+      box-shadow: none !important;
+    }
+    
+    table {
+      border-collapse: collapse;
+    }
+    
+    th, td {
+      border: 1px solid #e5e7eb !important;
+    }
+  }
+</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen flex flex-col">
+
+<!-- Top Navbar -->
+<nav class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+  <h1 class="text-2xl font-bold tracking-wide flex items-center space-x-2">
+    <i class="ph ph-heartbeat text-3xl"></i>
+    <span>SHMS</span>
+  </h1>
+  <span class="text-xl font-bold flex items-center space-x-2">
+    <i class="ph ph-user-circle"></i>
+    <span>Hospital Administrator</span>
+  </span>
+  <div class="relative">
+    <button id="menuBtn" class="text-white text-2xl focus:outline-none hover:bg-indigo-600 rounded-full p-2 transition" aria-label="Menu">
+      <i class="ph ph-dots-three-vertical"></i>
+    </button>
+    <div id="menuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded-md shadow-lg z-50">
+      <a href="#" class="block px-4 py-2 hover:bg-indigo-100 rounded-t-md flex items-center space-x-2">
+        <i class="ph ph-user"></i>
+        <span>Profile</span>
+      </a>
+      <a href="#" class="block px-4 py-2 hover:bg-indigo-100 flex items-center space-x-2">
+        <i class="ph ph-chart-bar"></i>
+        <span>Report</span>
+      </a>
+      <a href="login.html" class="block px-4 py-2 hover:bg-indigo-100 text-red-600 rounded-b-md flex items-center space-x-2">
+        <i class="ph ph-sign-out"></i>
+        <span>Logout</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- Feature Navbar -->
+<nav id="featureNavbar" class="bg-indigo-800 text-white shadow-md sticky top-0 z-40 transition-transform duration-300" style="top: 64px;">
+  <div class="container mx-auto flex flex-wrap justify-center md:justify-start items-center px-4 py-2 space-x-2">
+    <div class="relative">
+      <a href="Home.html" class="px-3 py-2 rounded-md hover:bg-indigo-700 block transition">Home</a>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Patient & Medical Record</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Patients.html" class="block px-4 py-2 hover:bg-indigo-100 font-semibold">Patient List</a>
+        <a href="MedicalRecords.html" class="block px-4 py-2 hover:bg-indigo-100 font-semibold">Medical Records</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Doctor & Appointment</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Doctors.html" class="block px-4 py-2 hover:bg-indigo-100">Doctors Directory</a>
+        <a href="Appointments.html" class="block px-4 py-2 hover:bg-indigo-100">Appointments Management</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Prescription & Investigation</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Prescriptions.html" class="block px-4 py-2 hover:bg-indigo-100">Prescriptions</a>
+        <a href="Investigations.html" class="block px-4 py-2 hover:bg-indigo-100">Tests & Diagnostic Reports</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md bg-indigo-600 font-semibold dropdownBtn transition">Billing & Insurance</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Billing.html" class="block px-4 py-2 hover:bg-indigo-100">Bills & Payments</a>
+        <a href="InsuranceClaims.html" class="block px-4 py-2 hover:bg-indigo-100">Insurance Claims</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Disease Prediction</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="DiseasePredictions.html" class="block px-4 py-2 hover:bg-indigo-100">Disease Predictions</a>
+        <a href="Symptoms.html" class="block px-4 py-2 hover:bg-indigo-100">Symptom Assessments</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Smart Recommendations</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="HealthReminders.html" class="block px-4 py-2 hover:bg-indigo-100">Health Reminders</a>
+        <a href="Recommendations.html" class="block px-4 py-2 hover:bg-indigo-100">Health Tips & Recommendations</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Header -->
+<header class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white p-6 shadow-lg flex justify-center items-center relative">
+  <div class="text-center">
+    <h1 class="text-3xl font-bold mb-1">Billing Management</h1>
+    <p class="text-indigo-200 text-sm">Track invoices, payments, and financial records</p>
+  </div>
+  <div class="absolute right-8 flex space-x-2">
+    <button id="exportBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium shadow-md transition flex items-center space-x-2 no-print">
+      <i class="ph ph-download-simple"></i>
+      <span>Export</span>
+    </button>
+    <button id="printBtn" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md font-medium shadow-md transition flex items-center space-x-2 no-print">
+      <i class="ph ph-printer"></i>
+      <span>Print</span>
+    </button>
+    <button id="addInvoiceBtn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md font-medium shadow-md transition flex items-center space-x-2">
+      <i class="ph ph-plus-circle"></i>
+      <span>Add Invoice</span>
+    </button>
+  </div>
+</header>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-20 right-4 flex flex-col space-y-2 pointer-events-none z-50"></div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50 fade-in">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-md mx-4">
+    <div class="bg-red-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+      <h3 class="text-xl font-bold">Confirm Invoice Deletion</h3>
+      <button id="closeConfirmModal" class="text-white hover:text-red-200 text-2xl">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+    <div class="p-6">
+      <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="ph ph-warning text-red-500 text-3xl"></i>
+      </div>
+      <p id="confirmText" class="mb-4 text-gray-600 text-center"></p>
+      
+      <div class="mb-4">
+        <label for="deleteReason" class="block text-sm font-medium text-gray-700 mb-2">Reason for deletion <span class="text-red-500">*</span></label>
+        <select id="deleteReason" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" required>
+          <option value="">Select a reason</option>
+          <option value="duplicate">Duplicate Invoice</option>
+          <option value="incorrect_amount">Incorrect Amount</option>
+          <option value="patient_request">Patient Request</option>
+          <option value="system_error">System Error</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      
+      <div id="otherReasonContainer" class="mb-4 hidden">
+        <label for="otherReason" class="block text-sm font-medium text-gray-700 mb-2">Please specify reason</label>
+        <textarea id="otherReason" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Enter specific reason for deletion"></textarea>
+      </div>
+      
+      <div class="mb-4">
+        <label for="deletionNotes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
+        <textarea id="deletionNotes" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Any additional information about this deletion"></textarea>
+      </div>
+      
+      <div class="flex justify-center space-x-4">
+        <button id="confirmYes" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md transition transform hover:scale-105 flex items-center space-x-2">
+          <i class="ph ph-trash"></i>
+          <span>Delete Invoice</span>
+        </button>
+        <button id="confirmNo" class="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-md transition transform hover:scale-105">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Invoice Modal -->
+<div id="invoiceModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50 fade-in overflow-y-auto py-8">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-3xl mx-4">
+    <div class="bg-indigo-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+      <h3 id="modalTitle" class="text-xl font-bold">Add New Invoice</h3>
+      <button id="closeModal" class="text-white hover:text-indigo-200 text-2xl">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+    <form id="invoiceForm" class="p-6 space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="invoiceId" class="block text-sm font-medium text-gray-700 mb-1">Invoice ID</label>
+          <input type="text" id="invoiceId" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="patientId" class="block text-sm font-medium text-gray-700 mb-1">Patient ID</label>
+          <input type="text" id="patientId" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="patientName" class="block text-sm font-medium text-gray-700 mb-1">Patient Name</label>
+          <input type="text" id="patientName" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="serviceDescription" class="block text-sm font-medium text-gray-700 mb-1">Service Description</label>
+          <select id="serviceDescription" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+            <option value="">Select Service</option>
+            <option value="Consultation">Consultation</option>
+            <option value="Laboratory Tests">Laboratory Tests</option>
+            <option value="X-Ray">X-Ray</option>
+            <option value="MRI Scan">MRI Scan</option>
+            <option value="Surgery">Surgery</option>
+            <option value="Medication">Medication</option>
+            <option value="Hospital Stay">Hospital Stay</option>
+            <option value="Emergency Services">Emergency Services</option>
+            <option value="Physical Therapy">Physical Therapy</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label for="amount" class="block text-sm font-medium text-gray-700 mb-1">Amount (₹)</label>
+          <input type="number" id="amount" step="0.01" min="0" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="dateOfService" class="block text-sm font-medium text-gray-700 mb-1">Date of Service</label>
+          <input type="date" id="dateOfService" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="dueDate" class="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+          <input type="date" id="dueDate" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="paymentMode" class="block text-sm font-medium text-gray-700 mb-1">Payment Mode</label>
+          <select id="paymentMode" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+            <option value="Cash">Cash</option>
+            <option value="Card">Card</option>
+            <option value="Insurance">Insurance</option>
+            <option value="Online">Online Payment</option>
+          </select>
+        </div>
+        <div>
+          <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <select id="status" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+            <option value="Paid">Paid</option>
+            <option value="Pending">Pending</option>
+            <option value="Overdue">Overdue</option>
+            <option value="Partial">Partial Payment</option>
+          </select>
+        </div>
+      </div>
+      
+      <div>
+        <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+        <textarea id="notes" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Any additional notes about this invoice"></textarea>
+      </div>
+      
+      <div class="flex justify-end space-x-3 pt-4">
+        <button type="button" id="cancelBtn" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md transition">Cancel</button>
+        <button type="submit" id="saveBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md transition">Save Invoice</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- View Invoice Modal -->
+<div id="viewInvoiceModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50 fade-in overflow-y-auto py-8">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl mx-4">
+    <div class="bg-indigo-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+      <h3 class="text-xl font-bold">Invoice Details</h3>
+      <button id="closeViewModal" class="text-white hover:text-indigo-200 text-2xl">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+    <div class="p-6 space-y-4" id="invoiceDetails">
+      <!-- Content will be populated by JavaScript -->
+    </div>
+  </div>
+</div>
+
+<!-- Financial Overview -->
+<div class="container mx-auto mt-6 px-4">
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <h2 class="text-xl font-bold text-gray-800 mb-4">Financial Overview</h2>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+        <div class="text-green-600 text-sm font-medium">Total Revenue</div>
+        <div id="statTotalRevenue" class="text-2xl font-bold text-green-700">₹0</div>
+        <div class="text-xs text-green-600 mt-1">This Month</div>
+      </div>
+      <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+        <div class="text-blue-600 text-sm font-medium">Pending Payments</div>
+        <div id="statPending" class="text-2xl font-bold text-blue-700">₹0</div>
+        <div class="text-xs text-blue-600 mt-1">Unpaid Invoices</div>
+      </div>
+      <div class="bg-gradient-to-br from-red-50 to-red-100 p-4 rounded-lg border border-red-200">
+        <div class="text-red-600 text-sm font-medium">Overdue Payments</div>
+        <div id="statOverdue" class="text-2xl font-bold text-red-700">₹0</div>
+        <div class="text-xs text-red-600 mt-1">Past Due Date</div>
+      </div>
+      <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+        <div class="text-purple-600 text-sm font-medium">Average Payment</div>
+        <div id="statAverage" class="text-2xl font-bold text-purple-700">₹0</div>
+        <div class="text-xs text-purple-600 mt-1">Per Invoice</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Controls -->
+<div class="container mx-auto mt-6 px-4">
+  <div class="bg-white rounded-lg shadow-md p-4 space-y-4">
+    <!-- Top row: Search and Sort -->
+    <div class="flex flex-wrap justify-between items-center gap-4">
+      <div class="flex items-center space-x-2 flex-1 max-w-md">
+        <i class="ph ph-magnifying-glass text-gray-400 text-xl"></i>
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Search by invoice ID, patient name, service..." 
+          class="border border-gray-300 rounded-md px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+        />
+        <button id="clearSearch" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-md transition hidden">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-2">
+          <label for="sort" class="font-medium text-gray-700">Sort by:</label>
+          <select id="sort" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+            <option value="id">Invoice ID</option>
+            <option value="date">Date of Service</option>
+            <option value="dueDate">Due Date</option>
+            <option value="amount">Amount</option>
+            <option value="status">Status</option>
+          </select>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <label for="perPage" class="font-medium text-gray-700">Show:</label>
+          <select id="perPage" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="50">50</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter chips -->
+    <div class="flex flex-wrap gap-2">
+      <button class="filter-chip bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="all">
+        Total Invoices (<span id="countAll">0</span>)
+      </button>
+      <button class="filter-chip bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="paid">
+        Paid (<span id="countPaid">0</span>)
+      </button>
+      <button class="filter-chip bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="pending">
+        Pending (<span id="countPending">0</span>)
+      </button>
+      <button class="filter-chip bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="overdue">
+        Overdue (<span id="countOverdue">0</span>)
+      </button>
+      <button class="filter-chip bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="partial">
+        Partial (<span id="countPartial">0</span>)
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+      <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+        <div class="text-blue-600 text-sm font-medium">Total Invoices</div>
+        <div id="statTotal" class="text-2xl font-bold text-blue-700">0</div>
+      </div>
+      <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+        <div class="text-green-600 text-sm font-medium">Showing</div>
+        <div id="statShowing" class="text-2xl font-bold text-green-700">0</div>
+      </div>
+      <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+        <div class="text-purple-600 text-sm font-medium">Current Page</div>
+        <div id="statPage" class="text-2xl font-bold text-purple-700">1</div>
+      </div>
+      <div class="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-lg border border-orange-200">
+        <div class="text-orange-600 text-sm font-medium">Total Pages</div>
+        <div id="statPages" class="text-2xl font-bold text-orange-700">1</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="container mx-auto mt-6 px-4 pb-6 overflow-x-auto">
+  <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <table id="invoiceTable" class="min-w-full">
+      <thead class="bg-indigo-600 text-white">
+        <tr>
+          <th class="compact-header text-left font-semibold col-invoice-id">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-receipt"></i>
+              <span>Invoice ID</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-patient-id">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-user"></i>
+              <span>Patient ID</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-patient-name">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-user"></i>
+              <span>Patient Name</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-service-description">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-first-aid-kit"></i>
+              <span>Service</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-amount">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-currency-inr"></i>
+              <span>Amount</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-date">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-calendar"></i>
+              <span>Service Date</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-due-date">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-calendar-x"></i>
+              <span>Due Date</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-payment-mode">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-credit-card"></i>
+              <span>Payment Mode</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-status">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-clock"></i>
+              <span>Status</span>
+            </div>
+          </th>
+          <th class="compact-header text-center font-semibold no-print col-actions">
+            <div class="flex items-center justify-center space-x-2">
+              <i class="ph ph-gear"></i>
+              <span>Actions</span>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div id="noResults" class="hidden py-12 text-center text-gray-500">
+      <i class="ph ph-magnifying-glass text-5xl mb-4"></i>
+      <p class="text-lg font-medium">No invoices found</p>
+      <p class="text-sm">Try adjusting your search or filters</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div id="paginationContainer" class="mt-6 flex justify-center items-center space-x-2">
+    <button id="firstPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-double-left"></i>
+    </button>
+    <button id="prevPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-left"></i>
+    </button>
+    <div id="pageNumbers" class="flex space-x-2"></div>
+    <button id="nextPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-right"></i>
+    </button>
+    <button id="lastPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-double-right"></i>
+    </button>
+  </div>
+</div>
+
+<script>
+  // Navigation scripts
+  const menuBtn = document.getElementById('menuBtn');
+  const menuDropdown = document.getElementById('menuDropdown');
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuDropdown.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+      menuDropdown.classList.add('hidden');
+    }
+  });
+
+  const dropdownButtons = document.querySelectorAll('.dropdownBtn');
+  let activeDropdown = null;
+
+  dropdownButtons.forEach(btn => {
+    const dropdown = btn.nextElementSibling;
+    if (!dropdown) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeDropdown && activeDropdown !== dropdown) {
+        activeDropdown.classList.remove('show');
+      }
+      if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        activeDropdown = null;
+      } else {
+        dropdown.classList.add('show');
+        activeDropdown = dropdown;
+      }
+    });
+
+    btn.addEventListener('mouseenter', () => dropdown.classList.add('show'));
+    btn.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!dropdown.matches(':hover')) {
+          dropdown.classList.remove('show');
+        }
+      }, 100);
+    });
+    
+    if (dropdown) {
+      dropdown.addEventListener('mouseleave', () => {
+        dropdown.classList.remove('show');
+        if (activeDropdown === dropdown) activeDropdown = null;
+      });
+    }
+  });
+
+  document.body.addEventListener('click', () => {
+    if (activeDropdown) {
+      activeDropdown.classList.remove('show');
+      activeDropdown = null;
+    }
+  });
+
+  let lastScroll = 0;
+  const featureNavbar = document.getElementById('featureNavbar');
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+    if (currentScroll > lastScroll && currentScroll > 100) {
+      featureNavbar.style.transform = 'translateY(-100%)';
+    } else {
+      featureNavbar.style.transform = 'translateY(0)';
+    }
+    lastScroll = currentScroll;
+  });
+
+  // Main application
+  const tbody = document.getElementById('tableBody');
+  const searchInput = document.getElementById('searchInput');
+  const clearSearch = document.getElementById('clearSearch');
+  const sortSelect = document.getElementById('sort');
+  const perPageSelect = document.getElementById('perPage');
+  const confirmModal = document.getElementById('confirmModal');
+  const confirmText = document.getElementById('confirmText');
+  const confirmYes = document.getElementById('confirmYes');
+  const confirmNo = document.getElementById('confirmNo');
+  const closeConfirmModal = document.getElementById('closeConfirmModal');
+  const deleteReason = document.getElementById('deleteReason');
+  const otherReasonContainer = document.getElementById('otherReasonContainer');
+  const otherReason = document.getElementById('otherReason');
+  const deletionNotes = document.getElementById('deletionNotes');
+  const toastContainer = document.getElementById('toastContainer');
+  const noResults = document.getElementById('noResults');
+  const exportBtn = document.getElementById('exportBtn');
+  const printBtn = document.getElementById('printBtn');
+  const addInvoiceBtn = document.getElementById('addInvoiceBtn');
+  const invoiceModal = document.getElementById('invoiceModal');
+  const invoiceForm = document.getElementById('invoiceForm');
+  const modalTitle = document.getElementById('modalTitle');
+  const closeModal = document.getElementById('closeModal');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const viewInvoiceModal = document.getElementById('viewInvoiceModal');
+  const closeViewModal = document.getElementById('closeViewModal');
+  const invoiceDetails = document.getElementById('invoiceDetails');
+
+  let deleteInvoiceId = null;
+  let deleteInvoiceInfo = "";
+  let currentPage = 1;
+  let recordsPerPage = 20;
+  let currentFilter = 'all';
+  let isEditing = false;
+  let editingInvoiceId = null;
+
+  // Format date
+  function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+  }
+
+  // Format currency
+  function formatCurrency(amount) {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0
+    }).format(amount);
+  }
+
+  // Sample billing data
+  const invoices = [
+    ["INV001", "0001001", "Ayesha Rahman", "Consultation", 500, "2024-01-10", "2024-01-20", "Cash", "Paid", "Regular checkup"],
+    ["INV002", "0001002", "Jamal Hossain", "Laboratory Tests", 1200, "2024-01-12", "2024-01-22", "Card", "Paid", "Blood tests and urinalysis"],
+    ["INV003", "0001003", "Mina Akter", "X-Ray", 800, "2024-01-08", "2024-01-18", "Insurance", "Pending", "Chest X-ray"],
+    ["INV004", "0001004", "Rafiul Islam", "MRI Scan", 4500, "2024-01-15", "2024-01-25", "Online", "Partial", "Brain MRI scan"],
+    ["INV005", "0001005", "Tahmina Sultana", "Surgery", 25000, "2024-01-05", "2024-01-15", "Insurance", "Paid", "Appendectomy"],
+    ["INV006", "0001006", "Arif Chowdhury", "Medication", 350, "2023-12-20", "2024-01-05", "Cash", "Overdue", "Prescription drugs"],
+    ["INV007", "0001007", "Nasrin Jahan", "Hospital Stay", 8000, "2024-01-14", "2024-01-24", "Card", "Paid", "3-day hospital stay"],
+    ["INV008", "0001008", "Sabbir Ahmed", "Emergency Services", 3000, "2024-01-16", "2024-01-26", "Insurance", "Pending", "Emergency room visit"],
+    ["INV009", "0001009", "Tania Rahman", "Physical Therapy", 1200, "2024-01-11", "2024-01-21", "Online", "Paid", "Physical therapy sessions"],
+    ["INV010", "0001010", "Mahmud Hasan", "Consultation", 500, "2024-01-09", "2024-01-19", "Cash", "Paid", "Follow-up consultation"],
+    ["INV011", "0001011", "Rumana Akter", "Laboratory Tests", 900, "2024-01-13", "2024-01-23", "Card", "Pending", "Diabetes screening"],
+    ["INV012", "0001012", "Rashid Karim", "X-Ray", 800, "2024-01-17", "2024-01-27", "Insurance", "Paid", "Leg X-ray"],
+    ["INV013", "0001013", "Farzana Khan", "MRI Scan", 4500, "2023-11-15", "2023-11-30", "Online", "Overdue", "Spine MRI"],
+    ["INV014", "0001014", "Imran Hossain", "Surgery", 18000, "2024-01-18", "2024-01-28", "Insurance", "Partial", "Minor surgery"],
+    ["INV015", "0001015", "Sadia Afrin", "Medication", 420, "2024-01-19", "2024-01-29", "Cash", "Pending", "Antibiotics"],
+    ["INV016", "0001016", "Shamim Akter", "Hospital Stay", 6000, "2024-01-20", "2024-01-30", "Card", "Paid", "2-day observation"],
+    ["INV017", "0001017", "Tanvir Ahmed", "Emergency Services", 2500, "2024-01-21", "2024-01-31", "Insurance", "Pending", "Emergency consultation"],
+    ["INV018", "0001018", "Nusrat Jahan", "Physical Therapy", 1500, "2024-01-22", "2024-02-01", "Online", "Paid", "Rehabilitation sessions"],
+    ["INV019", "0001019", "Sufian Karim", "Consultation", 500, "2024-01-23", "2024-02-02", "Cash", "Pending", "Specialist consultation"],
+    ["INV020", "0001020", "Rokeya Begum", "Laboratory Tests", 1100, "2024-01-24", "2024-02-03", "Card", "Paid", "Comprehensive health check"]
+  ];
+
+  function getFilteredData() {
+    const term = searchInput.value.toLowerCase();
+    let filtered = invoices.filter(p => {
+      const matchesSearch = p.some((field, index) => {
+        return String(field).toLowerCase().includes(term);
+      });
+      
+      let matchesFilter = true;
+      if (currentFilter === 'paid') matchesFilter = p[8] === 'Paid';
+      else if (currentFilter === 'pending') matchesFilter = p[8] === 'Pending';
+      else if (currentFilter === 'overdue') matchesFilter = p[8] === 'Overdue';
+      else if (currentFilter === 'partial') matchesFilter = p[8] === 'Partial';
+      
+      return matchesSearch && matchesFilter;
+    });
+    return filtered;
+  }
+
+  function updateStats() {
+    const filtered = getFilteredData();
+    const totalPages = recordsPerPage === 'all' ? 1 : Math.ceil(filtered.length / recordsPerPage);
+    
+    document.getElementById('statTotal').textContent = invoices.length;
+    document.getElementById('statShowing').textContent = filtered.length;
+    document.getElementById('statPage').textContent = currentPage;
+    document.getElementById('statPages').textContent = totalPages;
+
+    // Update filter counts
+    document.getElementById('countAll').textContent = invoices.length;
+    document.getElementById('countPaid').textContent = invoices.filter(p => p[8] === 'Paid').length;
+    document.getElementById('countPending').textContent = invoices.filter(p => p[8] === 'Pending').length;
+    document.getElementById('countOverdue').textContent = invoices.filter(p => p[8] === 'Overdue').length;
+    document.getElementById('countPartial').textContent = invoices.filter(p => p[8] === 'Partial').length;
+
+    // Update financial overview
+    const totalRevenue = invoices
+      .filter(p => p[8] === 'Paid')
+      .reduce((sum, p) => sum + p[4], 0);
+    
+    const pendingPayments = invoices
+      .filter(p => p[8] === 'Pending')
+      .reduce((sum, p) => sum + p[4], 0);
+    
+    const overduePayments = invoices
+      .filter(p => p[8] === 'Overdue')
+      .reduce((sum, p) => sum + p[4], 0);
+    
+    const averagePayment = invoices.length > 0 ? 
+      invoices.reduce((sum, p) => sum + p[4], 0) / invoices.length : 0;
+    
+    document.getElementById('statTotalRevenue').textContent = formatCurrency(totalRevenue);
+    document.getElementById('statPending').textContent = formatCurrency(pendingPayments);
+    document.getElementById('statOverdue').textContent = formatCurrency(overduePayments);
+    document.getElementById('statAverage').textContent = formatCurrency(averagePayment);
+  }
+
+  function highlightText(text, searchTerm) {
+    if (!searchTerm) return text;
+    
+    const regex = new RegExp(`(${searchTerm})`, 'gi');
+    return text.replace(regex, '<span class="highlight">$1</span>');
+  }
+
+  function renderTable() {
+    const filtered = getFilteredData();
+    const startIndex = recordsPerPage === 'all' ? 0 : (currentPage - 1) * recordsPerPage;
+    const endIndex = recordsPerPage === 'all' ? filtered.length : startIndex + recordsPerPage;
+    const paginatedData = filtered.slice(startIndex, endIndex);
+    const searchTerm = searchInput.value.toLowerCase();
+
+    tbody.innerHTML = "";
+    
+    if (paginatedData.length === 0) {
+      noResults.classList.remove('hidden');
+      document.getElementById('paginationContainer').classList.add('hidden');
+    } else {
+      noResults.classList.add('hidden');
+      document.getElementById('paginationContainer').classList.remove('hidden');
+      
+      paginatedData.forEach((p, index) => {
+        const statusClass = p[8] === 'Paid' ? 'status-paid' : 
+                           p[8] === 'Pending' ? 'status-pending' : 
+                           p[8] === 'Overdue' ? 'status-overdue' : 'status-partial';
+        
+        const statusIcon = p[8] === 'Paid' ? 'ph-check-circle' : 
+                          p[8] === 'Pending' ? 'ph-clock' : 
+                          p[8] === 'Overdue' ? 'ph-warning-circle' : 'ph-currency-inr';
+        
+        const paymentClass = p[7] === 'Cash' ? 'payment-cash' : 
+                            p[7] === 'Card' ? 'payment-card' : 
+                            p[7] === 'Insurance' ? 'payment-insurance' : 'payment-online';
+        
+        const paymentIcon = p[7] === 'Cash' ? 'ph-money' : 
+                           p[7] === 'Card' ? 'ph-credit-card' : 
+                           p[7] === 'Insurance' ? 'ph-shield-check' : 'ph-globe';
+        
+        // Check if invoice is overdue
+        const dueDate = new Date(p[6]);
+        const today = new Date();
+        const isOverdue = dueDate < today && p[8] !== 'Paid';
+        
+        tbody.innerHTML += `
+          <tr class="compact-row transition-all duration-200 ${isOverdue ? 'bg-red-50' : ''}" style="animation: fadeIn 0.3s ease ${index * 0.05}s both">
+            <td class="compact-cell font-mono text-sm col-invoice-id">${highlightText(p[0], searchTerm)}</td>
+            <td class="compact-cell font-mono text-sm col-patient-id">${highlightText(p[1], searchTerm)}</td>
+            <td class="compact-cell font-medium col-patient-name">${highlightText(p[2], searchTerm)}</td>
+            <td class="compact-cell text-sm col-service-description">${highlightText(p[3], searchTerm)}</td>
+            <td class="compact-cell font-mono text-sm col-amount amount-positive">${formatCurrency(p[4])}</td>
+            <td class="compact-cell text-sm col-date">${formatDate(p[5])}</td>
+            <td class="compact-cell text-sm col-due-date ${isOverdue ? 'font-bold text-red-700' : ''}">
+              ${formatDate(p[6])}
+              ${isOverdue ? '<span class="ml-1 text-xs bg-red-200 text-red-800 px-1 py-0.5 rounded">Overdue</span>' : ''}
+            </td>
+            <td class="compact-cell col-payment-mode">
+              <span class="badge ${paymentClass} px-2 py-1 rounded-md text-xs font-medium flex items-center space-x-1 w-fit">
+                <i class="ph ${paymentIcon}"></i>
+                <span>${p[7]}</span>
+              </span>
+            </td>
+            <td class="compact-cell col-status">
+              <span class="badge ${statusClass} px-2 py-1 rounded-full text-xs font-medium flex items-center space-x-1 w-fit">
+                <i class="ph ${statusIcon}"></i>
+                <span>${p[8]}</span>
+              </span>
+            </td>
+            <td class="compact-cell text-center space-x-2 no-print col-actions">
+              <button class="bg-blue-400 hover:bg-blue-500 text-white px-2 py-1 rounded-md transition transform hover:scale-105 viewBtn" title="View Details" data-id="${p[0]}">
+                <i class="ph ph-eye"></i>
+              </button>
+              <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded-md transition transform hover:scale-105 editBtn" title="Edit Invoice" data-id="${p[0]}">
+                <i class="ph ph-pencil"></i>
+              </button>
+              <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded-md transition transform hover:scale-105 deleteBtn" title="Delete Invoice" data-id="${p[0]}" data-info="${p[2]} - ${p[3]}">
+                <i class="ph ph-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+    
+    updatePagination();
+    updateStats();
+  }
+
+  function updatePagination() {
+    const filtered = getFilteredData();
+    const totalPages = recordsPerPage === 'all' ? 1 : Math.ceil(filtered.length / recordsPerPage);
+    const pageNumbers = document.getElementById('pageNumbers');
+    pageNumbers.innerHTML = '';
+
+    if (recordsPerPage !== 'all') {
+      let startPage = Math.max(1, currentPage - 2);
+      let endPage = Math.min(totalPages, startPage + 4);
+      
+      if (endPage - startPage < 4) {
+        startPage = Math.max(1, endPage - 4);
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.className = `pagination-btn px-4 py-2 rounded-md transition ${
+          i === currentPage 
+            ? 'bg-indigo-600 text-white' 
+            : 'bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300'
+        }`;
+        btn.onclick = () => {
+          currentPage = i;
+          renderTable();
+        };
+        pageNumbers.appendChild(btn);
+      }
+    }
+
+    document.getElementById('firstPage').disabled = currentPage === 1;
+    document.getElementById('prevPage').disabled = currentPage === 1;
+    document.getElementById('nextPage').disabled = currentPage === totalPages || recordsPerPage === 'all';
+    document.getElementById('lastPage').disabled = currentPage === totalPages || recordsPerPage === 'all';
+  }
+
+  // Search functionality
+  searchInput.addEventListener('input', () => {
+    currentPage = 1;
+    renderTable();
+    clearSearch.classList.toggle('hidden', searchInput.value === '');
+  });
+
+  clearSearch.addEventListener('click', () => {
+    searchInput.value = '';
+    clearSearch.classList.add('hidden');
+    currentPage = 1;
+    renderTable();
+  });
+
+  // Sort functionality
+  sortSelect.addEventListener('change', () => {
+    const key = sortSelect.value;
+    let index;
+    
+    switch(key) {
+      case 'id': index = 0; break;
+      case 'date': index = 5; break;
+      case 'dueDate': index = 6; break;
+      case 'amount': index = 4; break;
+      case 'status': index = 8; break;
+      default: index = 0;
+    }
+    
+    invoices.sort((a, b) => {
+      if (key === 'date' || key === 'dueDate') {
+        return new Date(a[index]) - new Date(b[index]);
+      } else if (key === 'amount') {
+        return a[index] - b[index];
+      }
+      return a[index].toString().localeCompare(b[index].toString());
+    });
+    
+    currentPage = 1;
+    renderTable();
+    showToast(`Sorted by ${key}`, 'info');
+  });
+
+  // Per page selector
+  perPageSelect.addEventListener('change', () => {
+    recordsPerPage = perPageSelect.value === 'all' ? 'all' : parseInt(perPageSelect.value);
+    currentPage = 1;
+    renderTable();
+  });
+
+  // Filter chips
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      currentFilter = chip.dataset.filter;
+      currentPage = 1;
+      
+      document.querySelectorAll('.filter-chip').forEach(c => {
+        c.classList.remove('ring-2', 'ring-indigo-500');
+      });
+      chip.classList.add('ring-2', 'ring-indigo-500');
+      
+      renderTable();
+      
+      const filterNames = {
+        all: 'all invoices',
+        paid: 'paid invoices',
+        pending: 'pending invoices',
+        overdue: 'overdue invoices',
+        partial: 'partial payment invoices'
+      };
+      showToast(`Showing ${filterNames[currentFilter]}`, 'info');
+    });
+  });
+
+  // Pagination buttons
+  document.getElementById('firstPage').addEventListener('click', () => {
+    currentPage = 1;
+    renderTable();
+  });
+
+  document.getElementById('prevPage').addEventListener('click', () => {
+    if (currentPage > 1) {
+      currentPage--;
+      renderTable();
+    }
+  });
+
+  document.getElementById('nextPage').addEventListener('click', () => {
+    const filtered = getFilteredData();
+    const totalPages = Math.ceil(filtered.length / recordsPerPage);
+    if (currentPage < totalPages) {
+      currentPage++;
+      renderTable();
+    }
+  });
+
+  document.getElementById('lastPage').addEventListener('click', () => {
+    const filtered = getFilteredData();
+    const totalPages = Math.ceil(filtered.length / recordsPerPage);
+    currentPage = totalPages;
+    renderTable();
+  });
+
+  // Table actions
+  tbody.addEventListener('click', (e) => {
+    const row = e.target.closest('tr');
+    if (!row) return;
+
+    const invoiceId = e.target.closest('.viewBtn')?.dataset.id || 
+                     e.target.closest('.editBtn')?.dataset.id || 
+                     e.target.closest('.deleteBtn')?.dataset.id;
+    const invoiceInfo = e.target.closest('.deleteBtn')?.dataset.info;
+
+    if (e.target.closest('.viewBtn')) {
+      viewInvoice(invoiceId);
+    } else if (e.target.closest('.editBtn')) {
+      editInvoice(invoiceId);
+    } else if (e.target.closest('.deleteBtn')) {
+      deleteInvoiceId = invoiceId;
+      deleteInvoiceInfo = invoiceInfo;
+      confirmText.textContent = `You are about to delete invoice ${deleteInvoiceId} (${deleteInvoiceInfo}). This action is irreversible. Please provide a reason for this deletion.`;
+      confirmModal.classList.remove('hidden');
+      
+      // Reset deletion form
+      deleteReason.value = '';
+      otherReasonContainer.classList.add('hidden');
+      otherReason.value = '';
+      deletionNotes.value = '';
+    }
+  });
+
+  // View invoice function
+  function viewInvoice(id) {
+    const invoice = invoices.find(p => p[0] === id);
+    if (!invoice) return;
+    
+    // Check if invoice is overdue
+    const dueDate = new Date(invoice[6]);
+    const today = new Date();
+    const isOverdue = dueDate < today && invoice[8] !== 'Paid';
+    const daysOverdue = isOverdue ? Math.ceil((today - dueDate) / (1000 * 60 * 60 * 24)) : 0;
+    
+    invoiceDetails.innerHTML = `
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Invoice ID</label>
+          <p class="mt-1 font-mono">${invoice[0]}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Service Description</label>
+          <p class="mt-1">${invoice[3]}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Patient</label>
+          <p class="mt-1">${invoice[2]} (ID: ${invoice[1]})</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Amount</label>
+          <p class="mt-1 font-bold text-lg amount-positive">${formatCurrency(invoice[4])}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Date of Service</label>
+          <p class="mt-1">${formatDate(invoice[5])}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Due Date</label>
+          <p class="mt-1 ${isOverdue ? 'font-bold text-red-700' : ''}">
+            ${formatDate(invoice[6])}
+            ${isOverdue ? `<span class="ml-2 text-xs bg-red-200 text-red-800 px-2 py-1 rounded">${daysOverdue} days overdue</span>` : ''}
+          </p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Payment Mode</label>
+          <p class="mt-1">
+            <span class="badge ${invoice[7] === 'Cash' ? 'payment-cash' : invoice[7] === 'Card' ? 'payment-card' : invoice[7] === 'Insurance' ? 'payment-insurance' : 'payment-online'} px-2 py-1 rounded-md text-xs font-medium inline-flex items-center space-x-1">
+              <i class="ph ${invoice[7] === 'Cash' ? 'ph-money' : invoice[7] === 'Card' ? 'ph-credit-card' : invoice[7] === 'Insurance' ? 'ph-shield-check' : 'ph-globe'}"></i>
+              <span>${invoice[7]}</span>
+            </span>
+          </p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Status</label>
+          <p class="mt-1">
+            <span class="badge ${invoice[8] === 'Paid' ? 'status-paid' : invoice[8] === 'Pending' ? 'status-pending' : invoice[8] === 'Overdue' ? 'status-overdue' : 'status-partial'} px-2 py-1 rounded-full text-xs font-medium inline-flex items-center space-x-1">
+              <i class="ph ${invoice[8] === 'Paid' ? 'ph-check-circle' : invoice[8] === 'Pending' ? 'ph-clock' : invoice[8] === 'Overdue' ? 'ph-warning-circle' : 'ph-currency-inr'}"></i>
+              <span>${invoice[8]}</span>
+            </span>
+          </p>
+        </div>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+        <p class="text-gray-600">${invoice[9] || 'No additional notes provided.'}</p>
+      </div>
+      
+      <div class="mt-6 pt-4 border-t border-gray-200">
+        <h4 class="text-sm font-medium text-gray-700 mb-2">Payment Timeline</h4>
+        <div class="flex justify-between items-center">
+          <div class="text-center">
+            <div class="text-sm font-medium">Issued</div>
+            <div class="text-xs text-gray-500">${formatDate(invoice[5])}</div>
+          </div>
+          <div class="h-1 bg-gray-200 flex-1 mx-4"></div>
+          <div class="text-center">
+            <div class="text-sm font-medium ${isOverdue ? 'text-red-700 font-bold' : ''}">Due</div>
+            <div class="text-xs text-gray-500">${formatDate(invoice[6])}</div>
+          </div>
+          <div class="h-1 bg-gray-200 flex-1 mx-4"></div>
+          <div class="text-center">
+            <div class="text-sm font-medium ${invoice[8] === 'Paid' ? 'text-green-700 font-bold' : 'text-gray-500'}">${invoice[8] === 'Paid' ? 'Paid' : 'Status'}</div>
+            <div class="text-xs text-gray-500">${invoice[8]}</div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    viewInvoiceModal.classList.remove('hidden');
+  }
+
+  // Delete reason change handler
+  deleteReason.addEventListener('change', () => {
+    if (deleteReason.value === 'other') {
+      otherReasonContainer.classList.remove('hidden');
+    } else {
+      otherReasonContainer.classList.add('hidden');
+    }
+  });
+
+  // Edit invoice function
+  function editInvoice(id) {
+    const invoice = invoices.find(p => p[0] === id);
+    if (!invoice) return;
+    
+    isEditing = true;
+    editingInvoiceId = id;
+    modalTitle.textContent = 'Edit Invoice';
+    
+    // Fill form with invoice data
+    document.getElementById('invoiceId').value = invoice[0];
+    document.getElementById('patientId').value = invoice[1];
+    document.getElementById('patientName').value = invoice[2];
+    document.getElementById('serviceDescription').value = invoice[3];
+    document.getElementById('amount').value = invoice[4];
+    document.getElementById('dateOfService').value = invoice[5];
+    document.getElementById('dueDate').value = invoice[6];
+    document.getElementById('paymentMode').value = invoice[7];
+    document.getElementById('status').value = invoice[8];
+    document.getElementById('notes').value = invoice[9] || '';
+    
+    invoiceModal.classList.remove('hidden');
+  }
+
+  // Add invoice modal
+  addInvoiceBtn.addEventListener('click', () => {
+    isEditing = false;
+    editingInvoiceId = null;
+    modalTitle.textContent = 'Add New Invoice';
+    invoiceForm.reset();
+    
+    // Set default dates
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('dateOfService').value = today;
+    
+    const nextWeek = new Date();
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    document.getElementById('dueDate').value = nextWeek.toISOString().split('T')[0];
+    
+    invoiceModal.classList.remove('hidden');
+  });
+
+  // Close modals
+  closeModal.addEventListener('click', () => {
+    invoiceModal.classList.add('hidden');
+  });
+
+  closeViewModal.addEventListener('click', () => {
+    viewInvoiceModal.classList.add('hidden');
+  });
+
+  closeConfirmModal.addEventListener('click', () => {
+    confirmModal.classList.add('hidden');
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    invoiceModal.classList.add('hidden');
+  });
+
+  confirmNo.addEventListener('click', () => {
+    confirmModal.classList.add('hidden');
+  });
+
+  // Save invoice form
+  invoiceForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const formData = {
+      id: document.getElementById('invoiceId').value,
+      patientId: document.getElementById('patientId').value,
+      patientName: document.getElementById('patientName').value,
+      serviceDescription: document.getElementById('serviceDescription').value,
+      amount: parseFloat(document.getElementById('amount').value),
+      dateOfService: document.getElementById('dateOfService').value,
+      dueDate: document.getElementById('dueDate').value,
+      paymentMode: document.getElementById('paymentMode').value,
+      status: document.getElementById('status').value,
+      notes: document.getElementById('notes').value
+    };
+    
+    if (isEditing) {
+      // Update existing invoice
+      const index = invoices.findIndex(p => p[0] === editingInvoiceId);
+      if (index !== -1) {
+        invoices[index] = [
+          formData.id,
+          formData.patientId,
+          formData.patientName,
+          formData.serviceDescription,
+          formData.amount,
+          formData.dateOfService,
+          formData.dueDate,
+          formData.paymentMode,
+          formData.status,
+          formData.notes
+        ];
+        showToast(`Invoice ${formData.id} updated successfully!`, 'success');
+      }
+    } else {
+      // Add new invoice
+      // Check if ID already exists
+      if (invoices.some(p => p[0] === formData.id)) {
+        showToast(`Invoice ID ${formData.id} already exists!`, 'error');
+        return;
+      }
+      
+      invoices.push([
+        formData.id,
+        formData.patientId,
+        formData.patientName,
+        formData.serviceDescription,
+        formData.amount,
+        formData.dateOfService,
+        formData.dueDate,
+        formData.paymentMode,
+        formData.status,
+        formData.notes
+      ]);
+      showToast(`Invoice ${formData.id} added successfully!`, 'success');
+    }
+    
+    invoiceModal.classList.add('hidden');
+    renderTable();
+  });
+
+  confirmYes.addEventListener('click', () => {
+    // Validate deletion reason
+    if (!deleteReason.value) {
+      showToast('Please select a reason for deletion', 'error');
+      return;
+    }
+    
+    if (deleteReason.value === 'other' && !otherReason.value.trim()) {
+      showToast('Please specify the deletion reason', 'error');
+      return;
+    }
+    
+    const finalReason = deleteReason.value === 'other' ? otherReason.value : deleteReason.options[deleteReason.selectedIndex].text;
+    const notes = deletionNotes.value;
+    
+    const index = invoices.findIndex(p => p[0] === deleteInvoiceId);
+    if (index !== -1) {
+      // Log deletion for audit purposes (in a real app, this would go to a server)
+      console.log(`Invoice deleted: ${deleteInvoiceId} (${deleteInvoiceInfo})`);
+      console.log(`Reason: ${finalReason}`);
+      console.log(`Notes: ${notes}`);
+      console.log(`Deleted by: Hospital Administrator`);
+      console.log(`Timestamp: ${new Date().toISOString()}`);
+      
+      invoices.splice(index, 1);
+      
+      const filtered = getFilteredData();
+      const totalPages = recordsPerPage === 'all' ? 1 : Math.ceil(filtered.length / recordsPerPage);
+      if (currentPage > totalPages && totalPages > 0) {
+        currentPage = totalPages;
+      }
+      
+      renderTable();
+      confirmModal.classList.add('hidden');
+      showToast(`Invoice "${deleteInvoiceId}" deleted successfully! Reason: ${finalReason}`, 'success');
+    }
+  });
+
+  // Export functionality
+  exportBtn.addEventListener('click', () => {
+    const filtered = getFilteredData();
+    let csv = 'Invoice ID,Patient ID,Patient Name,Service Description,Amount,Date of Service,Due Date,Payment Mode,Status,Notes\n';
+    filtered.forEach(row => {
+      csv += `"${row[0]}","${row[1]}","${row[2]}","${row[3]}","${row[4]}","${row[5]}","${row[6]}","${row[7]}","${row[8]}","${row[9] || ''}"\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `billing_invoices_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    showToast(`Exported ${filtered.length} invoices successfully!`, 'success');
+  });
+
+  // Print functionality
+  printBtn.addEventListener('click', () => {
+    window.print();
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      searchInput.focus();
+    }
+    
+    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+      e.preventDefault();
+      window.print();
+    }
+    
+    if (e.key === 'Escape') {
+      if (!confirmModal.classList.contains('hidden')) {
+        confirmModal.classList.add('hidden');
+      }
+      if (!invoiceModal.classList.contains('hidden')) {
+        invoiceModal.classList.add('hidden');
+      }
+      if (!viewInvoiceModal.classList.contains('hidden')) {
+        viewInvoiceModal.classList.add('hidden');
+      }
+    }
+  });
+
+  // Toast notification system
+  function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    const colors = {
+      success: 'bg-green-500',
+      error: 'bg-red-500',
+      warning: 'bg-yellow-500',
+      info: 'bg-blue-500'
+    };
+    const icons = {
+      success: 'check-circle',
+      error: 'x-circle',
+      warning: 'warning',
+      info: 'info'
+    };
+    
+    toast.className = `${colors[type]} text-white px-6 py-4 rounded-lg shadow-2xl font-medium flex items-center space-x-3 pointer-events-auto transform transition-all duration-300 mb-2`;
+    toast.style.animation = 'slideInRight 0.3s ease-out';
+    toast.innerHTML = `
+      <i class="ph ph-${icons[type]} text-xl"></i>
+      <span>${message}</span>
+    `;
+    
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.animation = 'slideOutRight 0.3s ease-in';
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+
+  // Add animation keyframes
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideInRight {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    @keyframes slideOutRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Initial render
+  renderTable();
+  
+  // Set first filter chip as active
+  document.querySelector('.filter-chip[data-filter="all"]').classList.add('ring-2', 'ring-indigo-500');
+
+  // Welcome message
+  setTimeout(() => {
+    showToast('Billing management loaded successfully!', 'success');
+  }, 500);
+</script>
+</body>
+</html>

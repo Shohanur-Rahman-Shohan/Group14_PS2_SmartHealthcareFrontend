@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Disease Predictions | SHMS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  .animate-slideUp {
+    animation: slideUp 0.7s ease-out forwards;
+  }
+  .animate-pulse-slow {
+    animation: pulse 3s ease-in-out infinite;
+  }
+  .dropdownContent {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none;
+    position: absolute;
+    z-index: 50;
+    left: 0;
+  }
+  .dropdownContent.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .card-hover {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  .stat-number {
+    font-feature-settings: 'tnum';
+    font-variant-numeric: tabular-nums;
+  }
+  .gradient-border {
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899) border-box;
+    border: 2px solid transparent;
+  }
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #6366f1;
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+  }
+
+  /* Floating animation for icons */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  .float-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Chart containers */
+  .chart-container {
+    position: relative;
+    height: 300px;
+  }
+  
+  /* Highlight search matches */
+  .highlight {
+    background-color: rgba(34, 211, 238, 0.3);
+    padding: 2px 4px;
+    border-radius: 4px;
+  }
+  
+  /* Risk level indicators */
+  .risk-low {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+  .risk-medium {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+  .risk-high {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+  .risk-critical {
+    background-color: #991b1b;
+    color: #fee2e2;
+  }
+  
+  /* Status indicators */
+  .status-pending {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+  .status-confirmed {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+  .status-false-positive {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+  .status-reviewed {
+    background-color: #e0e7ff;
+    color: #3730a3;
+  }
+  
+  /* Confidence score indicators */
+  .confidence-high {
+    background: linear-gradient(90deg, #10b981, #34d399);
+    color: white;
+  }
+  .confidence-medium {
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    color: white;
+  }
+  .confidence-low {
+    background: linear-gradient(90deg, #ef4444, #f87171);
+    color: white;
+  }
+  
+  /* IoT device status */
+  .device-active {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+  .device-inactive {
+    background-color: #f3f4f6;
+    color: #6b7280;
+  }
+  .device-error {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+  
+  /* Disease type badges */
+  .disease-badge {
+    background-color: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+    font-size: 0.75rem;
+  }
+  
+  /* Compact table rows */
+  .compact-row {
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .compact-row:hover {
+    background-color: #f8fafc;
+  }
+  .compact-cell {
+    padding: 8px 10px;
+    font-size: 0.875rem;
+  }
+  .compact-header {
+    padding: 10px 10px;
+    font-size: 0.875rem;
+  }
+  
+  /* Optimized column widths */
+  .col-prediction-id {
+    width: 120px;
+  }
+  .col-patient-id {
+    width: 100px;
+  }
+  .col-patient-name {
+    width: 140px;
+  }
+  .col-disease {
+    width: 150px;
+  }
+  .col-risk-level {
+    width: 100px;
+  }
+  .col-confidence {
+    width: 120px;
+  }
+  .col-timestamp {
+    width: 160px;
+  }
+  .col-status {
+    width: 120px;
+  }
+  .col-iot-device {
+    width: 120px;
+  }
+  .col-actions {
+    width: 90px;
+  }
+  
+  /* Confidence bar */
+  .confidence-bar {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e5e7eb;
+    overflow: hidden;
+  }
+  .confidence-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+  
+  /* IoT data visualization */
+  .iot-data-point {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px;
+    margin: 2px 0;
+    background-color: #f8fafc;
+    border-radius: 4px;
+    font-size: 0.75rem;
+  }
+  
+  /* Risk trend indicator */
+  .trend-up {
+    color: #ef4444;
+  }
+  .trend-down {
+    color: #10b981;
+  }
+  .trend-stable {
+    color: #6b7280;
+  }
+</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen flex flex-col">
+
+<!-- Top Navbar -->
+<nav class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+  <h1 class="text-2xl font-bold tracking-wide flex items-center space-x-2">
+    <i class="ph ph-heartbeat text-3xl"></i>
+    <span>SHMS</span>
+  </h1>
+  <span class="text-xl font-bold flex items-center space-x-2">
+    <i class="ph ph-user-circle"></i>
+    <span>Hospital Administrator</span>
+  </span>
+  <div class="relative">
+    <button id="menuBtn" class="text-white text-2xl focus:outline-none hover:bg-indigo-600 rounded-full p-2 transition" aria-label="Menu">
+      <i class="ph ph-dots-three-vertical"></i>
+    </button>
+    <div id="menuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded-md shadow-lg z-50">
+      <a href="#" class="block px-4 py-2 hover:bg-indigo-100 rounded-t-md flex items-center space-x-2">
+        <i class="ph ph-user"></i>
+        <span>Profile</span>
+      </a>
+      <a href="#" class="block px-4 py-2 hover:bg-indigo-100 flex items-center space-x-2">
+        <i class="ph ph-chart-bar"></i>
+        <span>Report</span>
+      </a>
+      <a href="login.html" class="block px-4 py-2 hover:bg-indigo-100 text-red-600 rounded-b-md flex items-center space-x-2">
+        <i class="ph ph-sign-out"></i>
+        <span>Logout</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- Feature Navbar -->
+<nav id="featureNavbar" class="bg-indigo-800 text-white shadow-md sticky top-0 z-40 transition-transform duration-300" style="top: 64px;">
+  <div class="container mx-auto flex flex-wrap justify-center md:justify-start items-center px-4 py-2 space-x-2">
+    <div class="relative">
+      <a href="Home.html" class="px-3 py-2 rounded-md hover:bg-indigo-700 block transition">Home</a>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Patient & Medical Record</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Patients.html" class="block px-4 py-2 hover:bg-indigo-100 font-semibold">Patient List</a>
+        <a href="MedicalRecords.html" class="block px-4 py-2 hover:bg-indigo-100 font-semibold">Medical Records</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Doctor & Appointment</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Doctors.html" class="block px-4 py-2 hover:bg-indigo-100">Doctors Directory</a>
+        <a href="Appointments.html" class="block px-4 py-2 hover:bg-indigo-100">Appointments Management</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Prescription & Investigation</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Prescriptions.html" class="block px-4 py-2 hover:bg-indigo-100">Prescriptions</a>
+        <a href="Investigations.html" class="block px-4 py-2 hover:bg-indigo-100">Tests & Diagnostic Reports</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Billing & Insurance</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Billing.html" class="block px-4 py-2 hover:bg-indigo-100">Bills & Payments</a>
+        <a href="InsuranceClaims.html" class="block px-4 py-2 hover:bg-indigo-100">Insurance Claims</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md bg-indigo-600 font-semibold dropdownBtn transition">Disease Prediction</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="DiseasePredictions.html" class="block px-4 py-2 hover:bg-indigo-100">Disease Predictions</a>
+        <a href="Symptoms.html" class="block px-4 py-2 hover:bg-indigo-100">Symptom Assessments</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Smart Recommendations</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="HealthReminders.html" class="block px-4 py-2 hover:bg-indigo-100">Health Reminders</a>
+        <a href="Recommendations.html" class="block px-4 py-2 hover:bg-indigo-100">Health Tips & Recommendations</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Header -->
+<header class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white p-6 shadow-lg flex justify-center items-center relative">
+  <div class="text-center">
+    <h1 class="text-3xl font-bold mb-1">Disease Predictions</h1>
+    <p class="text-indigo-200 text-sm">AI-powered disease risk assessment with IoT health monitoring</p>
+  </div>
+  <div class="absolute right-8 flex space-x-2">
+    <button id="exportBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium shadow-md transition flex items-center space-x-2 no-print">
+      <i class="ph ph-download-simple"></i>
+      <span>Export</span>
+    </button>
+    <button id="printBtn" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md font-medium shadow-md transition flex items-center space-x-2 no-print">
+      <i class="ph ph-printer"></i>
+      <span>Print</span>
+    </button>
+    <button id="runPredictionBtn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md font-medium shadow-md transition flex items-center space-x-2">
+      <i class="ph ph-brain"></i>
+      <span>Run Prediction</span>
+    </button>
+  </div>
+</header>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-20 right-4 flex flex-col space-y-2 pointer-events-none z-50"></div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50 fade-in">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-md mx-4">
+    <div class="bg-red-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+      <h3 class="text-xl font-bold">Confirm Prediction Deletion</h3>
+      <button id="closeConfirmModal" class="text-white hover:text-red-200 text-2xl">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+    <div class="p-6">
+      <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="ph ph-warning text-red-500 text-3xl"></i>
+      </div>
+      <p id="confirmText" class="mb-4 text-gray-600 text-center"></p>
+      
+      <div class="mb-4">
+        <label for="deleteReason" class="block text-sm font-medium text-gray-700 mb-2">Reason for deletion <span class="text-red-500">*</span></label>
+        <select id="deleteReason" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" required>
+          <option value="">Select a reason</option>
+          <option value="false_positive">False Positive</option>
+          <option value="data_error">Data Error</option>
+          <option value="patient_request">Patient Request</option>
+          <option value="doctor_request">Doctor Request</option>
+          <option value="duplicate">Duplicate Prediction</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      
+      <div id="otherReasonContainer" class="mb-4 hidden">
+        <label for="otherReason" class="block text-sm font-medium text-gray-700 mb-2">Please specify reason</label>
+        <textarea id="otherReason" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Enter specific reason for deletion"></textarea>
+      </div>
+      
+      <div class="mb-4">
+        <label for="deletionNotes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
+        <textarea id="deletionNotes" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Any additional information about this deletion"></textarea>
+      </div>
+      
+      <div class="flex justify-center space-x-4">
+        <button id="confirmYes" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md transition transform hover:scale-105 flex items-center space-x-2">
+          <i class="ph ph-trash"></i>
+          <span>Delete Prediction</span>
+        </button>
+        <button id="confirmNo" class="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-md transition transform hover:scale-105">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Run Prediction Modal -->
+<div id="predictionModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50 fade-in overflow-y-auto py-8">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-4xl mx-4">
+    <div class="bg-indigo-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+      <h3 class="text-xl font-bold">Run AI Disease Prediction</h3>
+      <button id="closeModal" class="text-white hover:text-indigo-200 text-2xl">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+    <form id="predictionForm" class="p-6 space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="patientId" class="block text-sm font-medium text-gray-700 mb-1">Patient ID</label>
+          <input type="text" id="patientId" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="patientName" class="block text-sm font-medium text-gray-700 mb-1">Patient Name</label>
+          <input type="text" id="patientName" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="age" class="block text-sm font-medium text-gray-700 mb-1">Age</label>
+          <input type="number" id="age" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+          <select id="gender" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label for="iotDevice" class="block text-sm font-medium text-gray-700 mb-1">IoT Device</label>
+          <select id="iotDevice" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+            <option value="">Select Device</option>
+            <option value="Cardiac Monitor">Cardiac Monitor Implant</option>
+            <option value="Glucose Sensor">Glucose Sensor Implant</option>
+            <option value="Neurological Monitor">Neurological Monitor</option>
+            <option value="Pulmonary Sensor">Pulmonary Sensor</option>
+            <option value="Multi-Parameter Monitor">Multi-Parameter Monitor</option>
+          </select>
+        </div>
+        <div>
+          <label for="dataSource" class="block text-sm font-medium text-gray-700 mb-1">Data Source</label>
+          <select id="dataSource" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+            <option value="real_time">Real-time IoT Data</option>
+            <option value="historical">Historical Data</option>
+            <option value="manual">Manual Input</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="border-t pt-4">
+        <h4 class="text-lg font-medium text-gray-900 mb-3">Health Parameters</h4>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label for="heartRate" class="block text-sm font-medium text-gray-700 mb-1">Heart Rate (bpm)</label>
+            <input type="number" id="heartRate" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label for="bloodPressure" class="block text-sm font-medium text-gray-700 mb-1">Blood Pressure (mmHg)</label>
+            <input type="text" id="bloodPressure" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="120/80">
+          </div>
+          <div>
+            <label for="temperature" class="block text-sm font-medium text-gray-700 mb-1">Temperature (°C)</label>
+            <input type="number" step="0.1" id="temperature" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label for="bloodGlucose" class="block text-sm font-medium text-gray-700 mb-1">Blood Glucose (mg/dL)</label>
+            <input type="number" id="bloodGlucose" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label for="oxygenSaturation" class="block text-sm font-medium text-gray-700 mb-1">Oxygen Saturation (%)</label>
+            <input type="number" id="oxygenSaturation" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label for="respiratoryRate" class="block text-sm font-medium text-gray-700 mb-1">Respiratory Rate (bpm)</label>
+            <input type="number" id="respiratoryRate" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+      </div>
+      
+      <div>
+        <label for="symptoms" class="block text-sm font-medium text-gray-700 mb-2">Reported Symptoms</label>
+        <textarea id="symptoms" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Describe any symptoms the patient is experiencing"></textarea>
+      </div>
+      
+      <div>
+        <label for="medicalHistory" class="block text-sm font-medium text-gray-700 mb-2">Medical History</label>
+        <textarea id="medicalHistory" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Relevant medical history, family history, etc."></textarea>
+      </div>
+      
+      <div class="flex justify-end space-x-3 pt-4">
+        <button type="button" id="cancelBtn" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md transition">Cancel</button>
+        <button type="submit" id="runAnalysisBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md transition flex items-center space-x-2">
+          <i class="ph ph-brain"></i>
+          <span>Run AI Analysis</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- View Prediction Modal -->
+<div id="viewPredictionModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50 fade-in overflow-y-auto py-8">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-4xl mx-4">
+    <div class="bg-indigo-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+      <h3 class="text-xl font-bold">Disease Prediction Details</h3>
+      <button id="closeViewModal" class="text-white hover:text-indigo-200 text-2xl">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+    <div class="p-6 space-y-4" id="predictionDetails">
+      <!-- Content will be populated by JavaScript -->
+    </div>
+  </div>
+</div>
+
+<!-- Controls -->
+<div class="container mx-auto mt-6 px-4">
+  <div class="bg-white rounded-lg shadow-md p-4 space-y-4">
+    <!-- Top row: Search and Sort -->
+    <div class="flex flex-wrap justify-between items-center gap-4">
+      <div class="flex items-center space-x-2 flex-1 max-w-md">
+        <i class="ph ph-magnifying-glass text-gray-400 text-xl"></i>
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Search by prediction ID, patient name, disease, IoT device..." 
+          class="border border-gray-300 rounded-md px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+        />
+        <button id="clearSearch" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-md transition hidden">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-2">
+          <label for="sort" class="font-medium text-gray-700">Sort by:</label>
+          <select id="sort" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+            <option value="timestamp">Prediction Date</option>
+            <option value="confidence">Confidence Score</option>
+            <option value="risk">Risk Level</option>
+            <option value="patientId">Patient ID</option>
+            <option value="disease">Disease</option>
+          </select>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <label for="perPage" class="font-medium text-gray-700">Show:</label>
+          <select id="perPage" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="50">50</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter chips -->
+    <div class="flex flex-wrap gap-2">
+      <button class="filter-chip bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="all">
+        Total Predictions (<span id="countAll">0</span>)
+      </button>
+      <button class="filter-chip bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="low-risk">
+        Low Risk (<span id="countLowRisk">0</span>)
+      </button>
+      <button class="filter-chip bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="medium-risk">
+        Medium Risk (<span id="countMediumRisk">0</span>)
+      </button>
+      <button class="filter-chip bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="high-risk">
+        High Risk (<span id="countHighRisk">0</span>)
+      </button>
+      <button class="filter-chip bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="critical-risk">
+        Critical Risk (<span id="countCriticalRisk">0</span>)
+      </button>
+      <button class="filter-chip bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="confirmed">
+        Confirmed (<span id="countConfirmed">0</span>)
+      </button>
+      <button class="filter-chip bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="pending">
+        Pending Review (<span id="countPending">0</span>)
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+      <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+        <div class="text-blue-600 text-sm font-medium">Total Predictions</div>
+        <div id="statTotal" class="text-2xl font-bold text-blue-700">0</div>
+      </div>
+      <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+        <div class="text-green-600 text-sm font-medium">Showing</div>
+        <div id="statShowing" class="text-2xl font-bold text-green-700">0</div>
+      </div>
+      <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+        <div class="text-purple-600 text-sm font-medium">Current Page</div>
+        <div id="statPage" class="text-2xl font-bold text-purple-700">1</div>
+      </div>
+      <div class="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-lg border border-orange-200">
+        <div class="text-orange-600 text-sm font-medium">Total Pages</div>
+        <div id="statPages" class="text-2xl font-bold text-orange-700">1</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="container mx-auto mt-6 px-4 pb-6 overflow-x-auto">
+  <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <table id="predictionTable" class="min-w-full">
+      <thead class="bg-indigo-600 text-white">
+        <tr>
+          <th class="compact-header text-left font-semibold col-prediction-id">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-brain"></i>
+              <span>Prediction ID</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-patient-id">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-user"></i>
+              <span>Patient ID</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-patient-name">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-user"></i>
+              <span>Patient Name</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-disease">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-warning"></i>
+              <span>Predicted Disease</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-risk-level">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-gauge"></i>
+              <span>Risk Level</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-confidence">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-chart-line"></i>
+              <span>Confidence</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-timestamp">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-calendar"></i>
+              <span>Prediction Date</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-status">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-clock"></i>
+              <span>Status</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-iot-device">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-device-mobile"></i>
+              <span>IoT Device</span>
+            </div>
+          </th>
+          <th class="compact-header text-center font-semibold no-print col-actions">
+            <div class="flex items-center justify-center space-x-2">
+              <i class="ph ph-gear"></i>
+              <span>Actions</span>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div id="noResults" class="hidden py-12 text-center text-gray-500">
+      <i class="ph ph-magnifying-glass text-5xl mb-4"></i>
+      <p class="text-lg font-medium">No predictions found</p>
+      <p class="text-sm">Try adjusting your search or filters</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div id="paginationContainer" class="mt-6 flex justify-center items-center space-x-2">
+    <button id="firstPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-double-left"></i>
+    </button>
+    <button id="prevPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-left"></i>
+    </button>
+    <div id="pageNumbers" class="flex space-x-2"></div>
+    <button id="nextPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-right"></i>
+    </button>
+    <button id="lastPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-double-right"></i>
+    </button>
+  </div>
+</div>
+
+<script>
+  // Navigation scripts
+  const menuBtn = document.getElementById('menuBtn');
+  const menuDropdown = document.getElementById('menuDropdown');
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuDropdown.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+      menuDropdown.classList.add('hidden');
+    }
+  });
+
+  const dropdownButtons = document.querySelectorAll('.dropdownBtn');
+  let activeDropdown = null;
+
+  dropdownButtons.forEach(btn => {
+    const dropdown = btn.nextElementSibling;
+    if (!dropdown) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeDropdown && activeDropdown !== dropdown) {
+        activeDropdown.classList.remove('show');
+      }
+      if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        activeDropdown = null;
+      } else {
+        dropdown.classList.add('show');
+        activeDropdown = dropdown;
+      }
+    });
+
+    btn.addEventListener('mouseenter', () => dropdown.classList.add('show'));
+    btn.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!dropdown.matches(':hover')) {
+          dropdown.classList.remove('show');
+        }
+      }, 100);
+    });
+    
+    if (dropdown) {
+      dropdown.addEventListener('mouseleave', () => {
+        dropdown.classList.remove('show');
+        if (activeDropdown === dropdown) activeDropdown = null;
+      });
+    }
+  });
+
+  document.body.addEventListener('click', () => {
+    if (activeDropdown) {
+      activeDropdown.classList.remove('show');
+      activeDropdown = null;
+    }
+  });
+
+  let lastScroll = 0;
+  const featureNavbar = document.getElementById('featureNavbar');
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+    if (currentScroll > lastScroll && currentScroll > 100) {
+      featureNavbar.style.transform = 'translateY(-100%)';
+    } else {
+      featureNavbar.style.transform = 'translateY(0)';
+    }
+    lastScroll = currentScroll;
+  });
+
+  // Main application
+  const tbody = document.getElementById('tableBody');
+  const searchInput = document.getElementById('searchInput');
+  const clearSearch = document.getElementById('clearSearch');
+  const sortSelect = document.getElementById('sort');
+  const perPageSelect = document.getElementById('perPage');
+  const confirmModal = document.getElementById('confirmModal');
+  const confirmText = document.getElementById('confirmText');
+  const confirmYes = document.getElementById('confirmYes');
+  const confirmNo = document.getElementById('confirmNo');
+  const closeConfirmModal = document.getElementById('closeConfirmModal');
+  const deleteReason = document.getElementById('deleteReason');
+  const otherReasonContainer = document.getElementById('otherReasonContainer');
+  const otherReason = document.getElementById('otherReason');
+  const deletionNotes = document.getElementById('deletionNotes');
+  const toastContainer = document.getElementById('toastContainer');
+  const noResults = document.getElementById('noResults');
+  const exportBtn = document.getElementById('exportBtn');
+  const printBtn = document.getElementById('printBtn');
+  const runPredictionBtn = document.getElementById('runPredictionBtn');
+  const predictionModal = document.getElementById('predictionModal');
+  const predictionForm = document.getElementById('predictionForm');
+  const closeModal = document.getElementById('closeModal');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const runAnalysisBtn = document.getElementById('runAnalysisBtn');
+  const viewPredictionModal = document.getElementById('viewPredictionModal');
+  const closeViewModal = document.getElementById('closeViewModal');
+  const predictionDetails = document.getElementById('predictionDetails');
+
+  let deletePredictionId = null;
+  let deletePredictionInfo = "";
+  let currentPage = 1;
+  let recordsPerPage = 20;
+  let currentFilter = 'all';
+
+  // Format date and time
+  function formatDateTime(dateStr) {
+    const date = new Date(dateStr);
+    const options = { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    };
+    return date.toLocaleDateString('en-US', options);
+  }
+
+  // Get confidence class based on score
+  function getConfidenceClass(score) {
+    if (score >= 80) return 'confidence-high';
+    if (score >= 60) return 'confidence-medium';
+    return 'confidence-low';
+  }
+
+  // Get risk trend indicator
+  function getTrendIndicator(trend) {
+    if (trend === 'increasing') return 'trend-up';
+    if (trend === 'decreasing') return 'trend-down';
+    return 'trend-stable';
+  }
+
+  // Sample predictions data with IoT integration
+  const predictions = [
+    ["PRED001", "0001001", "Ayesha Rahman", 45, "Female", 
+     "Cardiac Arrhythmia", "High", 87.5, "2024-01-15T10:30:00", "Confirmed", 
+     "Cardiac Monitor", "Active", 
+     { heartRate: 95, bloodPressure: "145/90", temperature: 36.8, bloodGlucose: 110, oxygenSaturation: 96, respiratoryRate: 18 },
+     "Patient reported occasional palpitations and dizziness. IoT device detected irregular heart rhythms.",
+     "Family history of heart disease. Previous mild hypertension.",
+     "increasing", "Consult cardiologist. Consider Holter monitor for 24-hour observation."],
+    
+    ["PRED002", "0001002", "Jamal Hossain", 62, "Male", 
+     "Type 2 Diabetes", "Medium", 72.3, "2024-01-14T14:20:00", "Pending", 
+     "Glucose Sensor", "Active", 
+     { heartRate: 78, bloodPressure: "130/85", temperature: 36.9, bloodGlucose: 185, oxygenSaturation: 97, respiratoryRate: 16 },
+     "Increased thirst and frequent urination noted. Glucose levels consistently elevated.",
+     "Overweight with sedentary lifestyle. Family history of diabetes.",
+     "stable", "Lifestyle modifications recommended. Monitor glucose levels closely."],
+    
+    ["PRED003", "0001003", "Mina Akter", 38, "Female", 
+     "Hypertension", "Low", 65.8, "2024-01-16T09:15:00", "Reviewed", 
+     "Multi-Parameter Monitor", "Active", 
+     { heartRate: 82, bloodPressure: "138/88", temperature: 36.7, bloodGlucose: 95, oxygenSaturation: 98, respiratoryRate: 17 },
+     "Mild headaches reported. Blood pressure readings show borderline hypertension.",
+     "No significant family history. Recent stress at work.",
+     "stable", "Regular monitoring. Stress management techniques recommended."],
+    
+    ["PRED004", "0001004", "Rafiul Islam", 55, "Male", 
+     "Coronary Artery Disease", "Critical", 92.1, "2024-01-13T16:45:00", "Confirmed", 
+     "Cardiac Monitor", "Active", 
+     { heartRate: 105, bloodPressure: "160/95", temperature: 37.1, bloodGlucose: 120, oxygenSaturation: 94, respiratoryRate: 20 },
+     "Chest pain and shortness of breath. ECG shows ST segment depression.",
+     "Smoker for 30 years. High cholesterol. Father had heart attack at 60.",
+     "increasing", "Immediate cardiology consultation required. Consider stress test and angiogram."],
+    
+    ["PRED005", "0001005", "Tahmina Sultana", 29, "Female", 
+     "Asthma", "Medium", 68.9, "2024-01-17T11:20:00", "False Positive", 
+     "Pulmonary Sensor", "Active", 
+     { heartRate: 76, bloodPressure: "118/76", temperature: 36.6, bloodGlucose: 88, oxygenSaturation: 95, respiratoryRate: 22 },
+     "Wheezing and shortness of breath during exercise. Pulmonary function reduced.",
+     "Childhood asthma. Allergic to pollen and dust.",
+     "decreasing", "Allergy testing recommended. Inhaler prescribed for symptomatic relief."],
+    
+    ["PRED006", "0001006", "Arif Chowdhury", 68, "Male", 
+     "Chronic Kidney Disease", "High", 79.4, "2024-01-12T13:10:00", "Confirmed", 
+     "Multi-Parameter Monitor", "Active", 
+     { heartRate: 72, bloodPressure: "155/92", temperature: 36.8, bloodGlucose: 135, oxygenSaturation: 96, respiratoryRate: 18 },
+     "Elevated creatinine levels. Swelling in ankles. Reduced urine output.",
+     "Long-standing hypertension. Diabetes for 15 years.",
+     "increasing", "Nephrology referral. Dietary modifications. Monitor kidney function."],
+    
+    ["PRED007", "0001007", "Nasrin Jahan", 41, "Female", 
+     "Migraine", "Low", 58.7, "2024-01-18T08:30:00", "Pending", 
+     "Neurological Monitor", "Active", 
+     { heartRate: 74, bloodPressure: "122/78", temperature: 36.5, bloodGlucose: 92, oxygenSaturation: 98, respiratoryRate: 16 },
+     "Recurrent headaches with aura. Light and sound sensitivity.",
+     "Family history of migraines. Hormonal fluctuations noted.",
+     "stable", "Trigger identification. Preventive medication considered."],
+    
+    ["PRED008", "0001008", "Sabbir Ahmed", 50, "Male", 
+     "Sleep Apnea", "Medium", 71.2, "2024-01-11T22:15:00", "Confirmed", 
+     "Pulmonary Sensor", "Active", 
+     { heartRate: 68, bloodPressure: "135/85", temperature: 36.7, bloodGlucose: 105, oxygenSaturation: 92, respiratoryRate: 14 },
+     "Loud snoring. Daytime sleepiness. Oxygen desaturation during sleep.",
+     "Overweight. Large neck circumference.",
+     "stable", "Sleep study recommended. CPAP therapy if confirmed."],
+    
+    ["PRED009", "0001009", "Tania Rahman", 33, "Female", 
+     "Anxiety Disorder", "Low", 63.5, "2024-01-19T15:40:00", "Reviewed", 
+     "Neurological Monitor", "Active", 
+     { heartRate: 88, bloodPressure: "128/82", temperature: 36.9, bloodGlucose: 98, oxygenSaturation: 97, respiratoryRate: 19 },
+     "Restlessness, difficulty concentrating, muscle tension. Heart rate variability increased.",
+     "Recent life stressors. Family history of anxiety.",
+     "decreasing", "Cognitive behavioral therapy recommended. Stress management techniques."],
+    
+    ["PRED010", "0001010", "Mahmud Hasan", 71, "Male", 
+     "Osteoporosis", "Medium", 69.8, "2024-01-10T12:25:00", "Pending", 
+     "Multi-Parameter Monitor", "Active", 
+     { heartRate: 70, bloodPressure: "140/80", temperature: 36.6, bloodGlucose: 110, oxygenSaturation: 96, respiratoryRate: 17 },
+     "Height loss. Back pain. Previous wrist fracture from minor fall.",
+     "Family history. Long-term corticosteroid use for arthritis.",
+     "stable", "Bone density test. Calcium and vitamin D supplementation."]
+  ];
+
+  function getFilteredData() {
+    const term = searchInput.value.toLowerCase();
+    let filtered = predictions.filter(p => {
+      const matchesSearch = p.some(field => 
+        String(field).toLowerCase().includes(term)
+      );
+      
+      let matchesFilter = true;
+      if (currentFilter === 'low-risk') matchesFilter = p[6] === 'Low';
+      else if (currentFilter === 'medium-risk') matchesFilter = p[6] === 'Medium';
+      else if (currentFilter === 'high-risk') matchesFilter = p[6] === 'High';
+      else if (currentFilter === 'critical-risk') matchesFilter = p[6] === 'Critical';
+      else if (currentFilter === 'confirmed') matchesFilter = p[9] === 'Confirmed';
+      else if (currentFilter === 'pending') matchesFilter = p[9] === 'Pending';
+      
+      return matchesSearch && matchesFilter;
+    });
+    return filtered;
+  }
+
+  function updateStats() {
+    const filtered = getFilteredData();
+    const totalPages = recordsPerPage === 'all' ? 1 : Math.ceil(filtered.length / recordsPerPage);
+    
+    document.getElementById('statTotal').textContent = predictions.length;
+    document.getElementById('statShowing').textContent = filtered.length;
+    document.getElementById('statPage').textContent = currentPage;
+    document.getElementById('statPages').textContent = totalPages;
+
+    // Update filter counts
+    document.getElementById('countAll').textContent = predictions.length;
+    document.getElementById('countLowRisk').textContent = predictions.filter(p => p[6] === 'Low').length;
+    document.getElementById('countMediumRisk').textContent = predictions.filter(p => p[6] === 'Medium').length;
+    document.getElementById('countHighRisk').textContent = predictions.filter(p => p[6] === 'High').length;
+    document.getElementById('countCriticalRisk').textContent = predictions.filter(p => p[6] === 'Critical').length;
+    document.getElementById('countConfirmed').textContent = predictions.filter(p => p[9] === 'Confirmed').length;
+    document.getElementById('countPending').textContent = predictions.filter(p => p[9] === 'Pending').length;
+  }
+
+  function highlightText(text, searchTerm) {
+    if (!searchTerm) return text;
+    
+    const regex = new RegExp(`(${searchTerm})`, 'gi');
+    return text.replace(regex, '<span class="highlight">$1</span>');
+  }
+
+  function renderTable() {
+    const filtered = getFilteredData();
+    const startIndex = recordsPerPage === 'all' ? 0 : (currentPage - 1) * recordsPerPage;
+    const endIndex = recordsPerPage === 'all' ? filtered.length : startIndex + recordsPerPage;
+    const paginatedData = filtered.slice(startIndex, endIndex);
+    const searchTerm = searchInput.value.toLowerCase();
+
+    tbody.innerHTML = "";
+    
+    if (paginatedData.length === 0) {
+      noResults.classList.remove('hidden');
+      document.getElementById('paginationContainer').classList.add('hidden');
+    } else {
+      noResults.classList.add('hidden');
+      document.getElementById('paginationContainer').classList.remove('hidden');
+      
+      paginatedData.forEach((p, index) => {
+        const riskClass = p[6] === 'Low' ? 'risk-low' : 
+                         p[6] === 'Medium' ? 'risk-medium' : 
+                         p[6] === 'High' ? 'risk-high' : 'risk-critical';
+        
+        const riskIcon = p[6] === 'Low' ? 'ph-check' : 
+                        p[6] === 'Medium' ? 'ph-warning' : 
+                        p[6] === 'High' ? 'ph-warning-circle' : 'ph-warning-octagon';
+        
+        const statusClass = p[9] === 'Pending' ? 'status-pending' : 
+                           p[9] === 'Confirmed' ? 'status-confirmed' : 
+                           p[9] === 'False Positive' ? 'status-false-positive' : 'status-reviewed';
+        
+        const statusIcon = p[9] === 'Pending' ? 'ph-clock' : 
+                          p[9] === 'Confirmed' ? 'ph-check-circle' : 
+                          p[9] === 'False Positive' ? 'ph-x-circle' : 'ph-eye';
+        
+        const deviceClass = p[11] === 'Active' ? 'device-active' : 
+                           p[11] === 'Inactive' ? 'device-inactive' : 'device-error';
+        
+        const deviceIcon = p[11] === 'Active' ? 'ph-check' : 
+                          p[11] === 'Inactive' ? 'ph-power' : 'ph-warning';
+        
+        const confidenceClass = getConfidenceClass(p[7]);
+        const trendClass = getTrendIndicator(p[15]);
+        const trendIcon = p[15] === 'increasing' ? 'ph-trend-up' : 
+                         p[15] === 'decreasing' ? 'ph-trend-down' : 'ph-minus';
+        
+        tbody.innerHTML += `
+          <tr class="compact-row transition-all duration-200" style="animation: fadeIn 0.3s ease ${index * 0.05}s both">
+            <td class="compact-cell font-mono text-sm col-prediction-id">${highlightText(p[0], searchTerm)}</td>
+            <td class="compact-cell font-mono text-sm col-patient-id">${highlightText(p[1], searchTerm)}</td>
+            <td class="compact-cell font-medium col-patient-name">${highlightText(p[2], searchTerm)}</td>
+            <td class="compact-cell text-sm col-disease">
+              <span class="disease-badge px-2 py-1 rounded-md text-xs font-medium">${p[5]}</span>
+            </td>
+            <td class="compact-cell col-risk-level">
+              <span class="badge ${riskClass} px-2 py-1 rounded-full text-xs font-medium flex items-center space-x-1 w-fit">
+                <i class="ph ${riskIcon}"></i>
+                <span>${p[6]}</span>
+              </span>
+            </td>
+            <td class="compact-cell col-confidence">
+              <div class="flex items-center space-x-2">
+                <div class="w-16 bg-gray-200 rounded-full h-2">
+                  <div class="${confidenceClass} h-2 rounded-full" style="width: ${p[7]}%"></div>
+                </div>
+                <span class="text-xs font-medium">${p[7]}%</span>
+                <i class="ph ${trendIcon} ${trendClass} text-xs"></i>
+              </div>
+            </td>
+            <td class="compact-cell text-sm col-timestamp">${formatDateTime(p[8])}</td>
+            <td class="compact-cell col-status">
+              <span class="badge ${statusClass} px-2 py-1 rounded-md text-xs font-medium flex items-center space-x-1 w-fit">
+                <i class="ph ${statusIcon}"></i>
+                <span>${p[9]}</span>
+              </span>
+            </td>
+            <td class="compact-cell col-iot-device">
+              <span class="badge ${deviceClass} px-2 py-1 rounded-md text-xs font-medium flex items-center space-x-1 w-fit">
+                <i class="ph ${deviceIcon}"></i>
+                <span>${p[10]}</span>
+              </span>
+            </td>
+            <td class="compact-cell text-center space-x-2 no-print col-actions">
+              <button class="bg-blue-400 hover:bg-blue-500 text-white px-2 py-1 rounded-md transition transform hover:scale-105 viewBtn" title="View Details" data-id="${p[0]}">
+                <i class="ph ph-eye"></i>
+              </button>
+              <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded-md transition transform hover:scale-105 updateBtn" title="Update Status" data-id="${p[0]}">
+                <i class="ph ph-pencil"></i>
+              </button>
+              <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded-md transition transform hover:scale-105 deleteBtn" title="Delete Prediction" data-id="${p[0]}" data-info="${p[2]} - ${p[5]}">
+                <i class="ph ph-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+    
+    updatePagination();
+    updateStats();
+  }
+
+  function updatePagination() {
+    const filtered = getFilteredData();
+    const totalPages = recordsPerPage === 'all' ? 1 : Math.ceil(filtered.length / recordsPerPage);
+    const pageNumbers = document.getElementById('pageNumbers');
+    pageNumbers.innerHTML = '';
+
+    if (recordsPerPage !== 'all') {
+      let startPage = Math.max(1, currentPage - 2);
+      let endPage = Math.min(totalPages, startPage + 4);
+      
+      if (endPage - startPage < 4) {
+        startPage = Math.max(1, endPage - 4);
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.className = `pagination-btn px-4 py-2 rounded-md transition ${
+          i === currentPage 
+            ? 'bg-indigo-600 text-white' 
+            : 'bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300'
+        }`;
+        btn.onclick = () => {
+          currentPage = i;
+          renderTable();
+        };
+        pageNumbers.appendChild(btn);
+      }
+    }
+
+    document.getElementById('firstPage').disabled = currentPage === 1;
+    document.getElementById('prevPage').disabled = currentPage === 1;
+    document.getElementById('nextPage').disabled = currentPage === totalPages || recordsPerPage === 'all';
+    document.getElementById('lastPage').disabled = currentPage === totalPages || recordsPerPage === 'all';
+  }
+
+  // Search functionality
+  searchInput.addEventListener('input', () => {
+    currentPage = 1;
+    renderTable();
+    clearSearch.classList.toggle('hidden', searchInput.value === '');
+  });
+
+  clearSearch.addEventListener('click', () => {
+    searchInput.value = '';
+    clearSearch.classList.add('hidden');
+    currentPage = 1;
+    renderTable();
+  });
+
+  // Sort functionality
+  sortSelect.addEventListener('change', () => {
+    const key = sortSelect.value;
+    let index;
+    
+    switch(key) {
+      case 'timestamp': index = 8; break;
+      case 'confidence': index = 7; break;
+      case 'risk': index = 6; break;
+      case 'patientId': index = 1; break;
+      case 'disease': index = 5; break;
+      default: index = 8;
+    }
+    
+    predictions.sort((a, b) => {
+      if (key === 'timestamp') {
+        return new Date(b[index]) - new Date(a[index]); // Most recent first
+      }
+      if (key === 'confidence' || key === 'risk') {
+        // Convert risk levels to numerical values for sorting
+        const riskValues = { 'Low': 1, 'Medium': 2, 'High': 3, 'Critical': 4 };
+        const aValue = key === 'confidence' ? a[index] : riskValues[a[index]];
+        const bValue = key === 'confidence' ? b[index] : riskValues[b[index]];
+        return bValue - aValue; // Highest first
+      }
+      return a[index].toString().localeCompare(b[index].toString());
+    });
+    
+    currentPage = 1;
+    renderTable();
+    showToast(`Sorted by ${key}`, 'info');
+  });
+
+  // Per page selector
+  perPageSelect.addEventListener('change', () => {
+    recordsPerPage = perPageSelect.value === 'all' ? 'all' : parseInt(perPageSelect.value);
+    currentPage = 1;
+    renderTable();
+  });
+
+  // Filter chips
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      currentFilter = chip.dataset.filter;
+      currentPage = 1;
+      
+      document.querySelectorAll('.filter-chip').forEach(c => {
+        c.classList.remove('ring-2', 'ring-indigo-500');
+      });
+      chip.classList.add('ring-2', 'ring-indigo-500');
+      
+      renderTable();
+      
+      const filterNames = {
+        all: 'all predictions',
+        'low-risk': 'low risk predictions',
+        'medium-risk': 'medium risk predictions',
+        'high-risk': 'high risk predictions',
+        'critical-risk': 'critical risk predictions',
+        confirmed: 'confirmed predictions',
+        pending: 'pending review predictions'
+      };
+      showToast(`Showing ${filterNames[currentFilter]}`, 'info');
+    });
+  });
+
+  // Pagination buttons
+  document.getElementById('firstPage').addEventListener('click', () => {
+    currentPage = 1;
+    renderTable();
+  });
+
+  document.getElementById('prevPage').addEventListener('click', () => {
+    if (currentPage > 1) {
+      currentPage--;
+      renderTable();
+    }
+  });
+
+  document.getElementById('nextPage').addEventListener('click', () => {
+    const filtered = getFilteredData();
+    const totalPages = Math.ceil(filtered.length / recordsPerPage);
+    if (currentPage < totalPages) {
+      currentPage++;
+      renderTable();
+    }
+  });
+
+  document.getElementById('lastPage').addEventListener('click', () => {
+    const filtered = getFilteredData();
+    const totalPages = Math.ceil(filtered.length / recordsPerPage);
+    currentPage = totalPages;
+    renderTable();
+  });
+
+  // Table actions
+  tbody.addEventListener('click', (e) => {
+    const row = e.target.closest('tr');
+    if (!row) return;
+
+    const predictionId = e.target.closest('.viewBtn')?.dataset.id || 
+                        e.target.closest('.updateBtn')?.dataset.id || 
+                        e.target.closest('.deleteBtn')?.dataset.id;
+    const predictionInfo = e.target.closest('.deleteBtn')?.dataset.info;
+
+    if (e.target.closest('.viewBtn')) {
+      viewPrediction(predictionId);
+    } else if (e.target.closest('.updateBtn')) {
+      updatePredictionStatus(predictionId);
+    } else if (e.target.closest('.deleteBtn')) {
+      deletePredictionId = predictionId;
+      deletePredictionInfo = predictionInfo;
+      confirmText.textContent = `You are about to delete prediction ${deletePredictionId} (${deletePredictionInfo}). This action is irreversible. Please provide a reason for this deletion.`;
+      confirmModal.classList.remove('hidden');
+      
+      // Reset deletion form
+      deleteReason.value = '';
+      otherReasonContainer.classList.add('hidden');
+      otherReason.value = '';
+      deletionNotes.value = '';
+    }
+  });
+
+  // View prediction function
+  function viewPrediction(id) {
+    const prediction = predictions.find(p => p[0] === id);
+    if (!prediction) return;
+    
+    // Create IoT data points HTML
+    let iotDataHTML = '';
+    const healthData = prediction[12];
+    for (const [key, value] of Object.entries(healthData)) {
+      if (value) {
+        const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+        iotDataHTML += `
+          <div class="iot-data-point">
+            <span class="font-medium">${formattedKey}:</span>
+            <span>${value}</span>
+          </div>
+        `;
+      }
+    }
+    
+    predictionDetails.innerHTML = `
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Prediction ID</label>
+          <p class="mt-1 font-mono">${prediction[0]}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Risk Trend</label>
+          <p class="mt-1">
+            <span class="badge ${getTrendIndicator(prediction[15])} px-2 py-1 rounded-md text-xs font-medium inline-flex items-center space-x-1">
+              <i class="ph ${prediction[15] === 'increasing' ? 'ph-trend-up' : prediction[15] === 'decreasing' ? 'ph-trend-down' : 'ph-minus'}"></i>
+              <span>${prediction[15].charAt(0).toUpperCase() + prediction[15].slice(1)}</span>
+            </span>
+          </p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Patient</label>
+          <p class="mt-1">${prediction[2]} (ID: ${prediction[1]})</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Age & Gender</label>
+          <p class="mt-1">${prediction[3]} years, ${prediction[4]}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Predicted Disease</label>
+          <p class="mt-1 font-medium">${prediction[5]}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Risk Level</label>
+          <p class="mt-1">
+            <span class="badge ${prediction[6] === 'Low' ? 'risk-low' : prediction[6] === 'Medium' ? 'risk-medium' : prediction[6] === 'High' ? 'risk-high' : 'risk-critical'} px-2 py-1 rounded-full text-xs font-medium inline-flex items-center space-x-1">
+              <i class="ph ${prediction[6] === 'Low' ? 'ph-check' : prediction[6] === 'Medium' ? 'ph-warning' : prediction[6] === 'High' ? 'ph-warning-circle' : 'ph-warning-octagon'}"></i>
+              <span>${prediction[6]}</span>
+            </span>
+          </p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Confidence Score</label>
+          <div class="mt-1 flex items-center space-x-2">
+            <div class="w-32 bg-gray-200 rounded-full h-3">
+              <div class="${getConfidenceClass(prediction[7])} h-3 rounded-full" style="width: ${prediction[7]}%"></div>
+            </div>
+            <span class="font-medium">${prediction[7]}%</span>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Prediction Date</label>
+          <p class="mt-1">${formatDateTime(prediction[8])}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Status</label>
+          <p class="mt-1">
+            <span class="badge ${prediction[9] === 'Pending' ? 'status-pending' : prediction[9] === 'Confirmed' ? 'status-confirmed' : prediction[9] === 'False Positive' ? 'status-false-positive' : 'status-reviewed'} px-2 py-1 rounded-md text-xs font-medium inline-flex items-center space-x-1">
+              <i class="ph ${prediction[9] === 'Pending' ? 'ph-clock' : prediction[9] === 'Confirmed' ? 'ph-check-circle' : prediction[9] === 'False Positive' ? 'ph-x-circle' : 'ph-eye'}"></i>
+              <span>${prediction[9]}</span>
+            </span>
+          </p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">IoT Device</label>
+          <p class="mt-1">
+            <span class="badge ${prediction[11] === 'Active' ? 'device-active' : prediction[11] === 'Inactive' ? 'device-inactive' : 'device-error'} px-2 py-1 rounded-md text-xs font-medium inline-flex items-center space-x-1">
+              <i class="ph ${prediction[11] === 'Active' ? 'ph-check' : prediction[11] === 'Inactive' ? 'ph-power' : 'ph-warning'}"></i>
+              <span>${prediction[10]} - ${prediction[11]}</span>
+            </span>
+          </p>
+        </div>
+      </div>
+      
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">IoT Health Data</label>
+        <div class="bg-gray-50 p-4 rounded-lg grid grid-cols-2 gap-2">
+          ${iotDataHTML}
+        </div>
+      </div>
+      
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Symptoms & Observations</label>
+        <p class="text-gray-600">${prediction[13]}</p>
+      </div>
+      
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Medical History</label>
+        <p class="text-gray-600">${prediction[14]}</p>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">AI Recommendations</label>
+        <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <p class="text-blue-800">${prediction[16]}</p>
+        </div>
+      </div>
+    `;
+    
+    viewPredictionModal.classList.remove('hidden');
+  }
+
+  // Update prediction status
+  function updatePredictionStatus(id) {
+    const prediction = predictions.find(p => p[0] === id);
+    if (!prediction) return;
+    
+    const newStatus = prompt(
+      `Update status for prediction ${id}:\n\nCurrent status: ${prediction[9]}\n\nEnter new status (Pending, Confirmed, False Positive, Reviewed):`,
+      prediction[9]
+    );
+    
+    if (newStatus && ['Pending', 'Confirmed', 'False Positive', 'Reviewed'].includes(newStatus)) {
+      prediction[9] = newStatus;
+      renderTable();
+      showToast(`Prediction ${id} status updated to ${newStatus}`, 'success');
+    } else if (newStatus) {
+      showToast('Invalid status. Please use: Pending, Confirmed, False Positive, or Reviewed', 'error');
+    }
+  }
+
+  // Delete reason change handler
+  deleteReason.addEventListener('change', () => {
+    if (deleteReason.value === 'other') {
+      otherReasonContainer.classList.remove('hidden');
+    } else {
+      otherReasonContainer.classList.add('hidden');
+    }
+  });
+
+  // Run prediction modal
+  runPredictionBtn.addEventListener('click', () => {
+    predictionModal.classList.remove('hidden');
+  });
+
+  // Close modals
+  closeModal.addEventListener('click', () => {
+    predictionModal.classList.add('hidden');
+  });
+
+  closeViewModal.addEventListener('click', () => {
+    viewPredictionModal.classList.add('hidden');
+  });
+
+  closeConfirmModal.addEventListener('click', () => {
+    confirmModal.classList.add('hidden');
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    predictionModal.classList.add('hidden');
+  });
+
+  confirmNo.addEventListener('click', () => {
+    confirmModal.classList.add('hidden');
+  });
+
+  // Run prediction form
+  predictionForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    // Simulate AI processing
+    runAnalysisBtn.disabled = true;
+    runAnalysisBtn.innerHTML = '<i class="ph ph-circle-notch animate-spin"></i><span>Analyzing...</span>';
+    
+    setTimeout(() => {
+      // Generate a new prediction ID
+      const newId = 'PRED' + String(predictions.length + 1).padStart(3, '0');
+      
+      // Create mock prediction based on input data
+      const patientId = document.getElementById('patientId').value;
+      const patientName = document.getElementById('patientName').value;
+      const age = parseInt(document.getElementById('age').value);
+      const gender = document.getElementById('gender').value;
+      const iotDevice = document.getElementById('iotDevice').value;
+      
+      // Mock disease prediction based on age and device type
+      let predictedDisease, riskLevel, confidence;
+      if (iotDevice.includes('Cardiac')) {
+        predictedDisease = age > 50 ? 'Coronary Artery Disease' : 'Cardiac Arrhythmia';
+        riskLevel = age > 50 ? 'High' : 'Medium';
+        confidence = 75 + Math.random() * 20;
+      } else if (iotDevice.includes('Glucose')) {
+        predictedDisease = 'Type 2 Diabetes';
+        riskLevel = age > 45 ? 'Medium' : 'Low';
+        confidence = 70 + Math.random() * 25;
+      } else if (iotDevice.includes('Neurological')) {
+        predictedDisease = age < 40 ? 'Migraine' : 'Cognitive Decline';
+        riskLevel = 'Low';
+        confidence = 65 + Math.random() * 20;
+      } else if (iotDevice.includes('Pulmonary')) {
+        predictedDisease = 'Asthma';
+        riskLevel = 'Medium';
+        confidence = 72 + Math.random() * 18;
+      } else {
+        predictedDisease = 'Hypertension';
+        riskLevel = age > 40 ? 'Medium' : 'Low';
+        confidence = 68 + Math.random() * 22;
+      }
+      
+      confidence = Math.round(confidence);
+      
+      const newPrediction = [
+        newId,
+        patientId,
+        patientName,
+        age,
+        gender,
+        predictedDisease,
+        riskLevel,
+        confidence,
+        new Date().toISOString(),
+        "Pending",
+        iotDevice,
+        "Active",
+        {
+          heartRate: document.getElementById('heartRate').value || 72,
+          bloodPressure: document.getElementById('bloodPressure').value || "120/80",
+          temperature: document.getElementById('temperature').value || 36.6,
+          bloodGlucose: document.getElementById('bloodGlucose').value || 95,
+          oxygenSaturation: document.getElementById('oxygenSaturation').value || 98,
+          respiratoryRate: document.getElementById('respiratoryRate').value || 16
+        },
+        document.getElementById('symptoms').value || "No specific symptoms reported.",
+        document.getElementById('medicalHistory').value || "No significant medical history.",
+        "stable",
+        "Further monitoring recommended. Consult relevant specialist if symptoms persist."
+      ];
+      
+      predictions.push(newPrediction);
+      
+      predictionModal.classList.add('hidden');
+      predictionForm.reset();
+      runAnalysisBtn.disabled = false;
+      runAnalysisBtn.innerHTML = '<i class="ph ph-brain"></i><span>Run AI Analysis</span>';
+      
+      renderTable();
+      showToast(`AI prediction completed! New prediction ${newId} generated with ${confidence}% confidence.`, 'success');
+    }, 2000); // Simulate 2-second processing time
+  });
+
+  confirmYes.addEventListener('click', () => {
+    // Validate deletion reason
+    if (!deleteReason.value) {
+      showToast('Please select a reason for deletion', 'error');
+      return;
+    }
+    
+    if (deleteReason.value === 'other' && !otherReason.value.trim()) {
+      showToast('Please specify the deletion reason', 'error');
+      return;
+    }
+    
+    const finalReason = deleteReason.value === 'other' ? otherReason.value : deleteReason.options[deleteReason.selectedIndex].text;
+    const notes = deletionNotes.value;
+    
+    const index = predictions.findIndex(p => p[0] === deletePredictionId);
+    if (index !== -1) {
+      // Log deletion for audit purposes
+      console.log(`Prediction deleted: ${deletePredictionId} (${deletePredictionInfo})`);
+      console.log(`Reason: ${finalReason}`);
+      console.log(`Notes: ${notes}`);
+      console.log(`Deleted by: Hospital Administrator`);
+      console.log(`Timestamp: ${new Date().toISOString()}`);
+      
+      predictions.splice(index, 1);
+      
+      const filtered = getFilteredData();
+      const totalPages = recordsPerPage === 'all' ? 1 : Math.ceil(filtered.length / recordsPerPage);
+      if (currentPage > totalPages && totalPages > 0) {
+        currentPage = totalPages;
+      }
+      
+      renderTable();
+      confirmModal.classList.add('hidden');
+      showToast(`Prediction "${deletePredictionId}" deleted successfully! Reason: ${finalReason}`, 'success');
+    }
+  });
+
+  // Export functionality
+  exportBtn.addEventListener('click', () => {
+    const filtered = getFilteredData();
+    let csv = 'Prediction ID,Patient ID,Patient Name,Age,Gender,Predicted Disease,Risk Level,Confidence,Timestamp,Status,IoT Device,Device Status,Symptoms,Medical History,Recommendations\n';
+    filtered.forEach(row => {
+      csv += `"${row[0]}","${row[1]}","${row[2]}","${row[3]}","${row[4]}","${row[5]}","${row[6]}","${row[7]}","${row[8]}","${row[9]}","${row[10]}","${row[11]}","${row[13]}","${row[14]}","${row[16]}"\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `disease_predictions_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    showToast(`Exported ${filtered.length} predictions successfully!`, 'success');
+  });
+
+  // Print functionality
+  printBtn.addEventListener('click', () => {
+    window.print();
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      searchInput.focus();
+    }
+    
+    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+      e.preventDefault();
+      window.print();
+    }
+    
+    if (e.key === 'Escape') {
+      if (!confirmModal.classList.contains('hidden')) {
+        confirmModal.classList.add('hidden');
+      }
+      if (!predictionModal.classList.contains('hidden')) {
+        predictionModal.classList.add('hidden');
+      }
+      if (!viewPredictionModal.classList.contains('hidden')) {
+        viewPredictionModal.classList.add('hidden');
+      }
+    }
+  });
+
+  // Toast notification system
+  function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    const colors = {
+      success: 'bg-green-500',
+      error: 'bg-red-500',
+      warning: 'bg-yellow-500',
+      info: 'bg-blue-500'
+    };
+    const icons = {
+      success: 'check-circle',
+      error: 'x-circle',
+      warning: 'warning',
+      info: 'info'
+    };
+    
+    toast.className = `${colors[type]} text-white px-6 py-4 rounded-lg shadow-2xl font-medium flex items-center space-x-3 pointer-events-auto transform transition-all duration-300 mb-2`;
+    toast.style.animation = 'slideInRight 0.3s ease-out';
+    toast.innerHTML = `
+      <i class="ph ph-${icons[type]} text-xl"></i>
+      <span>${message}</span>
+    `;
+    
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.animation = 'slideOutRight 0.3s ease-in';
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+
+  // Add animation keyframes
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideInRight {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    @keyframes slideOutRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Initial render
+  renderTable();
+  
+  // Set first filter chip as active
+  document.querySelector('.filter-chip[data-filter="all"]').classList.add('ring-2', 'ring-indigo-500');
+
+  // Welcome message
+  setTimeout(() => {
+    showToast('Disease Predictions management loaded successfully!', 'success');
+  }, 500);
+</script>
+</body>
+</html>

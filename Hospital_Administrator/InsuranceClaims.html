@@ -1,0 +1,2305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Insurance Claims Management | SHMS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  .animate-slideUp {
+    animation: slideUp 0.7s ease-out forwards;
+  }
+  .animate-pulse-slow {
+    animation: pulse 3s ease-in-out infinite;
+  }
+  .dropdownContent {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none;
+    position: absolute;
+    z-index: 50;
+    left: 0;
+  }
+  .dropdownContent.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .card-hover {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  .stat-number {
+    font-feature-settings: 'tnum';
+    font-variant-numeric: tabular-nums;
+  }
+  .gradient-border {
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899) border-box;
+    border: 2px solid transparent;
+  }
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #6366f1;
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+  }
+
+  /* Floating animation for icons */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  .float-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Chart containers */
+  .chart-container {
+    position: relative;
+    height: 300px;
+  }
+  
+  /* Highlight search matches */
+  .highlight {
+    background-color: rgba(34, 211, 238, 0.3);
+    padding: 2px 4px;
+    border-radius: 4px;
+  }
+  
+  /* Status indicators */
+  .status-submitted {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+  .status-approved {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+  .status-rejected {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+  .status-pending {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+  .status-processing {
+    background-color: #e0e7ff;
+    color: #3730a3;
+  }
+  .status-paid {
+    background-color: #dcfce7;
+    color: #166534;
+  }
+  
+  /* Insurance company badges */
+  .insurance-company {
+    background-color: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+    font-size: 0.75rem;
+  }
+  
+  /* Amount styling */
+  .amount-approved {
+    color: #059669;
+    font-weight: 600;
+  }
+  .amount-rejected {
+    color: #dc2626;
+    font-weight: 600;
+  }
+  .amount-pending {
+    color: #d97706;
+    font-weight: 600;
+  }
+  
+  /* Compact table rows */
+  .compact-row {
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .compact-row:hover {
+    background-color: #f8fafc;
+  }
+  .compact-cell {
+    padding: 8px 10px;
+    font-size: 0.875rem;
+  }
+  .compact-header {
+    padding: 10px 10px;
+    font-size: 0.875rem;
+  }
+  
+  /* Optimized column widths */
+  .col-claim-id {
+    width: 120px;
+  }
+  .col-patient-id {
+    width: 100px;
+  }
+  .col-patient-name {
+    width: 140px;
+  }
+  .col-insurance-id {
+    width: 120px;
+  }
+  .col-insurance-company {
+    width: 150px;
+  }
+  .col-claim-amount {
+    width: 100px;
+  }
+  .col-approved-amount {
+    width: 120px;
+  }
+  .col-submission-date {
+    width: 120px;
+  }
+  .col-status {
+    width: 120px;
+  }
+  .col-actions {
+    width: 120px;
+  }
+  
+  /* Progress bar */
+  .progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e5e7eb;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+  
+  /* Timeline */
+  .timeline {
+    position: relative;
+    padding-left: 20px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #e5e7eb;
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    top: 5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #6366f1;
+  }
+  .timeline-item.completed::before {
+    background-color: #10b981;
+  }
+  .timeline-item.current::before {
+    background-color: #f59e0b;
+    animation: pulse 2s infinite;
+  }
+</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen flex flex-col">
+
+<!-- Top Navbar -->
+<nav class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+  <h1 class="text-2xl font-bold tracking-wide flex items-center space-x-2">
+    <i class="ph ph-heartbeat text-3xl"></i>
+    <span>SHMS</span>
+  </h1>
+  <span class="text-xl font-bold flex items-center space-x-2">
+    <i class="ph ph-user-circle"></i>
+    <span>Hospital Administrator</span>
+  </span>
+  <div class="relative">
+    <button id="menuBtn" class="text-white text-2xl focus:outline-none hover:bg-indigo-600 rounded-full p-2 transition" aria-label="Menu">
+      <i class="ph ph-dots-three-vertical"></i>
+    </button>
+    <div id="menuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded-md shadow-lg z-50">
+      <a href="#" class="block px-4 py-2 hover:bg-indigo-100 rounded-t-md flex items-center space-x-2">
+        <i class="ph ph-user"></i>
+        <span>Profile</span>
+      </a>
+      <a href="#" class="block px-4 py-2 hover:bg-indigo-100 flex items-center space-x-2">
+        <i class="ph ph-chart-bar"></i>
+        <span>Report</span>
+      </a>
+      <a href="login.html" class="block px-4 py-2 hover:bg-indigo-100 text-red-600 rounded-b-md flex items-center space-x-2">
+        <i class="ph ph-sign-out"></i>
+        <span>Logout</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- Feature Navbar -->
+<nav id="featureNavbar" class="bg-indigo-800 text-white shadow-md sticky top-0 z-40 transition-transform duration-300" style="top: 64px;">
+  <div class="container mx-auto flex flex-wrap justify-center md:justify-start items-center px-4 py-2 space-x-2">
+    <div class="relative">
+      <a href="Home.html" class="px-3 py-2 rounded-md hover:bg-indigo-700 block transition">Home</a>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Patient & Medical Record</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Patients.html" class="block px-4 py-2 hover:bg-indigo-100 font-semibold">Patient List</a>
+        <a href="MedicalRecords.html" class="block px-4 py-2 hover:bg-indigo-100 font-semibold">Medical Records</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Doctor & Appointment</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Doctors.html" class="block px-4 py-2 hover:bg-indigo-100">Doctors Directory</a>
+        <a href="Appointments.html" class="block px-4 py-2 hover:bg-indigo-100">Appointments Management</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Prescription & Investigation</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Prescriptions.html" class="block px-4 py-2 hover:bg-indigo-100">Prescriptions</a>
+        <a href="Investigations.html" class="block px-4 py-2 hover:bg-indigo-100">Tests & Diagnostic Reports</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md bg-indigo-600 font-semibold dropdownBtn transition">Billing & Insurance</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Billing.html" class="block px-4 py-2 hover:bg-indigo-100">Bills & Payments</a>
+        <a href="InsuranceClaims.html" class="block px-4 py-2 hover:bg-indigo-100">Insurance Claims</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Disease Prediction</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="DiseasePredictions.html" class="block px-4 py-2 hover:bg-indigo-100">Disease Predictions</a>
+        <a href="Symptoms.html" class="block px-4 py-2 hover:bg-indigo-100">Symptom Assessments</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Smart Recommendations</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="HealthReminders.html" class="block px-4 py-2 hover:bg-indigo-100">Health Reminders</a>
+        <a href="Recommendations.html" class="block px-4 py-2 hover:bg-indigo-100">Health Tips & Recommendations</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Header -->
+<header class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white p-6 shadow-lg flex justify-center items-center relative">
+  <div class="text-center">
+    <h1 class="text-3xl font-bold mb-1">Insurance Claims Management</h1>
+    <p class="text-indigo-200 text-sm">Track and manage patient insurance claims, approvals, and payments</p>
+  </div>
+  <div class="absolute right-8 flex space-x-2">
+    <button id="exportBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium shadow-md transition flex items-center space-x-2 no-print">
+      <i class="ph ph-download-simple"></i>
+      <span>Export</span>
+    </button>
+    <button id="printBtn" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md font-medium shadow-md transition flex items-center space-x-2 no-print">
+      <i class="ph ph-printer"></i>
+      <span>Print</span>
+    </button>
+    <button id="addClaimBtn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md font-medium shadow-md transition flex items-center space-x-2">
+      <i class="ph ph-plus-circle"></i>
+      <span>New Claim</span>
+    </button>
+  </div>
+</header>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-20 right-4 flex flex-col space-y-2 pointer-events-none z-50"></div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50 fade-in">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-md mx-4">
+    <div class="bg-red-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+      <h3 class="text-xl font-bold">Confirm Claim Deletion</h3>
+      <button id="closeConfirmModal" class="text-white hover:text-red-200 text-2xl">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+    <div class="p-6">
+      <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="ph ph-warning text-red-500 text-3xl"></i>
+      </div>
+      <p id="confirmText" class="mb-4 text-gray-600 text-center"></p>
+      
+      <div class="mb-4">
+        <label for="deleteReason" class="block text-sm font-medium text-gray-700 mb-2">Reason for deletion <span class="text-red-500">*</span></label>
+        <select id="deleteReason" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" required>
+          <option value="">Select a reason</option>
+          <option value="duplicate_claim">Duplicate Claim</option>
+          <option value="incorrect_information">Incorrect Information</option>
+          <option value="patient_request">Patient Request</option>
+          <option value="insurance_request">Insurance Company Request</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      
+      <div id="otherReasonContainer" class="mb-4 hidden">
+        <label for="otherReason" class="block text-sm font-medium text-gray-700 mb-2">Please specify reason</label>
+        <textarea id="otherReason" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Enter specific reason for deletion"></textarea>
+      </div>
+      
+      <div class="mb-4">
+        <label for="deletionNotes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
+        <textarea id="deletionNotes" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Any additional information about this deletion"></textarea>
+      </div>
+      
+      <div class="flex justify-center space-x-4">
+        <button id="confirmYes" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md transition transform hover:scale-105 flex items-center space-x-2">
+          <i class="ph ph-trash"></i>
+          <span>Delete Claim</span>
+        </button>
+        <button id="confirmNo" class="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-md transition transform hover:scale-105">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Claim Modal -->
+<div id="claimModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50 fade-in overflow-y-auto py-8">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-4xl mx-4">
+    <div class="bg-indigo-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+      <h3 id="modalTitle" class="text-xl font-bold">Add New Insurance Claim</h3>
+      <button id="closeModal" class="text-white hover:text-indigo-200 text-2xl">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+    <form id="claimForm" class="p-6 space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="claimId" class="block text-sm font-medium text-gray-700 mb-1">Claim ID</label>
+          <input type="text" id="claimId" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="patientId" class="block text-sm font-medium text-gray-700 mb-1">Patient ID</label>
+          <input type="text" id="patientId" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="patientName" class="block text-sm font-medium text-gray-700 mb-1">Patient Name</label>
+          <input type="text" id="patientName" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="insuranceId" class="block text-sm font-medium text-gray-700 mb-1">Insurance ID</label>
+          <input type="text" id="insuranceId" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="insuranceCompany" class="block text-sm font-medium text-gray-700 mb-1">Insurance Company</label>
+          <select id="insuranceCompany" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+            <option value="">Select Company</option>
+            <option value="Green Delta Insurance">Green Delta Insurance</option>
+            <option value="Pragati Life Insurance">Pragati Life Insurance</option>
+            <option value="Delta Life Insurance">Delta Life Insurance</option>
+            <option value="MetLife Bangladesh">MetLife Bangladesh</option>
+            <option value="American Life Insurance">American Life Insurance</option>
+            <option value="Prime Insurance">Prime Insurance</option>
+            <option value="Sandhani Life Insurance">Sandhani Life Insurance</option>
+            <option value="Progoti Life Insurance">Progoti Life Insurance</option>
+            <option value="Fareast Islami Life Insurance">Fareast Islami Life Insurance</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label for="policyNumber" class="block text-sm font-medium text-gray-700 mb-1">Policy Number</label>
+          <input type="text" id="policyNumber" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="claimAmount" class="block text-sm font-medium text-gray-700 mb-1">Claim Amount (BDT)</label>
+          <input type="number" id="claimAmount" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="approvedAmount" class="block text-sm font-medium text-gray-700 mb-1">Approved Amount (BDT)</label>
+          <input type="number" id="approvedAmount" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label for="submissionDate" class="block text-sm font-medium text-gray-700 mb-1">Submission Date</label>
+          <input type="date" id="submissionDate" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="decisionDate" class="block text-sm font-medium text-gray-700 mb-1">Decision Date</label>
+          <input type="date" id="decisionDate" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <select id="status" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+            <option value="Submitted">Submitted</option>
+            <option value="Processing">Processing</option>
+            <option value="Pending">Pending</option>
+            <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Paid">Paid</option>
+          </select>
+        </div>
+        <div>
+          <label for="paymentDate" class="block text-sm font-medium text-gray-700 mb-1">Payment Date</label>
+          <input type="date" id="paymentDate" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+      </div>
+      
+      <div>
+        <label for="treatmentDetails" class="block text-sm font-medium text-gray-700 mb-1">Treatment Details</label>
+        <textarea id="treatmentDetails" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Describe the treatment, procedures, and medical services provided"></textarea>
+      </div>
+      
+      <div>
+        <label for="documents" class="block text-sm font-medium text-gray-700 mb-2">Supporting Documents</label>
+        <div id="documentsContainer" class="space-y-2">
+          <div class="flex space-x-2">
+            <input type="text" class="document-name flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Document name">
+            <input type="text" class="document-type w-32 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Type">
+            <input type="date" class="document-date w-32 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Date">
+            <button type="button" class="remove-document bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-md transition">
+              <i class="ph ph-trash"></i>
+            </button>
+          </div>
+        </div>
+        <button type="button" id="addDocumentBtn" class="mt-2 bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-md transition flex items-center space-x-2">
+          <i class="ph ph-plus"></i>
+          <span>Add Another Document</span>
+        </button>
+      </div>
+      
+      <div>
+        <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Additional Notes</label>
+        <textarea id="notes" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Any additional notes or comments"></textarea>
+      </div>
+      
+      <div class="flex justify-end space-x-3 pt-4">
+        <button type="button" id="cancelBtn" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md transition">Cancel</button>
+        <button type="submit" id="saveBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md transition">Save Claim</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- View Claim Modal -->
+<div id="viewClaimModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50 fade-in overflow-y-auto py-8">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-3xl mx-4">
+    <div class="bg-indigo-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+      <h3 class="text-xl font-bold">Insurance Claim Details</h3>
+      <button id="closeViewModal" class="text-white hover:text-indigo-200 text-2xl">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+    <div class="p-6 space-y-4" id="claimDetails">
+      <!-- Content will be populated by JavaScript -->
+    </div>
+  </div>
+</div>
+
+<!-- Status Update Modal -->
+<div id="statusModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50 fade-in">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-md mx-4">
+    <div class="bg-indigo-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+      <h3 class="text-xl font-bold">Update Claim Status</h3>
+      <button id="closeStatusModal" class="text-white hover:text-indigo-200 text-2xl">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+    <div class="p-6 space-y-4">
+      <div id="statusClaimInfo" class="mb-4 p-3 bg-gray-50 rounded-md">
+        <!-- Claim info will be populated here -->
+      </div>
+      
+      <div>
+        <label for="newStatus" class="block text-sm font-medium text-gray-700 mb-2">New Status</label>
+        <select id="newStatus" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <option value="Submitted">Submitted</option>
+          <option value="Processing">Processing</option>
+          <option value="Pending">Pending</option>
+          <option value="Approved">Approved</option>
+          <option value="Rejected">Rejected</option>
+          <option value="Paid">Paid</option>
+        </select>
+      </div>
+      
+      <div id="approvedAmountContainer" class="hidden">
+        <label for="updateApprovedAmount" class="block text-sm font-medium text-gray-700 mb-2">Approved Amount (BDT)</label>
+        <input type="number" id="updateApprovedAmount" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+      
+      <div id="decisionDateContainer" class="hidden">
+        <label for="updateDecisionDate" class="block text-sm font-medium text-gray-700 mb-2">Decision Date</label>
+        <input type="date" id="updateDecisionDate" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+      
+      <div id="paymentDateContainer" class="hidden">
+        <label for="updatePaymentDate" class="block text-sm font-medium text-gray-700 mb-2">Payment Date</label>
+        <input type="date" id="updatePaymentDate" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+      
+      <div>
+        <label for="statusNotes" class="block text-sm font-medium text-gray-700 mb-2">Status Update Notes</label>
+        <textarea id="statusNotes" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Add notes about this status update"></textarea>
+      </div>
+      
+      <div class="flex justify-end space-x-3 pt-4">
+        <button id="cancelStatusUpdate" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md transition">Cancel</button>
+        <button id="saveStatusUpdate" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md transition">Update Status</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Dashboard Stats -->
+<div class="container mx-auto mt-6 px-4">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+    <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Total Claims</p>
+          <p id="totalClaims" class="text-2xl font-bold text-gray-900">0</p>
+        </div>
+        <div class="bg-blue-100 p-3 rounded-full">
+          <i class="ph ph-files text-blue-600 text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex justify-between text-sm text-gray-500">
+          <span>This month</span>
+          <span id="monthlyClaims">0</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Approved Claims</p>
+          <p id="approvedClaims" class="text-2xl font-bold text-gray-900">0</p>
+        </div>
+        <div class="bg-green-100 p-3 rounded-full">
+          <i class="ph ph-check-circle text-green-600 text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex justify-between text-sm text-gray-500">
+          <span>Approval Rate</span>
+          <span id="approvalRate">0%</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-500">
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Pending Claims</p>
+          <p id="pendingClaims" class="text-2xl font-bold text-gray-900">0</p>
+        </div>
+        <div class="bg-yellow-100 p-3 rounded-full">
+          <i class="ph ph-clock text-yellow-600 text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex justify-between text-sm text-gray-500">
+          <span>Avg. Processing Time</span>
+          <span id="avgProcessingTime">0 days</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Total Claim Value</p>
+          <p id="totalClaimValue" class="text-2xl font-bold text-gray-900">৳0</p>
+        </div>
+        <div class="bg-purple-100 p-3 rounded-full">
+          <i class="ph ph-currency-dollar text-purple-600 text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex justify-between text-sm text-gray-500">
+          <span>Paid This Month</span>
+          <span id="monthlyPaid">৳0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Controls -->
+<div class="container mx-auto mt-6 px-4">
+  <div class="bg-white rounded-lg shadow-md p-4 space-y-4">
+    <!-- Top row: Search and Sort -->
+    <div class="flex flex-wrap justify-between items-center gap-4">
+      <div class="flex items-center space-x-2 flex-1 max-w-md">
+        <i class="ph ph-magnifying-glass text-gray-400 text-xl"></i>
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Search by claim ID, patient name, insurance company, policy number..." 
+          class="border border-gray-300 rounded-md px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+        />
+        <button id="clearSearch" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-md transition hidden">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-2">
+          <label for="sort" class="font-medium text-gray-700">Sort by:</label>
+          <select id="sort" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+            <option value="claimId">Claim ID</option>
+            <option value="submissionDate">Submission Date</option>
+            <option value="claimAmount">Claim Amount</option>
+            <option value="status">Status</option>
+            <option value="insuranceCompany">Insurance Company</option>
+          </select>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <label for="perPage" class="font-medium text-gray-700">Show:</label>
+          <select id="perPage" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="50">50</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter chips -->
+    <div class="flex flex-wrap gap-2">
+      <button class="filter-chip bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="all">
+        Total Claims (<span id="countAll">0</span>)
+      </button>
+      <button class="filter-chip bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="submitted">
+        Submitted (<span id="countSubmitted">0</span>)
+      </button>
+      <button class="filter-chip bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="processing">
+        Processing (<span id="countProcessing">0</span>)
+      </button>
+      <button class="filter-chip bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="pending">
+        Pending (<span id="countPending">0</span>)
+      </button>
+      <button class="filter-chip bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="approved">
+        Approved (<span id="countApproved">0</span>)
+      </button>
+      <button class="filter-chip bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="rejected">
+        Rejected (<span id="countRejected">0</span>)
+      </button>
+      <button class="filter-chip bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="paid">
+        Paid (<span id="countPaid">0</span>)
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+      <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+        <div class="text-blue-600 text-sm font-medium">Total Claims</div>
+        <div id="statTotal" class="text-2xl font-bold text-blue-700">0</div>
+      </div>
+      <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+        <div class="text-green-600 text-sm font-medium">Showing</div>
+        <div id="statShowing" class="text-2xl font-bold text-green-700">0</div>
+      </div>
+      <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+        <div class="text-purple-600 text-sm font-medium">Current Page</div>
+        <div id="statPage" class="text-2xl font-bold text-purple-700">1</div>
+      </div>
+      <div class="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-lg border border-orange-200">
+        <div class="text-orange-600 text-sm font-medium">Total Pages</div>
+        <div id="statPages" class="text-2xl font-bold text-orange-700">1</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="container mx-auto mt-6 px-4 pb-6 overflow-x-auto">
+  <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <table id="claimTable" class="min-w-full">
+      <thead class="bg-indigo-600 text-white">
+        <tr>
+          <th class="compact-header text-left font-semibold col-claim-id">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-file-text"></i>
+              <span>Claim ID</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-patient-id">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-user"></i>
+              <span>Patient ID</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-patient-name">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-user"></i>
+              <span>Patient Name</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-insurance-id">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-identification-card"></i>
+              <span>Insurance ID</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-insurance-company">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-buildings"></i>
+              <span>Insurance Company</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-claim-amount">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-currency-dollar"></i>
+              <span>Claim Amount</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-approved-amount">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-currency-dollar"></i>
+              <span>Approved Amount</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-submission-date">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-calendar"></i>
+              <span>Submission Date</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-status">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-clock"></i>
+              <span>Status</span>
+            </div>
+          </th>
+          <th class="compact-header text-center font-semibold no-print col-actions">
+            <div class="flex items-center justify-center space-x-2">
+              <i class="ph ph-gear"></i>
+              <span>Actions</span>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div id="noResults" class="hidden py-12 text-center text-gray-500">
+      <i class="ph ph-magnifying-glass text-5xl mb-4"></i>
+      <p class="text-lg font-medium">No insurance claims found</p>
+      <p class="text-sm">Try adjusting your search or filters</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div id="paginationContainer" class="mt-6 flex justify-center items-center space-x-2">
+    <button id="firstPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-double-left"></i>
+    </button>
+    <button id="prevPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-left"></i>
+    </button>
+    <div id="pageNumbers" class="flex space-x-2"></div>
+    <button id="nextPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-right"></i>
+    </button>
+    <button id="lastPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-double-right"></i>
+    </button>
+  </div>
+</div>
+
+<script>
+  // Navigation scripts
+  const menuBtn = document.getElementById('menuBtn');
+  const menuDropdown = document.getElementById('menuDropdown');
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuDropdown.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+      menuDropdown.classList.add('hidden');
+    }
+  });
+
+  const dropdownButtons = document.querySelectorAll('.dropdownBtn');
+  let activeDropdown = null;
+
+  dropdownButtons.forEach(btn => {
+    const dropdown = btn.nextElementSibling;
+    if (!dropdown) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeDropdown && activeDropdown !== dropdown) {
+        activeDropdown.classList.remove('show');
+      }
+      if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        activeDropdown = null;
+      } else {
+        dropdown.classList.add('show');
+        activeDropdown = dropdown;
+      }
+    });
+
+    btn.addEventListener('mouseenter', () => dropdown.classList.add('show'));
+    btn.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!dropdown.matches(':hover')) {
+          dropdown.classList.remove('show');
+        }
+      }, 100);
+    });
+    
+    if (dropdown) {
+      dropdown.addEventListener('mouseleave', () => {
+        dropdown.classList.remove('show');
+        if (activeDropdown === dropdown) activeDropdown = null;
+      });
+    }
+  });
+
+  document.body.addEventListener('click', () => {
+    if (activeDropdown) {
+      activeDropdown.classList.remove('show');
+      activeDropdown = null;
+    }
+  });
+
+  let lastScroll = 0;
+  const featureNavbar = document.getElementById('featureNavbar');
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+    if (currentScroll > lastScroll && currentScroll > 100) {
+      featureNavbar.style.transform = 'translateY(-100%)';
+    } else {
+      featureNavbar.style.transform = 'translateY(0)';
+    }
+    lastScroll = currentScroll;
+  });
+
+  // Main application
+  const tbody = document.getElementById('tableBody');
+  const searchInput = document.getElementById('searchInput');
+  const clearSearch = document.getElementById('clearSearch');
+  const sortSelect = document.getElementById('sort');
+  const perPageSelect = document.getElementById('perPage');
+  const confirmModal = document.getElementById('confirmModal');
+  const confirmText = document.getElementById('confirmText');
+  const confirmYes = document.getElementById('confirmYes');
+  const confirmNo = document.getElementById('confirmNo');
+  const closeConfirmModal = document.getElementById('closeConfirmModal');
+  const deleteReason = document.getElementById('deleteReason');
+  const otherReasonContainer = document.getElementById('otherReasonContainer');
+  const otherReason = document.getElementById('otherReason');
+  const deletionNotes = document.getElementById('deletionNotes');
+  const toastContainer = document.getElementById('toastContainer');
+  const noResults = document.getElementById('noResults');
+  const exportBtn = document.getElementById('exportBtn');
+  const printBtn = document.getElementById('printBtn');
+  const addClaimBtn = document.getElementById('addClaimBtn');
+  const claimModal = document.getElementById('claimModal');
+  const claimForm = document.getElementById('claimForm');
+  const modalTitle = document.getElementById('modalTitle');
+  const closeModal = document.getElementById('closeModal');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const addDocumentBtn = document.getElementById('addDocumentBtn');
+  const documentsContainer = document.getElementById('documentsContainer');
+  const viewClaimModal = document.getElementById('viewClaimModal');
+  const closeViewModal = document.getElementById('closeViewModal');
+  const claimDetails = document.getElementById('claimDetails');
+  const statusModal = document.getElementById('statusModal');
+  const closeStatusModal = document.getElementById('closeStatusModal');
+  const cancelStatusUpdate = document.getElementById('cancelStatusUpdate');
+  const saveStatusUpdate = document.getElementById('saveStatusUpdate');
+  const newStatus = document.getElementById('newStatus');
+  const statusClaimInfo = document.getElementById('statusClaimInfo');
+  const updateApprovedAmount = document.getElementById('updateApprovedAmount');
+  const updateDecisionDate = document.getElementById('updateDecisionDate');
+  const updatePaymentDate = document.getElementById('updatePaymentDate');
+  const approvedAmountContainer = document.getElementById('approvedAmountContainer');
+  const decisionDateContainer = document.getElementById('decisionDateContainer');
+  const paymentDateContainer = document.getElementById('paymentDateContainer');
+  const statusNotes = document.getElementById('statusNotes');
+
+  let deleteClaimId = null;
+  let deleteClaimInfo = "";
+  let currentPage = 1;
+  let recordsPerPage = 20;
+  let currentFilter = 'all';
+  let isEditing = false;
+  let editingClaimId = null;
+  let updatingClaimId = null;
+
+  // Format date
+  function formatDate(dateStr) {
+    if (!dateStr) return 'Not set';
+    const date = new Date(dateStr);
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+  }
+
+  // Format currency
+  function formatCurrency(amount) {
+    if (!amount) return '৳0';
+    return '৳' + parseInt(amount).toLocaleString('en-BD');
+  }
+
+  // Calculate days between dates
+  function daysBetween(date1, date2) {
+    const oneDay = 24 * 60 * 60 * 1000;
+    const firstDate = new Date(date1);
+    const secondDate = new Date(date2);
+    return Math.round(Math.abs((firstDate - secondDate) / oneDay));
+  }
+
+  // Sample insurance claims data
+  const insuranceClaims = [
+    ["CLM001", "0001001", "Ayesha Rahman", "INS001", "Green Delta Insurance", "POL001", 
+     15000, 12000, "2024-01-10", "2024-01-25", "Approved", "2024-02-05",
+     "Cardiac consultation and ECG test", 
+     [
+       {name: "Medical Certificate", type: "PDF", date: "2024-01-08"},
+       {name: "ECG Report", type: "Image", date: "2024-01-09"},
+       {name: "Doctor's Prescription", type: "PDF", date: "2024-01-10"}
+     ],
+     "Patient has hypertension history. All documents verified."],
+    
+    ["CLM002", "0001002", "Jamal Hossain", "INS002", "Pragati Life Insurance", "POL002", 
+     25000, 20000, "2024-01-12", "2024-02-10", "Processing", null,
+     "Neurology consultation and MRI scan", 
+     [
+       {name: "MRI Report", type: "PDF", date: "2024-01-11"},
+       {name: "Doctor's Referral", type: "PDF", date: "2024-01-12"}
+     ],
+     "Awaiting additional medical records from patient."],
+    
+    ["CLM003", "0001003", "Mina Akter", "INS003", "Delta Life Insurance", "POL003", 
+     8000, 0, "2024-01-08", null, "Submitted", null,
+     "Minor surgery - wound dressing and medication", 
+     [
+       {name: "Surgical Report", type: "PDF", date: "2024-01-07"},
+       {name: "Medication List", type: "PDF", date: "2024-01-08"}
+     ],
+     "Claim submitted, awaiting insurance company response."],
+    
+    ["CLM004", "0001004", "Rafiul Islam", "INS004", "MetLife Bangladesh", "POL004", 
+     12000, 10000, "2024-01-15", "2024-01-30", "Approved", "2024-02-15",
+     "Pediatric consultation and vaccination", 
+     [
+       {name: "Vaccination Record", type: "PDF", date: "2024-01-14"},
+       {name: "Pediatric Report", type: "PDF", date: "2024-01-15"}
+     ],
+     "Routine pediatric care. Approved with standard co-pay."],
+    
+    ["CLM005", "0001005", "Tahmina Sultana", "INS005", "American Life Insurance", "POL005", 
+     35000, 28000, "2024-01-05", "2024-01-28", "Paid", "2024-02-01",
+     "Pulmonology consultation and chest X-ray", 
+     [
+       {name: "X-Ray Report", type: "Image", date: "2024-01-04"},
+       {name: "Pulmonology Assessment", type: "PDF", date: "2024-01-05"}
+     ],
+     "Payment received on Feb 1, 2024. Case closed."],
+    
+    ["CLM006", "0001006", "Arif Chowdhury", "INS001", "Green Delta Insurance", "POL006", 
+     18000, 0, "2023-12-20", "2024-01-10", "Rejected", null,
+     "Cardiology follow-up and blood tests", 
+     [
+       {name: "Blood Test Results", type: "PDF", date: "2023-12-19"},
+       {name: "Follow-up Notes", type: "PDF", date: "2023-12-20"}
+     ],
+     "Rejected due to policy exclusion for pre-existing condition."],
+    
+    ["CLM007", "0001007", "Nasrin Jahan", "INS006", "Prime Insurance", "POL007", 
+     22000, 18000, "2024-01-14", "2024-02-05", "Approved", null,
+     "Orthopedic consultation and physical therapy", 
+     [
+       {name: "Physical Therapy Plan", type: "PDF", date: "2024-01-13"},
+       {name: "Orthopedic Assessment", type: "PDF", date: "2024-01-14"}
+     ],
+     "Approved for 12 sessions of physical therapy."],
+    
+    ["CLM008", "0001008", "Sabbir Ahmed", "INS007", "Sandhani Life Insurance", "POL008", 
+     9000, 0, "2024-01-16", null, "Pending", null,
+     "Gynecology consultation and ultrasound", 
+     [
+       {name: "Ultrasound Report", type: "Image", date: "2024-01-15"},
+       {name: "Consultation Notes", type: "PDF", date: "2024-01-16"}
+     ],
+     "Additional information requested by insurance company."],
+    
+    ["CLM009", "0001009", "Tania Rahman", "INS008", "Progoti Life Insurance", "POL009", 
+     15000, 12000, "2024-01-11", "2024-01-26", "Approved", "2024-02-10",
+     "Dermatology consultation and skin treatment", 
+     [
+       {name: "Skin Assessment", type: "PDF", date: "2024-01-10"},
+       {name: "Treatment Plan", type: "PDF", date: "2024-01-11"}
+     ],
+     "Standard dermatological procedure. Payment pending."],
+    
+    ["CLM010", "0001010", "Mahmud Hasan", "INS009", "Fareast Islami Life Insurance", "POL010", 
+     28000, 22000, "2024-01-09", "2024-01-30", "Paid", "2024-02-08",
+     "Psychiatry consultation and medication management", 
+     [
+       {name: "Psychiatric Evaluation", type: "PDF", date: "2024-01-08"},
+       {name: "Medication Chart", type: "PDF", date: "2024-01-09"}
+     ],
+     "Payment processed successfully. Case completed."],
+    
+    ["CLM011", "0001011", "Rumana Akter", "INS010", "Green Delta Insurance", "POL011", 
+     12000, 0, "2024-01-13", null, "Processing", null,
+     "Emergency room visit and basic treatment", 
+     [
+       {name: "ER Report", type: "PDF", date: "2024-01-12"},
+       {name: "Treatment Summary", type: "PDF", date: "2024-01-13"}
+     ],
+     "Under review by insurance claims department."],
+    
+    ["CLM012", "0001012", "Rashid Karim", "INS001", "Green Delta Insurance", "POL012", 
+     32000, 25000, "2024-01-17", "2024-02-12", "Approved", null,
+     "Cardiac stress test and consultation", 
+     [
+       {name: "Stress Test Results", type: "PDF", date: "2024-01-16"},
+       {name: "Cardiology Report", type: "PDF", date: "2024-01-17"}
+     ],
+     "Approved with 22% co-payment as per policy terms."],
+    
+    ["CLM013", "0001013", "Farzana Khan", "INS002", "Pragati Life Insurance", "POL013", 
+     18000, 0, "2023-11-15", "2023-12-01", "Rejected", null,
+     "Neurology follow-up and nerve conduction study", 
+     [
+       {name: "Nerve Study Report", type: "PDF", date: "2023-11-14"},
+       {name: "Follow-up Notes", type: "PDF", date: "2023-11-15"}
+     ],
+     "Rejected - procedure not covered under current plan."],
+    
+    ["CLM014", "0001014", "Imran Hossain", "INS003", "Delta Life Insurance", "POL014", 
+     15000, 12000, "2024-01-18", "2024-02-02", "Approved", "2024-02-20",
+     "Surgical follow-up and wound care", 
+     [
+       {name: "Surgical Follow-up", type: "PDF", date: "2024-01-17"},
+       {name: "Wound Care Instructions", type: "PDF", date: "2024-01-18"}
+     ],
+     "Standard post-operative care. Payment scheduled."],
+    
+    ["CLM015", "0001015", "Sadia Afrin", "INS004", "MetLife Bangladesh", "POL015", 
+     8000, 6400, "2024-01-19", "2024-02-05", "Paid", "2024-02-12",
+     "Pediatric vaccination and wellness check", 
+     [
+       {name: "Vaccination Record", type: "PDF", date: "2024-01-18"},
+       {name: "Wellness Certificate", type: "PDF", date: "2024-01-19"}
+     ],
+     "Routine pediatric care. Payment received."],
+    
+    ["CLM016", "0001016", "Shamim Akter", "INS005", "American Life Insurance", "POL016", 
+     25000, 20000, "2024-01-20", "2024-02-10", "Processing", null,
+     "Pulmonology consultation and spirometry test", 
+     [
+       {name: "Spirometry Results", type: "PDF", date: "2024-01-19"},
+       {name: "Consultation Summary", type: "PDF", date: "2024-01-20"}
+     ],
+     "Awaiting pre-authorization from insurance company."],
+    
+    ["CLM017", "0001017", "Tanvir Ahmed", "INS006", "Prime Insurance", "POL017", 
+     12000, 0, "2024-01-21", null, "Pending", null,
+     "Orthopedic consultation for back pain", 
+     [
+       {name: "Back Assessment", type: "PDF", date: "2024-01-20"},
+       {name: "X-Ray Report", type: "Image", date: "2024-01-21"}
+     ],
+     "Additional diagnostic tests required for approval."],
+    
+    ["CLM018", "0001018", "Nusrat Jahan", "INS007", "Sandhani Life Insurance", "POL018", 
+     18000, 14400, "2024-01-22", "2024-02-08", "Approved", null,
+     "Gynecology consultation and prenatal care", 
+     [
+       {name: "Prenatal Records", type: "PDF", date: "2024-01-21"},
+       {name: "Ultrasound Images", type: "Image", date: "2024-01-22"}
+     ],
+     "Standard prenatal care. Payment processing."],
+    
+    ["CLM019", "0001019", "Sufian Karim", "INS008", "Progoti Life Insurance", "POL019", 
+     10000, 8000, "2024-01-23", "2024-02-06", "Paid", "2024-02-14",
+     "Dermatology consultation for skin condition", 
+     [
+       {name: "Skin Biopsy Report", type: "PDF", date: "2024-01-22"},
+       {name: "Treatment Summary", type: "PDF", date: "2024-01-23"}
+     ],
+     "Minor dermatological procedure. Payment completed."],
+    
+    ["CLM020", "0001020", "Rokeya Begum", "INS009", "Fareast Islami Life Insurance", "POL020", 
+     22000, 17600, "2024-01-24", "2024-02-07", "Approved", "2024-02-18",
+     "Psychiatry consultation and therapy session", 
+     [
+       {name: "Therapy Notes", type: "PDF", date: "2024-01-23"},
+       {name: "Treatment Plan", type: "PDF", date: "2024-01-24"}
+     ],
+     "Cognitive behavioral therapy. Payment scheduled."]
+  ];
+
+  function getFilteredData() {
+    const term = searchInput.value.toLowerCase();
+    let filtered = insuranceClaims.filter(p => {
+      const matchesSearch = p.some((field, index) => {
+        if (index === 13) { // Documents array
+          return field.some(doc => 
+            doc.name.toLowerCase().includes(term) ||
+            doc.type.toLowerCase().includes(term)
+          );
+        }
+        return String(field).toLowerCase().includes(term);
+      });
+      
+      let matchesFilter = true;
+      if (currentFilter === 'submitted') matchesFilter = p[10] === 'Submitted';
+      else if (currentFilter === 'processing') matchesFilter = p[10] === 'Processing';
+      else if (currentFilter === 'pending') matchesFilter = p[10] === 'Pending';
+      else if (currentFilter === 'approved') matchesFilter = p[10] === 'Approved';
+      else if (currentFilter === 'rejected') matchesFilter = p[10] === 'Rejected';
+      else if (currentFilter === 'paid') matchesFilter = p[10] === 'Paid';
+      
+      return matchesSearch && matchesFilter;
+    });
+    return filtered;
+  }
+
+  function updateStats() {
+    const filtered = getFilteredData();
+    const totalPages = recordsPerPage === 'all' ? 1 : Math.ceil(filtered.length / recordsPerPage);
+    
+    document.getElementById('statTotal').textContent = insuranceClaims.length;
+    document.getElementById('statShowing').textContent = filtered.length;
+    document.getElementById('statPage').textContent = currentPage;
+    document.getElementById('statPages').textContent = totalPages;
+
+    // Update filter counts
+    document.getElementById('countAll').textContent = insuranceClaims.length;
+    document.getElementById('countSubmitted').textContent = insuranceClaims.filter(p => p[10] === 'Submitted').length;
+    document.getElementById('countProcessing').textContent = insuranceClaims.filter(p => p[10] === 'Processing').length;
+    document.getElementById('countPending').textContent = insuranceClaims.filter(p => p[10] === 'Pending').length;
+    document.getElementById('countApproved').textContent = insuranceClaims.filter(p => p[10] === 'Approved').length;
+    document.getElementById('countRejected').textContent = insuranceClaims.filter(p => p[10] === 'Rejected').length;
+    document.getElementById('countPaid').textContent = insuranceClaims.filter(p => p[10] === 'Paid').length;
+
+    // Update dashboard stats
+    const totalClaims = insuranceClaims.length;
+    const monthlyClaims = insuranceClaims.filter(p => {
+      const submissionDate = new Date(p[8]);
+      const now = new Date();
+      return submissionDate.getMonth() === now.getMonth() && 
+             submissionDate.getFullYear() === now.getFullYear();
+    }).length;
+    
+    const approvedClaims = insuranceClaims.filter(p => p[10] === 'Approved' || p[10] === 'Paid').length;
+    const approvalRate = totalClaims > 0 ? Math.round((approvedClaims / totalClaims) * 100) : 0;
+    
+    const pendingClaims = insuranceClaims.filter(p => p[10] === 'Submitted' || p[10] === 'Processing' || p[10] === 'Pending').length;
+    
+    // Calculate average processing time for paid claims
+    const paidClaims = insuranceClaims.filter(p => p[10] === 'Paid' && p[8] && p[11]);
+    let totalProcessingDays = 0;
+    paidClaims.forEach(claim => {
+      totalProcessingDays += daysBetween(claim[8], claim[11]);
+    });
+    const avgProcessingTime = paidClaims.length > 0 ? Math.round(totalProcessingDays / paidClaims.length) : 0;
+    
+    // Calculate total claim values
+    const totalClaimValue = insuranceClaims.reduce((sum, claim) => sum + claim[6], 0);
+    const monthlyPaid = insuranceClaims
+      .filter(p => p[11] && new Date(p[11]).getMonth() === new Date().getMonth())
+      .reduce((sum, claim) => sum + (claim[7] || 0), 0);
+
+    document.getElementById('totalClaims').textContent = totalClaims;
+    document.getElementById('monthlyClaims').textContent = monthlyClaims;
+    document.getElementById('approvedClaims').textContent = approvedClaims;
+    document.getElementById('approvalRate').textContent = approvalRate + '%';
+    document.getElementById('pendingClaims').textContent = pendingClaims;
+    document.getElementById('avgProcessingTime').textContent = avgProcessingTime + ' days';
+    document.getElementById('totalClaimValue').textContent = formatCurrency(totalClaimValue);
+    document.getElementById('monthlyPaid').textContent = formatCurrency(monthlyPaid);
+  }
+
+  function highlightText(text, searchTerm) {
+    if (!searchTerm) return text;
+    
+    const regex = new RegExp(`(${searchTerm})`, 'gi');
+    return text.replace(regex, '<span class="highlight">$1</span>');
+  }
+
+  function renderTable() {
+    const filtered = getFilteredData();
+    const startIndex = recordsPerPage === 'all' ? 0 : (currentPage - 1) * recordsPerPage;
+    const endIndex = recordsPerPage === 'all' ? filtered.length : startIndex + recordsPerPage;
+    const paginatedData = filtered.slice(startIndex, endIndex);
+    const searchTerm = searchInput.value.toLowerCase();
+
+    tbody.innerHTML = "";
+    
+    if (paginatedData.length === 0) {
+      noResults.classList.remove('hidden');
+      document.getElementById('paginationContainer').classList.add('hidden');
+    } else {
+      noResults.classList.add('hidden');
+      document.getElementById('paginationContainer').classList.remove('hidden');
+      
+      paginatedData.forEach((claim, index) => {
+        const statusClass = 
+          claim[10] === 'Submitted' ? 'status-submitted' : 
+          claim[10] === 'Processing' ? 'status-processing' : 
+          claim[10] === 'Pending' ? 'status-pending' : 
+          claim[10] === 'Approved' ? 'status-approved' : 
+          claim[10] === 'Rejected' ? 'status-rejected' : 'status-paid';
+        
+        const statusIcon = 
+          claim[10] === 'Submitted' ? 'ph-arrow-up' : 
+          claim[10] === 'Processing' ? 'ph-gear' : 
+          claim[10] === 'Pending' ? 'ph-clock' : 
+          claim[10] === 'Approved' ? 'ph-check-circle' : 
+          claim[10] === 'Rejected' ? 'ph-x-circle' : 'ph-currency-dollar';
+        
+        const amountClass = 
+          claim[10] === 'Approved' || claim[10] === 'Paid' ? 'amount-approved' : 
+          claim[10] === 'Rejected' ? 'amount-rejected' : 'amount-pending';
+        
+        tbody.innerHTML += `
+          <tr class="compact-row transition-all duration-200" style="animation: fadeIn 0.3s ease ${index * 0.05}s both">
+            <td class="compact-cell font-mono text-sm col-claim-id">${highlightText(claim[0], searchTerm)}</td>
+            <td class="compact-cell font-mono text-sm col-patient-id">${highlightText(claim[1], searchTerm)}</td>
+            <td class="compact-cell font-medium col-patient-name">${highlightText(claim[2], searchTerm)}</td>
+            <td class="compact-cell font-mono text-sm col-insurance-id">${highlightText(claim[3], searchTerm)}</td>
+            <td class="compact-cell col-insurance-company">
+              <span class="insurance-company px-2 py-1 rounded-md text-xs font-medium inline-block">${highlightText(claim[4], searchTerm)}</span>
+            </td>
+            <td class="compact-cell font-medium ${amountClass} col-claim-amount">${formatCurrency(claim[6])}</td>
+            <td class="compact-cell font-medium ${claim[7] > 0 ? 'amount-approved' : 'amount-pending'} col-approved-amount">${claim[7] > 0 ? formatCurrency(claim[7]) : 'Not set'}</td>
+            <td class="compact-cell text-sm col-submission-date">${formatDate(claim[8])}</td>
+            <td class="compact-cell col-status">
+              <span class="badge ${statusClass} px-2 py-1 rounded-full text-xs font-medium flex items-center space-x-1 w-fit">
+                <i class="ph ${statusIcon}"></i>
+                <span>${claim[10]}</span>
+              </span>
+            </td>
+            <td class="compact-cell text-center space-x-2 no-print col-actions">
+              <button class="bg-blue-400 hover:bg-blue-500 text-white px-2 py-1 rounded-md transition transform hover:scale-105 viewBtn" title="View Details" data-id="${claim[0]}">
+                <i class="ph ph-eye"></i>
+              </button>
+              <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded-md transition transform hover:scale-105 editBtn" title="Edit Claim" data-id="${claim[0]}">
+                <i class="ph ph-pencil"></i>
+              </button>
+              <button class="bg-green-400 hover:bg-green-500 text-white px-2 py-1 rounded-md transition transform hover:scale-105 statusBtn" title="Update Status" data-id="${claim[0]}" data-info="${claim[2]} - ${claim[4]}">
+                <i class="ph ph-arrows-clockwise"></i>
+              </button>
+              <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded-md transition transform hover:scale-105 deleteBtn" title="Delete Claim" data-id="${claim[0]}" data-info="${claim[2]} - ${claim[4]}">
+                <i class="ph ph-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+    
+    updatePagination();
+    updateStats();
+  }
+
+  function updatePagination() {
+    const filtered = getFilteredData();
+    const totalPages = recordsPerPage === 'all' ? 1 : Math.ceil(filtered.length / recordsPerPage);
+    const pageNumbers = document.getElementById('pageNumbers');
+    pageNumbers.innerHTML = '';
+
+    if (recordsPerPage !== 'all') {
+      let startPage = Math.max(1, currentPage - 2);
+      let endPage = Math.min(totalPages, startPage + 4);
+      
+      if (endPage - startPage < 4) {
+        startPage = Math.max(1, endPage - 4);
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.className = `pagination-btn px-4 py-2 rounded-md transition ${
+          i === currentPage 
+            ? 'bg-indigo-600 text-white' 
+            : 'bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300'
+        }`;
+        btn.onclick = () => {
+          currentPage = i;
+          renderTable();
+        };
+        pageNumbers.appendChild(btn);
+      }
+    }
+
+    document.getElementById('firstPage').disabled = currentPage === 1;
+    document.getElementById('prevPage').disabled = currentPage === 1;
+    document.getElementById('nextPage').disabled = currentPage === totalPages || recordsPerPage === 'all';
+    document.getElementById('lastPage').disabled = currentPage === totalPages || recordsPerPage === 'all';
+  }
+
+  // Search functionality
+  searchInput.addEventListener('input', () => {
+    currentPage = 1;
+    renderTable();
+    clearSearch.classList.toggle('hidden', searchInput.value === '');
+  });
+
+  clearSearch.addEventListener('click', () => {
+    searchInput.value = '';
+    clearSearch.classList.add('hidden');
+    currentPage = 1;
+    renderTable();
+  });
+
+  // Sort functionality
+  sortSelect.addEventListener('change', () => {
+    const key = sortSelect.value;
+    let index;
+    
+    switch(key) {
+      case 'claimId': index = 0; break;
+      case 'submissionDate': index = 8; break;
+      case 'claimAmount': index = 6; break;
+      case 'status': index = 10; break;
+      case 'insuranceCompany': index = 4; break;
+      default: index = 0;
+    }
+    
+    insuranceClaims.sort((a, b) => {
+      if (key === 'submissionDate') {
+        return new Date(a[index]) - new Date(b[index]);
+      } else if (key === 'claimAmount') {
+        return b[index] - a[index];
+      }
+      return a[index].toString().localeCompare(b[index].toString());
+    });
+    
+    currentPage = 1;
+    renderTable();
+    showToast(`Sorted by ${key}`, 'info');
+  });
+
+  // Per page selector
+  perPageSelect.addEventListener('change', () => {
+    recordsPerPage = perPageSelect.value === 'all' ? 'all' : parseInt(perPageSelect.value);
+    currentPage = 1;
+    renderTable();
+  });
+
+  // Filter chips
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      currentFilter = chip.dataset.filter;
+      currentPage = 1;
+      
+      document.querySelectorAll('.filter-chip').forEach(c => {
+        c.classList.remove('ring-2', 'ring-indigo-500');
+      });
+      chip.classList.add('ring-2', 'ring-indigo-500');
+      
+      renderTable();
+      
+      const filterNames = {
+        all: 'all claims',
+        submitted: 'submitted claims',
+        processing: 'processing claims',
+        pending: 'pending claims',
+        approved: 'approved claims',
+        rejected: 'rejected claims',
+        paid: 'paid claims'
+      };
+      showToast(`Showing ${filterNames[currentFilter]}`, 'info');
+    });
+  });
+
+  // Pagination buttons
+  document.getElementById('firstPage').addEventListener('click', () => {
+    currentPage = 1;
+    renderTable();
+  });
+
+  document.getElementById('prevPage').addEventListener('click', () => {
+    if (currentPage > 1) {
+      currentPage--;
+      renderTable();
+    }
+  });
+
+  document.getElementById('nextPage').addEventListener('click', () => {
+    const filtered = getFilteredData();
+    const totalPages = Math.ceil(filtered.length / recordsPerPage);
+    if (currentPage < totalPages) {
+      currentPage++;
+      renderTable();
+    }
+  });
+
+  document.getElementById('lastPage').addEventListener('click', () => {
+    const filtered = getFilteredData();
+    const totalPages = Math.ceil(filtered.length / recordsPerPage);
+    currentPage = totalPages;
+    renderTable();
+  });
+
+  // Table actions
+  tbody.addEventListener('click', (e) => {
+    const row = e.target.closest('tr');
+    if (!row) return;
+
+    const claimId = e.target.closest('.viewBtn')?.dataset.id || 
+                    e.target.closest('.editBtn')?.dataset.id || 
+                    e.target.closest('.statusBtn')?.dataset.id || 
+                    e.target.closest('.deleteBtn')?.dataset.id;
+    const claimInfo = e.target.closest('.deleteBtn')?.dataset.info || 
+                      e.target.closest('.statusBtn')?.dataset.info;
+
+    if (e.target.closest('.viewBtn')) {
+      viewClaim(claimId);
+    } else if (e.target.closest('.editBtn')) {
+      editClaim(claimId);
+    } else if (e.target.closest('.statusBtn')) {
+      updateClaimId = claimId;
+      openStatusModal(claimId, claimInfo);
+    } else if (e.target.closest('.deleteBtn')) {
+      deleteClaimId = claimId;
+      deleteClaimInfo = claimInfo;
+      confirmText.textContent = `You are about to delete claim ${deleteClaimId} (${deleteClaimInfo}). This action is irreversible. Please provide a reason for this deletion.`;
+      confirmModal.classList.remove('hidden');
+      
+      // Reset deletion form
+      deleteReason.value = '';
+      otherReasonContainer.classList.add('hidden');
+      otherReason.value = '';
+      deletionNotes.value = '';
+    }
+  });
+
+
+
+
+
+
+  // View claim function - FIXED AND IMPROVED - 75% WIDTH
+function viewClaim(id) {
+  const claim = insuranceClaims.find(c => c[0] === id);
+  if (!claim) {
+    showToast('Claim not found', 'error');
+    return;
+  }
+
+  // Update modal width to 75% of screen
+  viewClaimModal.classList.remove('hidden');
+  viewClaimModal.style.display = 'flex';
+  
+  // Set max-width to 75% of viewport
+  const modalContent = viewClaimModal.querySelector('.max-w-3xl');
+  if (modalContent) {
+    modalContent.style.maxWidth = '75vw';
+    modalContent.style.width = '75%';
+  }
+  
+  // Build documents HTML
+  let documentsHTML = '';
+  if (claim[13] && claim[13].length > 0) {
+    claim[13].forEach((doc, index) => {
+      documentsHTML += `
+        <div class="bg-white p-3 rounded-lg mb-2 border-l-4 border-blue-500 shadow-sm hover:shadow-md transition">
+          <div class="flex items-start justify-between">
+            <div class="flex-1">
+              <div class="font-semibold text-gray-800 flex items-center space-x-2">
+                <i class="ph ph-file-pdf text-red-500 text-lg"></i>
+                <span>${doc.name}</span>
+              </div>
+              <div class="text-xs text-gray-600 mt-2 space-x-3">
+                <span class="inline-block"><span class="font-medium">Type:</span> <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">${doc.type}</span></span>
+                <span class="inline-block"><span class="font-medium">Date:</span> ${formatDate(doc.date)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  } else {
+    documentsHTML = '<div class="text-gray-500 text-sm bg-gray-50 p-4 rounded text-center"><i class="ph ph-file-x text-2xl mb-2"></i><p>No documents attached</p></div>';
+  }
+  
+  // Build timeline
+  let timelineHTML = '';
+  const processingDays = claim[8] && claim[9] ? daysBetween(claim[8], claim[9]) : 0;
+  
+  if (claim[8]) {
+    timelineHTML += `
+      <div class="timeline-item completed">
+        <div class="font-semibold text-gray-800 flex items-center space-x-2">
+          <i class="ph ph-check text-green-500"></i>
+          <span>Claim Submitted</span>
+        </div>
+        <div class="text-sm text-gray-600 mt-1">${formatDate(claim[8])}</div>
+      </div>
+    `;
+  }
+  
+  if (claim[9] || claim[10] === 'Processing' || claim[10] === 'Pending') {
+    const isCompleted = claim[10] !== 'Submitted' && claim[10] !== 'Processing' && claim[10] !== 'Pending';
+    const statusIcon = claim[10] === 'Approved' ? 'check-circle' : 
+                       claim[10] === 'Rejected' ? 'x-circle' :
+                       claim[10] === 'Paid' ? 'currency-dollar' : 'gear';
+    const statusColor = claim[10] === 'Approved' ? 'text-green-500' : 
+                        claim[10] === 'Rejected' ? 'text-red-500' :
+                        claim[10] === 'Paid' ? 'text-emerald-500' : 'text-yellow-500';
+    
+    timelineHTML += `
+      <div class="timeline-item ${isCompleted ? 'completed' : 'current'}">
+        <div class="font-semibold text-gray-800 flex items-center space-x-2">
+          <i class="ph ph-${statusIcon} ${statusColor}"></i>
+          <span>Under Review</span>
+        </div>
+        <div class="text-sm text-gray-600 mt-1">
+          <span class="font-medium">Status:</span> 
+          <span class="bg-${claim[10] === 'Approved' ? 'green' : claim[10] === 'Rejected' ? 'red' : claim[10] === 'Paid' ? 'emerald' : 'yellow'}-100 text-${claim[10] === 'Approved' ? 'green' : claim[10] === 'Rejected' ? 'red' : claim[10] === 'Paid' ? 'emerald' : 'yellow'}-700 px-2 py-1 rounded text-xs font-medium">${claim[10]}</span>
+        </div>
+        ${claim[9] ? `<div class="text-sm text-gray-600 mt-1"><span class="font-medium">Decision:</span> ${formatDate(claim[9])}</div>` : '<div class="text-sm text-yellow-600 mt-1">⏳ Processing...</div>'}
+      </div>
+    `;
+  }
+  
+  if (claim[11]) {
+    timelineHTML += `
+      <div class="timeline-item completed">
+        <div class="font-semibold text-gray-800 flex items-center space-x-2">
+          <i class="ph ph-check-circle text-green-500"></i>
+          <span>Payment Processed</span>
+        </div>
+        <div class="text-sm text-gray-600 mt-1">${formatDate(claim[11])}</div>
+        <div class="text-sm text-green-600 font-semibold mt-1">✓ Payment Completed</div>
+      </div>
+    `;
+  }
+  
+  if (!timelineHTML) {
+    timelineHTML = '<p class="text-gray-500 text-sm">No timeline data available</p>';
+  }
+  
+  // Calculate approval percentage
+  const approvalPercentage = claim[6] > 0 ? Math.round((claim[7] / claim[6]) * 100) : 0;
+  const processingDaysText = processingDays > 0 ? `${processingDays} days` : 'Processing';
+  
+  // Build complete claim details
+  claimDetails.innerHTML = `
+    <!-- Top Header with Status and Close Button -->
+    <div class="mb-6 p-5 bg-gradient-to-r from-indigo-600 via-indigo-500 to-blue-600 rounded-xl text-white shadow-lg">
+      <div class="flex justify-between items-start mb-4">
+        <div>
+          <p class="text-indigo-100 text-sm font-medium">CLAIM ID</p>
+          <p class="text-3xl font-bold font-mono tracking-wide">${claim[0]}</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="badge ${claim[10] === 'Submitted' ? 'status-submitted' : claim[10] === 'Processing' ? 'status-processing' : claim[10] === 'Pending' ? 'status-pending' : claim[10] === 'Approved' ? 'status-approved' : claim[10] === 'Rejected' ? 'status-rejected' : 'status-paid'} px-4 py-2 rounded-full text-sm font-bold inline-flex items-center space-x-2 shadow-lg">
+            <i class="ph ${claim[10] === 'Submitted' ? 'ph-arrow-up' : claim[10] === 'Processing' ? 'ph-gear' : claim[10] === 'Pending' ? 'ph-clock' : claim[10] === 'Approved' ? 'ph-check-circle' : claim[10] === 'Rejected' ? 'ph-x-circle' : 'ph-currency-dollar'} text-lg"></i>
+            <span>${claim[10]}</span>
+          </span>
+          <button onclick="document.getElementById('viewClaimModal').classList.add('hidden')" class="hover:bg-white hover:bg-opacity-20 text-white px-3 py-2 rounded-lg transition transform hover:scale-110" title="Close">
+            <i class="ph ph-x text-2xl font-bold"></i>
+          </button>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <p class="text-indigo-100">Patient Name</p>
+          <p class="font-semibold">${claim[2]}</p>
+          <p class="text-indigo-100 text-xs">ID: ${claim[1]}</p>
+        </div>
+        <div>
+          <p class="text-indigo-100">Insurance Provider</p>
+          <p class="font-semibold">${claim[4]}</p>
+          <p class="text-indigo-100 text-xs">ID: ${claim[3]}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Financial Summary Cards -->
+    <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-xl border-2 border-blue-200 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-sm font-semibold text-blue-700">CLAIM AMOUNT</p>
+          <i class="ph ph-currency-dollar text-2xl text-blue-500"></i>
+        </div>
+        <p class="text-3xl font-bold text-blue-900">${formatCurrency(claim[6])}</p>
+        <p class="text-xs text-blue-600 mt-2">Requested for reimbursement</p>
+      </div>
+
+      <div class="bg-gradient-to-br from-green-50 to-green-100 p-5 rounded-xl border-2 border-green-200 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-sm font-semibold text-green-700">APPROVED AMOUNT</p>
+          <i class="ph ph-check-circle text-2xl text-green-500"></i>
+        </div>
+        <p class="text-3xl font-bold text-green-900">${claim[7] > 0 ? formatCurrency(claim[7]) : '—'}</p>
+        <p class="text-xs text-green-600 mt-2">${claim[7] > 0 ? 'Approved for payment' : 'Awaiting approval'}</p>
+      </div>
+
+      <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-5 rounded-xl border-2 border-purple-200 shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-sm font-semibold text-purple-700">APPROVAL RATE</p>
+          <i class="ph ph-percent text-2xl text-purple-500"></i>
+        </div>
+        <p class="text-3xl font-bold text-purple-900">${claim[7] > 0 ? approvalPercentage + '%' : '—'}</p>
+        <p class="text-xs text-purple-600 mt-2">${claim[7] > 0 ? 'Of requested amount' : 'Pending decision'}</p>
+      </div>
+    </div>
+
+    <!-- Approval Progress Bar -->
+    ${claim[7] > 0 ? `
+      <div class="mb-6 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-sm font-semibold text-gray-700">Claim Approval Progress</span>
+          <span class="text-sm font-bold text-gray-900 bg-gray-100 px-3 py-1 rounded-full">${approvalPercentage}%</span>
+        </div>
+        <div class="progress-bar bg-gray-200 rounded-full overflow-hidden">
+          <div class="progress-fill" style="width: ${approvalPercentage}%; background: linear-gradient(90deg, #10b981, #059669, #047857); transition: width 0.8s ease-out;"></div>
+        </div>
+      </div>
+    ` : `
+      <div class="mb-6 bg-yellow-50 p-4 rounded-xl border border-yellow-200">
+        <p class="text-sm text-yellow-800"><i class="ph ph-warning mr-2"></i>Claim approval is pending. No approved amount set yet.</p>
+      </div>
+    `}
+
+    <!-- Key Information Grid -->
+    <div class="mb-6 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="bg-gray-50 px-5 py-3 border-b border-gray-200">
+        <h4 class="font-bold text-gray-900 flex items-center space-x-2">
+          <i class="ph ph-list text-indigo-600"></i>
+          <span>Claim Details</span>
+        </h4>
+      </div>
+      <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="border-l-4 border-blue-500 pl-4">
+          <p class="text-xs text-gray-600 font-semibold uppercase tracking-wide">Policy Number</p>
+          <p class="text-lg font-mono text-gray-900 mt-1">${claim[5]}</p>
+        </div>
+        <div class="border-l-4 border-indigo-500 pl-4">
+          <p class="text-xs text-gray-600 font-semibold uppercase tracking-wide">Insurance ID</p>
+          <p class="text-lg font-mono text-gray-900 mt-1">${claim[3]}</p>
+        </div>
+        <div class="border-l-4 border-green-500 pl-4">
+          <p class="text-xs text-gray-600 font-semibold uppercase tracking-wide">Submission Date</p>
+          <p class="text-lg font-semibold text-gray-900 mt-1">${formatDate(claim[8])}</p>
+        </div>
+        <div class="border-l-4 border-purple-500 pl-4">
+          <p class="text-xs text-gray-600 font-semibold uppercase tracking-wide">Decision Date</p>
+          <p class="text-lg font-semibold text-gray-900 mt-1">${formatDate(claim[9])}</p>
+        </div>
+        <div class="border-l-4 border-orange-500 pl-4">
+          <p class="text-xs text-gray-600 font-semibold uppercase tracking-wide">Processing Time</p>
+          <p class="text-lg font-bold text-gray-900 mt-1">${processingDaysText}</p>
+        </div>
+        <div class="border-l-4 border-emerald-500 pl-4">
+          <p class="text-xs text-gray-600 font-semibold uppercase tracking-wide">Payment Date</p>
+          <p class="text-lg font-semibold text-gray-900 mt-1">${formatDate(claim[11])}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Treatment Details -->
+    <div class="mb-6 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="bg-gray-50 px-5 py-3 border-b border-gray-200">
+        <h4 class="font-bold text-gray-900 flex items-center space-x-2">
+          <i class="ph ph-stethoscope text-green-600"></i>
+          <span>Treatment Details</span>
+        </h4>
+      </div>
+      <div class="p-5">
+        <p class="text-gray-700 leading-relaxed">${claim[12] || 'No treatment details provided'}</p>
+      </div>
+    </div>
+
+    <!-- Supporting Documents -->
+    <div class="mb-6 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="bg-gray-50 px-5 py-3 border-b border-gray-200">
+        <h4 class="font-bold text-gray-900 flex items-center space-x-2">
+          <i class="ph ph-paperclip text-yellow-600"></i>
+          <span>Supporting Documents (${claim[13] ? claim[13].length : 0})</span>
+        </h4>
+      </div>
+      <div class="p-5 space-y-2">
+        ${documentsHTML}
+      </div>
+    </div>
+
+    <!-- Additional Notes -->
+    ${claim[14] ? `
+      <div class="mb-6 bg-amber-50 rounded-xl border-2 border-amber-200 overflow-hidden">
+        <div class="bg-amber-100 px-5 py-3 border-b border-amber-200">
+          <h4 class="font-bold text-amber-900 flex items-center space-x-2">
+            <i class="ph ph-note-pencil text-amber-600"></i>
+            <span>Additional Notes</span>
+          </h4>
+        </div>
+        <div class="p-5">
+          <p class="text-amber-900 leading-relaxed">${claim[14]}</p>
+        </div>
+      </div>
+    ` : ''}
+
+    <!-- Timeline -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="bg-gray-50 px-5 py-3 border-b border-gray-200">
+        <h4 class="font-bold text-gray-900 flex items-center space-x-2">
+          <i class="ph ph-timeline text-indigo-600"></i>
+          <span>Claim Timeline</span>
+        </h4>
+      </div>
+      <div class="p-5">
+        <div class="timeline">
+          ${timelineHTML}
+        </div>
+      </div>
+    </div>
+
+    <!-- Back Button at End -->
+    <div class="mt-8 pt-6 border-t border-gray-200 flex justify-between items-center">
+      <div class="text-sm text-gray-500">
+        <i class="ph ph-info text-lg mr-2"></i>
+        Click below to go back to claims list
+      </div>
+      <a href="InsuranceClaims.html" class="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white px-6 py-3 rounded-lg font-semibold transition transform hover:scale-105 flex items-center space-x-2 shadow-lg cursor-pointer no-underline">
+        <i class="ph ph-arrow-left text-lg"></i>
+        <span>Back to Claims List</span>
+      </a>
+    </div>
+  `;
+  
+  viewClaimModal.classList.remove('hidden');}
+  
+
+
+
+
+  // Delete reason change handler
+  deleteReason.addEventListener('change', () => {
+    if (deleteReason.value === 'other') {
+      otherReasonContainer.classList.remove('hidden');
+    } else {
+      otherReasonContainer.classList.add('hidden');
+    }
+  });
+
+  // Edit claim function
+  function editClaim(id) {
+    const claim = insuranceClaims.find(c => c[0] === id);
+    if (!claim) return;
+    
+    isEditing = true;
+    editingClaimId = id;
+    modalTitle.textContent = 'Edit Insurance Claim';
+    
+    // Clear existing documents
+    documentsContainer.innerHTML = '';
+    
+    // Fill form with claim data
+    document.getElementById('claimId').value = claim[0];
+    document.getElementById('patientId').value = claim[1];
+    document.getElementById('patientName').value = claim[2];
+    document.getElementById('insuranceId').value = claim[3];
+    document.getElementById('insuranceCompany').value = claim[4];
+    document.getElementById('policyNumber').value = claim[5];
+    document.getElementById('claimAmount').value = claim[6];
+    document.getElementById('approvedAmount').value = claim[7] || '';
+    document.getElementById('submissionDate').value = claim[8];
+    document.getElementById('decisionDate').value = claim[9] || '';
+    document.getElementById('status').value = claim[10];
+    document.getElementById('paymentDate').value = claim[11] || '';
+    document.getElementById('treatmentDetails').value = claim[12];
+    document.getElementById('notes').value = claim[14] || '';
+    
+    // Add documents
+    claim[13].forEach(doc => {
+      addDocumentRow(doc.name, doc.type, doc.date);
+    });
+    
+    claimModal.classList.remove('hidden');
+  }
+
+  // Add document row function
+  function addDocumentRow(name = '', type = '', date = '') {
+    const documentRow = document.createElement('div');
+    documentRow.className = 'flex space-x-2';
+    documentRow.innerHTML = `
+      <input type="text" class="document-name flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Document name" value="${name}">
+      <input type="text" class="document-type w-32 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Type" value="${type}">
+      <input type="date" class="document-date w-32 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Date" value="${date}">
+      <button type="button" class="remove-document bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-md transition">
+        <i class="ph ph-trash"></i>
+      </button>
+    `;
+    documentsContainer.appendChild(documentRow);
+    
+    // Add event listener to remove button
+    documentRow.querySelector('.remove-document').addEventListener('click', function() {
+      if (documentsContainer.children.length > 1) {
+        documentRow.remove();
+      } else {
+        showToast('At least one document is required', 'warning');
+      }
+    });
+  }
+
+  // Add document button
+  addDocumentBtn.addEventListener('click', () => {
+    addDocumentRow();
+  });
+
+  // Add claim modal
+  addClaimBtn.addEventListener('click', () => {
+    isEditing = false;
+    editingClaimId = null;
+    modalTitle.textContent = 'Add New Insurance Claim';
+    claimForm.reset();
+    
+    // Clear documents and add one empty row
+    documentsContainer.innerHTML = '';
+    addDocumentRow();
+    
+    // Set default dates
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('submissionDate').value = today;
+    
+    claimModal.classList.remove('hidden');
+  });
+
+  // Status update modal
+  function openStatusModal(id, info) {
+    const claim = insuranceClaims.find(c => c[0] === id);
+    if (!claim) return;
+    
+    updatingClaimId = id;
+    statusClaimInfo.innerHTML = `
+      <div class="font-medium">${claim[0]} - ${claim[2]}</div>
+      <div class="text-sm text-gray-600">${claim[4]} | Claim: ${formatCurrency(claim[6])}</div>
+      <div class="text-sm">Current Status: <span class="font-medium">${claim[10]}</span></div>
+    `;
+    
+    // Set current status as default
+    newStatus.value = claim[10];
+    
+    // Reset additional fields
+    updateApprovedAmount.value = claim[7] || '';
+    updateDecisionDate.value = claim[9] || '';
+    updatePaymentDate.value = claim[11] || '';
+    statusNotes.value = '';
+    
+    // Show/hide additional fields based on status
+    toggleStatusFields();
+    
+    statusModal.classList.remove('hidden');
+  }
+
+  // Toggle additional fields based on status selection
+  newStatus.addEventListener('change', toggleStatusFields);
+
+  function toggleStatusFields() {
+    const status = newStatus.value;
+    
+    // Reset all containers
+    approvedAmountContainer.classList.add('hidden');
+    decisionDateContainer.classList.add('hidden');
+    paymentDateContainer.classList.add('hidden');
+    
+    // Show relevant containers based on status
+    if (status === 'Approved' || status === 'Paid') {
+      approvedAmountContainer.classList.remove('hidden');
+      decisionDateContainer.classList.remove('hidden');
+    }
+    
+    if (status === 'Rejected') {
+      decisionDateContainer.classList.remove('hidden');
+    }
+    
+    if (status === 'Paid') {
+      paymentDateContainer.classList.remove('hidden');
+    }
+  }
+
+  // Save status update
+  saveStatusUpdate.addEventListener('click', () => {
+    const claim = insuranceClaims.find(c => c[0] === updatingClaimId);
+    if (!claim) return;
+    
+    const newStatusValue = newStatus.value;
+    const notes = statusNotes.value;
+    
+    // Update claim status
+    claim[10] = newStatusValue;
+    
+    // Update additional fields if provided
+    if (newStatusValue === 'Approved' || newStatusValue === 'Paid') {
+      if (updateApprovedAmount.value) {
+        claim[7] = parseInt(updateApprovedAmount.value);
+      }
+      if (updateDecisionDate.value) {
+        claim[9] = updateDecisionDate.value;
+      }
+    }
+    
+    if (newStatusValue === 'Rejected' && updateDecisionDate.value) {
+      claim[9] = updateDecisionDate.value;
+    }
+    
+    if (newStatusValue === 'Paid' && updatePaymentDate.value) {
+      claim[11] = updatePaymentDate.value;
+    }
+    
+    // Add status update to notes
+    if (notes) {
+      claim[14] = (claim[14] ? claim[14] + '\n' : '') + 
+                 `Status updated to ${newStatusValue} on ${new Date().toLocaleDateString()}: ${notes}`;
+    }
+    
+    statusModal.classList.add('hidden');
+    renderTable();
+    showToast(`Claim ${updatingClaimId} status updated to ${newStatusValue}`, 'success');
+  });
+
+  // Close modals
+  closeModal.addEventListener('click', () => {
+    claimModal.classList.add('hidden');
+  });
+
+  closeViewModal.addEventListener('click', () => {
+    viewClaimModal.classList.add('hidden');
+  });
+
+  closeStatusModal.addEventListener('click', () => {
+    statusModal.classList.add('hidden');
+  });
+
+  closeConfirmModal.addEventListener('click', () => {
+    confirmModal.classList.add('hidden');
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    claimModal.classList.add('hidden');
+  });
+
+  cancelStatusUpdate.addEventListener('click', () => {
+    statusModal.classList.add('hidden');
+  });
+
+  confirmNo.addEventListener('click', () => {
+    confirmModal.classList.add('hidden');
+  });
+
+  // Save claim form
+  claimForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    // Collect documents data
+    const documents = [];
+    const documentRows = documentsContainer.querySelectorAll('.flex.space-x-2');
+    documentRows.forEach(row => {
+      const name = row.querySelector('.document-name').value;
+      const type = row.querySelector('.document-type').value;
+      const date = row.querySelector('.document-date').value;
+      
+      if (name && type && date) {
+        documents.push({ name, type, date });
+      }
+    });
+    
+    if (documents.length === 0) {
+      showToast('Please add at least one supporting document', 'error');
+      return;
+    }
+    
+    const formData = {
+      id: document.getElementById('claimId').value,
+      patientId: document.getElementById('patientId').value,
+      patientName: document.getElementById('patientName').value,
+      insuranceId: document.getElementById('insuranceId').value,
+      insuranceCompany: document.getElementById('insuranceCompany').value,
+      policyNumber: document.getElementById('policyNumber').value,
+      claimAmount: parseInt(document.getElementById('claimAmount').value),
+      approvedAmount: document.getElementById('approvedAmount').value ? parseInt(document.getElementById('approvedAmount').value) : 0,
+      submissionDate: document.getElementById('submissionDate').value,
+      decisionDate: document.getElementById('decisionDate').value || null,
+      status: document.getElementById('status').value,
+      paymentDate: document.getElementById('paymentDate').value || null,
+      treatmentDetails: document.getElementById('treatmentDetails').value,
+      documents: documents,
+      notes: document.getElementById('notes').value
+    };
+    
+    if (isEditing) {
+      // Update existing claim
+      const index = insuranceClaims.findIndex(c => c[0] === editingClaimId);
+      if (index !== -1) {
+        insuranceClaims[index] = [
+          formData.id,
+          formData.patientId,
+          formData.patientName,
+          formData.insuranceId,
+          formData.insuranceCompany,
+          formData.policyNumber,
+          formData.claimAmount,
+          formData.approvedAmount,
+          formData.submissionDate,
+          formData.decisionDate,
+          formData.status,
+          formData.paymentDate,
+          formData.treatmentDetails,
+          formData.documents,
+          formData.notes
+        ];
+        showToast(`Insurance claim ${formData.id} updated successfully!`, 'success');
+      }
+    } else {
+      // Add new claim
+      // Check if ID already exists
+      if (insuranceClaims.some(c => c[0] === formData.id)) {
+        showToast(`Claim ID ${formData.id} already exists!`, 'error');
+        return;
+      }
+      
+      insuranceClaims.push([
+        formData.id,
+        formData.patientId,
+        formData.patientName,
+        formData.insuranceId,
+        formData.insuranceCompany,
+        formData.policyNumber,
+        formData.claimAmount,
+        formData.approvedAmount,
+        formData.submissionDate,
+        formData.decisionDate,
+        formData.status,
+        formData.paymentDate,
+        formData.treatmentDetails,
+        formData.documents,
+        formData.notes
+      ]);
+      showToast(`Insurance claim ${formData.id} added successfully!`, 'success');
+    }
+    
+    claimModal.classList.add('hidden');
+    renderTable();
+  });
+
+  confirmYes.addEventListener('click', () => {
+    // Validate deletion reason
+    if (!deleteReason.value) {
+      showToast('Please select a reason for deletion', 'error');
+      return;
+    }
+    
+    if (deleteReason.value === 'other' && !otherReason.value.trim()) {
+      showToast('Please specify the deletion reason', 'error');
+      return;
+    }
+    
+    const finalReason = deleteReason.value === 'other' ? otherReason.value : deleteReason.options[deleteReason.selectedIndex].text;
+    const notes = deletionNotes.value;
+    
+    const index = insuranceClaims.findIndex(c => c[0] === deleteClaimId);
+    if (index !== -1) {
+      // Log deletion for audit purposes (in a real app, this would go to a server)
+      console.log(`Insurance claim deleted: ${deleteClaimId} (${deleteClaimInfo})`);
+      console.log(`Reason: ${finalReason}`);
+      console.log(`Notes: ${notes}`);
+      console.log(`Deleted by: Hospital Administrator`);
+      console.log(`Timestamp: ${new Date().toISOString()}`);
+      
+      insuranceClaims.splice(index, 1);
+      
+      const filtered = getFilteredData();
+      const totalPages = recordsPerPage === 'all' ? 1 : Math.ceil(filtered.length / recordsPerPage);
+      if (currentPage > totalPages && totalPages > 0) {
+        currentPage = totalPages;
+      }
+      
+      renderTable();
+      confirmModal.classList.add('hidden');
+      showToast(`Insurance claim "${deleteClaimId}" deleted successfully! Reason: ${finalReason}`, 'success');
+    }
+  });
+
+  // Export functionality
+  exportBtn.addEventListener('click', () => {
+    const filtered = getFilteredData();
+    let csv = 'Claim ID,Patient ID,Patient Name,Insurance ID,Insurance Company,Policy Number,Claim Amount,Approved Amount,Submission Date,Decision Date,Status,Payment Date,Treatment Details,Notes\n';
+    filtered.forEach(row => {
+      csv += `"${row[0]}","${row[1]}","${row[2]}","${row[3]}","${row[4]}","${row[5]}","${row[6]}","${row[7]}","${row[8]}","${row[9]}","${row[10]}","${row[11]}","${row[12]}","${row[14] || ''}"\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `insurance_claims_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    showToast(`Exported ${filtered.length} insurance claims successfully!`, 'success');
+  });
+
+  // Print functionality
+  printBtn.addEventListener('click', () => {
+    window.print();
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      searchInput.focus();
+    }
+    
+    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+      e.preventDefault();
+      window.print();
+    }
+    
+    if (e.key === 'Escape') {
+      if (!confirmModal.classList.contains('hidden')) {
+        confirmModal.classList.add('hidden');
+      }
+      if (!claimModal.classList.contains('hidden')) {
+        claimModal.classList.add('hidden');
+      }
+      if (!viewClaimModal.classList.contains('hidden')) {
+        viewClaimModal.classList.add('hidden');
+      }
+      if (!statusModal.classList.contains('hidden')) {
+        statusModal.classList.add('hidden');
+      }
+    }
+  });
+
+  // Toast notification system
+  function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    const colors = {
+      success: 'bg-green-500',
+      error: 'bg-red-500',
+      warning: 'bg-yellow-500',
+      info: 'bg-blue-500'
+    };
+    const icons = {
+      success: 'check-circle',
+      error: 'x-circle',
+      warning: 'warning',
+      info: 'info'
+    };
+    
+    toast.className = `${colors[type]} text-white px-6 py-4 rounded-lg shadow-2xl font-medium flex items-center space-x-3 pointer-events-auto transform transition-all duration-300 mb-2`;
+    toast.style.animation = 'slideInRight 0.3s ease-out';
+    toast.innerHTML = `
+      <i class="ph ph-${icons[type]} text-xl"></i>
+      <span>${message}</span>
+    `;
+    
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.animation = 'slideOutRight 0.3s ease-in';
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+
+  // Add animation keyframes
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideInRight {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    @keyframes slideOutRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Initial render
+  renderTable();
+  
+  // Set first filter chip as active
+  document.querySelector('.filter-chip[data-filter="all"]').classList.add('ring-2', 'ring-indigo-500');
+
+  // Welcome message
+  setTimeout(() => {
+    showToast('Insurance claims management loaded successfully!', 'success');
+  }, 500);
+</script>
+</body>
+</html>

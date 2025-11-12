@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Symptoms Input & Assessment | SHMS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  .animate-slideUp {
+    animation: slideUp 0.7s ease-out forwards;
+  }
+  .animate-pulse-slow {
+    animation: pulse 3s ease-in-out infinite;
+  }
+  .dropdownContent {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none;
+    position: absolute;
+    z-index: 50;
+    left: 0;
+  }
+  .dropdownContent.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .card-hover {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  .stat-number {
+    font-feature-settings: 'tnum';
+    font-variant-numeric: tabular-nums;
+  }
+  .gradient-border {
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899) border-box;
+    border: 2px solid transparent;
+  }
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #6366f1;
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+  }
+
+  /* Floating animation for icons */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  .float-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Chart containers */
+  .chart-container {
+    position: relative;
+    height: 300px;
+  }
+  
+  /* Highlight search matches */
+  .highlight {
+    background-color: rgba(34, 211, 238, 0.3);
+    padding: 2px 4px;
+    border-radius: 4px;
+  }
+  
+  /* Status indicators */
+  .status-normal {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+  .status-warning {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+  .status-critical {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+  
+  /* IoT device status */
+  .device-connected {
+    background-color: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+  }
+  .device-disconnected {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+  }
+  .device-syncing {
+    background-color: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+  }
+  
+  /* Symptom severity */
+  .severity-mild {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+  .severity-moderate {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+  .severity-severe {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+  
+  /* Prediction confidence */
+  .confidence-high {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+  .confidence-medium {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+  .confidence-low {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+  
+  /* Compact table rows */
+  .compact-row {
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .compact-row:hover {
+    background-color: #f8fafc;
+  }
+  .compact-cell {
+    padding: 8px 10px;
+    font-size: 0.875rem;
+  }
+  .compact-header {
+    padding: 10px 10px;
+    font-size: 0.875rem;
+  }
+  
+  /* Optimized column widths */
+  .col-symptom-id {
+    width: 120px;
+  }
+  .col-patient-id {
+    width: 100px;
+  }
+  .col-patient-name {
+    width: 140px;
+  }
+  .col-symptoms {
+    width: 200px;
+  }
+  .col-severity {
+    width: 100px;
+  }
+  .col-date {
+    width: 120px;
+  }
+  .col-prediction {
+    width: 150px;
+  }
+  .col-confidence {
+    width: 100px;
+  }
+  .col-actions {
+    width: 90px;
+  }
+  
+  /* IoT device card */
+  .device-card {
+    transition: all 0.3s ease;
+    border-left: 4px solid #6366f1;
+  }
+  .device-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Print styles */
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+    
+    body {
+      background: white !important;
+    }
+    
+    .bg-gradient-to-br {
+      background: white !important;
+    }
+    
+    .shadow-lg, .shadow-md, .shadow-2xl {
+      box-shadow: none !important;
+    }
+    
+    table {
+      border-collapse: collapse;
+    }
+    
+    th, td {
+      border: 1px solid #e5e7eb !important;
+    }
+  }
+</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen flex flex-col">
+
+<!-- Top Navbar -->
+<nav class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+  <h1 class="text-2xl font-bold tracking-wide flex items-center space-x-2">
+    <i class="ph ph-heartbeat text-3xl"></i>
+    <span>SHMS</span>
+  </h1>
+  <span class="text-xl font-bold flex items-center space-x-2">
+    <i class="ph ph-user-circle"></i>
+    <span>Hospital Administrator</span>
+  </span>
+  <div class="relative">
+    <button id="menuBtn" class="text-white text-2xl focus:outline-none hover:bg-indigo-600 rounded-full p-2 transition" aria-label="Menu">
+      <i class="ph ph-dots-three-vertical"></i>
+    </button>
+    <div id="menuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded-md shadow-lg z-50">
+      <a href="#" class="block px-4 py-2 hover:bg-indigo-100 rounded-t-md flex items-center space-x-2">
+        <i class="ph ph-user"></i>
+        <span>Profile</span>
+      </a>
+      <a href="#" class="block px-4 py-2 hover:bg-indigo-100 flex items-center space-x-2">
+        <i class="ph ph-chart-bar"></i>
+        <span>Report</span>
+      </a>
+      <a href="login.html" class="block px-4 py-2 hover:bg-indigo-100 text-red-600 rounded-b-md flex items-center space-x-2">
+        <i class="ph ph-sign-out"></i>
+        <span>Logout</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- Feature Navbar -->
+<nav id="featureNavbar" class="bg-indigo-800 text-white shadow-md sticky top-0 z-40 transition-transform duration-300" style="top: 64px;">
+  <div class="container mx-auto flex flex-wrap justify-center md:justify-start items-center px-4 py-2 space-x-2">
+    <div class="relative">
+      <a href="Home.html" class="px-3 py-2 rounded-md hover:bg-indigo-700 block transition">Home</a>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Patient & Medical Record</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Patients.html" class="block px-4 py-2 hover:bg-indigo-100 font-semibold">Patient List</a>
+        <a href="MedicalRecords.html" class="block px-4 py-2 hover:bg-indigo-100 font-semibold">Medical Records</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Doctor & Appointment</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Doctors.html" class="block px-4 py-2 hover:bg-indigo-100">Doctors Directory</a>
+        <a href="Appointments.html" class="block px-4 py-2 hover:bg-indigo-100">Appointments Management</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Prescription & Investigation</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Prescriptions.html" class="block px-4 py-2 hover:bg-indigo-100">Prescriptions</a>
+        <a href="Investigations.html" class="block px-4 py-2 hover:bg-indigo-100">Tests & Diagnostic Reports</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Billing & Insurance</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Billing.html" class="block px-4 py-2 hover:bg-indigo-100">Bills & Payments</a>
+        <a href="InsuranceClaims.html" class="block px-4 py-2 hover:bg-indigo-100">Insurance Claims</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md bg-indigo-600 font-semibold dropdownBtn transition">Disease Prediction</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="DiseasePredictions.html" class="block px-4 py-2 hover:bg-indigo-100">Disease Predictions</a>
+        <a href="Symptoms.html" class="block px-4 py-2 hover:bg-indigo-100">Symptom Assessments</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn transition">Smart Recommendations</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="HealthReminders.html" class="block px-4 py-2 hover:bg-indigo-100">Health Reminders</a>
+        <a href="Recommendations.html" class="block px-4 py-2 hover:bg-indigo-100">Health Tips & Recommendations</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Header -->
+<header class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white p-6 shadow-lg flex justify-center items-center relative">
+  <div class="text-center">
+    <h1 class="text-3xl font-bold mb-1">Symptoms Input & Assessment</h1>
+    <p class="text-indigo-200 text-sm">Patient symptoms tracking with IoT health monitoring</p>
+  </div>
+  <div class="absolute right-8 flex space-x-2">
+    <button id="exportBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium shadow-md transition flex items-center space-x-2 no-print">
+      <i class="ph ph-download-simple"></i>
+      <span>Export</span>
+    </button>
+    <button id="printBtn" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md font-medium shadow-md transition flex items-center space-x-2 no-print">
+      <i class="ph ph-printer"></i>
+      <span>Print</span>
+    </button>
+    <button id="addSymptomBtn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md font-medium shadow-md transition flex items-center space-x-2">
+      <i class="ph ph-plus-circle"></i>
+      <span>Add Symptoms</span>
+    </button>
+  </div>
+</header>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-20 right-4 flex flex-col space-y-2 pointer-events-none z-50"></div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50 fade-in">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-md mx-4">
+    <div class="bg-red-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+      <h3 class="text-xl font-bold">Confirm Symptom Entry Deletion</h3>
+      <button id="closeConfirmModal" class="text-white hover:text-red-200 text-2xl">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+    <div class="p-6">
+      <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="ph ph-warning text-red-500 text-3xl"></i>
+      </div>
+      <p id="confirmText" class="mb-4 text-gray-600 text-center"></p>
+      
+      <div class="mb-4">
+        <label for="deleteReason" class="block text-sm font-medium text-gray-700 mb-2">Reason for deletion <span class="text-red-500">*</span></label>
+        <select id="deleteReason" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" required>
+          <option value="">Select a reason</option>
+          <option value="incorrect_entry">Incorrect Entry</option>
+          <option value="patient_request">Patient Request</option>
+          <option value="duplicate">Duplicate Entry</option>
+          <option value="test_data">Test Data</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      
+      <div id="otherReasonContainer" class="mb-4 hidden">
+        <label for="otherReason" class="block text-sm font-medium text-gray-700 mb-2">Please specify reason</label>
+        <textarea id="otherReason" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Enter specific reason for deletion"></textarea>
+      </div>
+      
+      <div class="mb-4">
+        <label for="deletionNotes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
+        <textarea id="deletionNotes" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Any additional information about this deletion"></textarea>
+      </div>
+      
+      <div class="flex justify-center space-x-4">
+        <button id="confirmYes" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md transition transform hover:scale-105 flex items-center space-x-2">
+          <i class="ph ph-trash"></i>
+          <span>Delete Entry</span>
+        </button>
+        <button id="confirmNo" class="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-md transition transform hover:scale-105">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Symptoms Modal -->
+<div id="symptomsModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50 fade-in overflow-y-auto py-8">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-3xl mx-4">
+    <div class="bg-indigo-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+      <h3 id="modalTitle" class="text-xl font-bold">Add New Symptoms</h3>
+      <button id="closeModal" class="text-white hover:text-indigo-200 text-2xl">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+    <form id="symptomsForm" class="p-6 space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="symptomId" class="block text-sm font-medium text-gray-700 mb-1">Symptom Entry ID</label>
+          <input type="text" id="symptomId" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="patientId" class="block text-sm font-medium text-gray-700 mb-1">Patient ID</label>
+          <input type="text" id="patientId" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="patientName" class="block text-sm font-medium text-gray-700 mb-1">Patient Name</label>
+          <input type="text" id="patientName" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+        <div>
+          <label for="dateRecorded" class="block text-sm font-medium text-gray-700 mb-1">Date Recorded</label>
+          <input type="date" id="dateRecorded" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Symptoms</label>
+        <div id="symptomsContainer" class="space-y-2">
+          <div class="flex space-x-2">
+            <select class="symptom-name flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="">Select Symptom</option>
+              <option value="Fever">Fever</option>
+              <option value="Headache">Headache</option>
+              <option value="Cough">Cough</option>
+              <option value="Shortness of breath">Shortness of breath</option>
+              <option value="Chest pain">Chest pain</option>
+              <option value="Fatigue">Fatigue</option>
+              <option value="Nausea">Nausea</option>
+              <option value="Dizziness">Dizziness</option>
+              <option value="Joint pain">Joint pain</option>
+              <option value="Abdominal pain">Abdominal pain</option>
+              <option value="Other">Other</option>
+            </select>
+            <select class="symptom-severity w-32 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="Mild">Mild</option>
+              <option value="Moderate">Moderate</option>
+              <option value="Severe">Severe</option>
+            </select>
+            <input type="number" class="symptom-duration w-32 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Duration (days)" min="0" step="1">
+            <button type="button" class="remove-symptom bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-md transition">
+              <i class="ph ph-trash"></i>
+            </button>
+          </div>
+        </div>
+        <button type="button" id="addSymptomBtnModal" class="mt-2 bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-md transition flex items-center space-x-2">
+          <i class="ph ph-plus"></i>
+          <span>Add Another Symptom</span>
+        </button>
+      </div>
+      
+      <div>
+        <label for="additionalNotes" class="block text-sm font-medium text-gray-700 mb-1">Additional Notes</label>
+        <textarea id="additionalNotes" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Any additional information about symptoms"></textarea>
+      </div>
+      
+      <div class="border-t pt-4">
+        <h4 class="text-lg font-medium text-gray-800 mb-3">IoT Device Data (Optional)</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="heartRate" class="block text-sm font-medium text-gray-700 mb-1">Heart Rate (BPM)</label>
+            <input type="number" id="heartRate" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 72">
+          </div>
+          <div>
+            <label for="bloodPressure" class="block text-sm font-medium text-gray-700 mb-1">Blood Pressure</label>
+            <input type="text" id="bloodPressure" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 120/80">
+          </div>
+          <div>
+            <label for="temperature" class="block text-sm font-medium text-gray-700 mb-1">Body Temperature (°C)</label>
+            <input type="number" id="temperature" step="0.1" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 36.6">
+          </div>
+          <div>
+            <label for="oxygenSaturation" class="block text-sm font-medium text-gray-700 mb-1">Oxygen Saturation (%)</label>
+            <input type="number" id="oxygenSaturation" min="0" max="100" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 98">
+          </div>
+        </div>
+      </div>
+      
+      <div class="flex justify-end space-x-3 pt-4">
+        <button type="button" id="cancelBtn" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md transition">Cancel</button>
+        <button type="submit" id="saveBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md transition">Save Symptoms</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- View Symptoms Modal -->
+<div id="viewSymptomsModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden z-50 fade-in overflow-y-auto py-8">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl mx-4">
+    <div class="bg-indigo-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+      <h3 class="text-xl font-bold">Symptom Assessment Details</h3>
+      <button id="closeViewModal" class="text-white hover:text-indigo-200 text-2xl">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+    <div class="p-6 space-y-4" id="symptomsDetails">
+      <!-- Content will be populated by JavaScript -->
+    </div>
+  </div>
+</div>
+
+<!-- IoT Device Monitoring Section -->
+<div class="container mx-auto mt-6 px-4">
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center space-x-2">
+      <i class="ph ph-device-mobile-camera text-indigo-600"></i>
+      <span>IoT Health Monitoring Devices</span>
+    </h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="device-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div class="flex justify-between items-start mb-3">
+          <h3 class="font-bold text-gray-800">Cardiac Monitor Implant</h3>
+          <span class="device-connected px-2 py-1 rounded-full text-xs font-medium">Connected</span>
+        </div>
+        <div class="space-y-2">
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-600">Heart Rate</span>
+            <span class="text-sm font-medium" id="iotHeartRate">72 BPM</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-600">Last Sync</span>
+            <span class="text-sm font-medium">2 min ago</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-600">Battery</span>
+            <span class="text-sm font-medium text-green-600">87%</span>
+          </div>
+        </div>
+        <button class="mt-3 w-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 py-2 rounded-md text-sm font-medium transition">
+          View Detailed Data
+        </button>
+      </div>
+      
+      <div class="device-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div class="flex justify-between items-start mb-3">
+          <h3 class="font-bold text-gray-800">Glucose Monitor</h3>
+          <span class="device-connected px-2 py-1 rounded-full text-xs font-medium">Connected</span>
+        </div>
+        <div class="space-y-2">
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-600">Glucose Level</span>
+            <span class="text-sm font-medium" id="iotGlucose">98 mg/dL</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-600">Last Sync</span>
+            <span class="text-sm font-medium">5 min ago</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-600">Battery</span>
+            <span class="text-sm font-medium text-green-600">72%</span>
+          </div>
+        </div>
+        <button class="mt-3 w-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 py-2 rounded-md text-sm font-medium transition">
+          View Detailed Data
+        </button>
+      </div>
+      
+      <div class="device-card bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div class="flex justify-between items-start mb-3">
+          <h3 class="font-bold text-gray-800">Activity Tracker</h3>
+          <span class="device-syncing px-2 py-1 rounded-full text-xs font-medium">Syncing</span>
+        </div>
+        <div class="space-y-2">
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-600">Steps Today</span>
+            <span class="text-sm font-medium" id="iotSteps">4,832</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-600">Last Sync</span>
+            <span class="text-sm font-medium">15 min ago</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-600">Battery</span>
+            <span class="text-sm font-medium text-yellow-600">42%</span>
+          </div>
+        </div>
+        <button class="mt-3 w-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 py-2 rounded-md text-sm font-medium transition">
+          View Detailed Data
+        </button>
+      </div>
+    </div>
+    
+    <div class="bg-gray-50 p-4 rounded-lg">
+      <h3 class="font-medium text-gray-800 mb-2">Real-time Health Metrics</h3>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="text-center">
+          <div class="text-2xl font-bold text-indigo-700" id="realTimeHeartRate">72</div>
+          <div class="text-xs text-gray-600">Heart Rate</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-green-700" id="realTimeOxygen">98%</div>
+          <div class="text-xs text-gray-600">Oxygen Sat</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-blue-700" id="realTimeTemp">36.6°C</div>
+          <div class="text-xs text-gray-600">Temperature</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-purple-700" id="realTimeBP">120/80</div>
+          <div class="text-xs text-gray-600">Blood Pressure</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AI Prediction Section -->
+<div class="container mx-auto mt-6 px-4">
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center space-x-2">
+      <i class="ph ph-brain text-indigo-600"></i>
+      <span>AI Disease Prediction</span>
+    </h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-gradient-to-br from-indigo-50 to-purple-50 p-4 rounded-lg border border-indigo-100">
+        <h3 class="font-bold text-gray-800 mb-3">Recent Predictions</h3>
+        <div class="space-y-3">
+          <div class="bg-white p-3 rounded-lg shadow-sm">
+            <div class="flex justify-between items-start">
+              <div>
+                <div class="font-medium">Influenza</div>
+                <div class="text-sm text-gray-600">Based on fever, cough, fatigue</div>
+              </div>
+              <span class="confidence-high px-2 py-1 rounded-full text-xs font-medium">87%</span>
+            </div>
+          </div>
+          <div class="bg-white p-3 rounded-lg shadow-sm">
+            <div class="flex justify-between items-start">
+              <div>
+                <div class="font-medium">Migraine</div>
+                <div class="text-sm text-gray-600">Based on headache, nausea</div>
+              </div>
+              <span class="confidence-medium px-2 py-1 rounded-full text-xs font-medium">72%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-gradient-to-br from-green-50 to-blue-50 p-4 rounded-lg border border-green-100">
+        <h3 class="font-bold text-gray-800 mb-3">Run New Prediction</h3>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Select Patient</label>
+            <select class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="">Choose a patient</option>
+              <option value="0001001">Ayesha Rahman (0001001)</option>
+              <option value="0001002">Jamal Hossain (0001002)</option>
+              <option value="0001003">Mina Akter (0001003)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Time Range</label>
+            <select class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="7">Last 7 days</option>
+              <option value="30" selected>Last 30 days</option>
+              <option value="90">Last 90 days</option>
+            </select>
+          </div>
+          <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-md font-medium transition flex items-center justify-center space-x-2">
+            <i class="ph ph-brain"></i>
+            <span>Generate Prediction</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Controls -->
+<div class="container mx-auto mt-6 px-4">
+  <div class="bg-white rounded-lg shadow-md p-4 space-y-4">
+    <!-- Top row: Search and Sort -->
+    <div class="flex flex-wrap justify-between items-center gap-4">
+      <div class="flex items-center space-x-2 flex-1 max-w-md">
+        <i class="ph ph-magnifying-glass text-gray-400 text-xl"></i>
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Search by symptom ID, patient name, symptoms..." 
+          class="border border-gray-300 rounded-md px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+        />
+        <button id="clearSearch" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-md transition hidden">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-2">
+          <label for="sort" class="font-medium text-gray-700">Sort by:</label>
+          <select id="sort" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+            <option value="id">Symptom ID</option>
+            <option value="date">Date Recorded</option>
+            <option value="patientId">Patient ID</option>
+            <option value="severity">Severity</option>
+          </select>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <label for="perPage" class="font-medium text-gray-700">Show:</label>
+          <select id="perPage" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="50">50</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter chips -->
+    <div class="flex flex-wrap gap-2">
+      <button class="filter-chip bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="all">
+        Total Entries (<span id="countAll">0</span>)
+      </button>
+      <button class="filter-chip bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="mild">
+        Mild Symptoms (<span id="countMild">0</span>)
+      </button>
+      <button class="filter-chip bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="moderate">
+        Moderate Symptoms (<span id="countModerate">0</span>)
+      </button>
+      <button class="filter-chip bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="severe">
+        Severe Symptoms (<span id="countSevere">0</span>)
+      </button>
+      <button class="filter-chip bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-1 rounded-full text-sm font-medium" data-filter="predicted">
+        With Predictions (<span id="countPredicted">0</span>)
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+      <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+        <div class="text-blue-600 text-sm font-medium">Total Entries</div>
+        <div id="statTotal" class="text-2xl font-bold text-blue-700">0</div>
+      </div>
+      <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+        <div class="text-green-600 text-sm font-medium">Showing</div>
+        <div id="statShowing" class="text-2xl font-bold text-green-700">0</div>
+      </div>
+      <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+        <div class="text-purple-600 text-sm font-medium">Current Page</div>
+        <div id="statPage" class="text-2xl font-bold text-purple-700">1</div>
+      </div>
+      <div class="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-lg border border-orange-200">
+        <div class="text-orange-600 text-sm font-medium">Total Pages</div>
+        <div id="statPages" class="text-2xl font-bold text-orange-700">1</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="container mx-auto mt-6 px-4 pb-6 overflow-x-auto">
+  <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <table id="symptomsTable" class="min-w-full">
+      <thead class="bg-indigo-600 text-white">
+        <tr>
+          <th class="compact-header text-left font-semibold col-symptom-id">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-first-aid-kit"></i>
+              <span>Symptom ID</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-patient-id">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-user"></i>
+              <span>Patient ID</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-patient-name">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-user"></i>
+              <span>Patient Name</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-symptoms">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-warning-circle"></i>
+              <span>Symptoms</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-severity">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-gauge"></i>
+              <span>Severity</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-date">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-calendar"></i>
+              <span>Date Recorded</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-prediction">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-brain"></i>
+              <span>AI Prediction</span>
+            </div>
+          </th>
+          <th class="compact-header text-left font-semibold col-confidence">
+            <div class="flex items-center space-x-2">
+              <i class="ph ph-trend-up"></i>
+              <span>Confidence</span>
+            </div>
+          </th>
+          <th class="compact-header text-center font-semibold no-print col-actions">
+            <div class="flex items-center justify-center space-x-2">
+              <i class="ph ph-gear"></i>
+              <span>Actions</span>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div id="noResults" class="hidden py-12 text-center text-gray-500">
+      <i class="ph ph-magnifying-glass text-5xl mb-4"></i>
+      <p class="text-lg font-medium">No symptom entries found</p>
+      <p class="text-sm">Try adjusting your search or filters</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div id="paginationContainer" class="mt-6 flex justify-center items-center space-x-2">
+    <button id="firstPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-double-left"></i>
+    </button>
+    <button id="prevPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-left"></i>
+    </button>
+    <div id="pageNumbers" class="flex space-x-2"></div>
+    <button id="nextPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-right"></i>
+    </button>
+    <button id="lastPage" class="pagination-btn bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300 px-3 py-2 rounded-md transition">
+      <i class="ph ph-caret-double-right"></i>
+    </button>
+  </div>
+</div>
+
+<script>
+  // Navigation scripts
+  const menuBtn = document.getElementById('menuBtn');
+  const menuDropdown = document.getElementById('menuDropdown');
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuDropdown.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+      menuDropdown.classList.add('hidden');
+    }
+  });
+
+  const dropdownButtons = document.querySelectorAll('.dropdownBtn');
+  let activeDropdown = null;
+
+  dropdownButtons.forEach(btn => {
+    const dropdown = btn.nextElementSibling;
+    if (!dropdown) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeDropdown && activeDropdown !== dropdown) {
+        activeDropdown.classList.remove('show');
+      }
+      if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        activeDropdown = null;
+      } else {
+        dropdown.classList.add('show');
+        activeDropdown = dropdown;
+      }
+    });
+
+    btn.addEventListener('mouseenter', () => dropdown.classList.add('show'));
+    btn.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!dropdown.matches(':hover')) {
+          dropdown.classList.remove('show');
+        }
+      }, 100);
+    });
+    
+    if (dropdown) {
+      dropdown.addEventListener('mouseleave', () => {
+        dropdown.classList.remove('show');
+        if (activeDropdown === dropdown) activeDropdown = null;
+      });
+    }
+  });
+
+  document.body.addEventListener('click', () => {
+    if (activeDropdown) {
+      activeDropdown.classList.remove('show');
+      activeDropdown = null;
+    }
+  });
+
+  let lastScroll = 0;
+  const featureNavbar = document.getElementById('featureNavbar');
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+    if (currentScroll > lastScroll && currentScroll > 100) {
+      featureNavbar.style.transform = 'translateY(-100%)';
+    } else {
+      featureNavbar.style.transform = 'translateY(0)';
+    }
+    lastScroll = currentScroll;
+  });
+
+  // Main application
+  const tbody = document.getElementById('tableBody');
+  const searchInput = document.getElementById('searchInput');
+  const clearSearch = document.getElementById('clearSearch');
+  const sortSelect = document.getElementById('sort');
+  const perPageSelect = document.getElementById('perPage');
+  const confirmModal = document.getElementById('confirmModal');
+  const confirmText = document.getElementById('confirmText');
+  const confirmYes = document.getElementById('confirmYes');
+  const confirmNo = document.getElementById('confirmNo');
+  const closeConfirmModal = document.getElementById('closeConfirmModal');
+  const deleteReason = document.getElementById('deleteReason');
+  const otherReasonContainer = document.getElementById('otherReasonContainer');
+  const otherReason = document.getElementById('otherReason');
+  const deletionNotes = document.getElementById('deletionNotes');
+  const toastContainer = document.getElementById('toastContainer');
+  const noResults = document.getElementById('noResults');
+  const exportBtn = document.getElementById('exportBtn');
+  const printBtn = document.getElementById('printBtn');
+  const addSymptomBtn = document.getElementById('addSymptomBtn');
+  const symptomsModal = document.getElementById('symptomsModal');
+  const symptomsForm = document.getElementById('symptomsForm');
+  const modalTitle = document.getElementById('modalTitle');
+  const closeModal = document.getElementById('closeModal');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const addSymptomBtnModal = document.getElementById('addSymptomBtnModal');
+  const symptomsContainer = document.getElementById('symptomsContainer');
+  const viewSymptomsModal = document.getElementById('viewSymptomsModal');
+  const closeViewModal = document.getElementById('closeViewModal');
+  const symptomsDetails = document.getElementById('symptomsDetails');
+
+  let deleteSymptomId = null;
+  let deleteSymptomInfo = "";
+  let currentPage = 1;
+  let recordsPerPage = 20;
+  let currentFilter = 'all';
+  let isEditing = false;
+  let editingSymptomId = null;
+
+  // Format date
+  function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+  }
+
+  // Format symptoms for display
+  function formatSymptoms(symptoms) {
+    if (!symptoms || symptoms.length === 0) return 'No symptoms';
+    
+    let html = '';
+    symptoms.forEach((symptom, index) => {
+      if (index < 2) { // Show max 2 symptoms in table
+        const severityClass = symptom.severity === 'Mild' ? 'severity-mild' : 
+                            symptom.severity === 'Moderate' ? 'severity-moderate' : 'severity-severe';
+        html += `<span class="${severityClass} px-2 py-1 rounded-md text-xs mr-1 mb-1 inline-block">${symptom.name}</span>`;
+      }
+    });
+    
+    if (symptoms.length > 2) {
+      html += `<span class="bg-gray-200 px-2 py-1 rounded-md text-xs mr-1 mb-1 inline-block">+${symptoms.length - 2} more</span>`;
+    }
+    
+    return html;
+  }
+
+  // Sample symptoms data
+  const symptomsEntries = [
+    ["SYM001", "0001001", "Ayesha Rahman", 
+     [{name: "Fever", severity: "Moderate", duration: 2}],
+     "2024-01-10", "Influenza", 87, "Patient reports fever and body aches"],
+    
+    ["SYM002", "0001002", "Jamal Hossain", 
+     [{name: "Headache", severity: "Severe", duration: 1},
+      {name: "Nausea", severity: "Mild", duration: 1}],
+     "2024-01-12", "Migraine", 72, "Severe headache with sensitivity to light"],
+    
+    ["SYM003", "0001003", "Mina Akter", 
+     [{name: "Cough", severity: "Mild", duration: 5},
+      {name: "Fatigue", severity: "Moderate", duration: 3}],
+     "2024-01-08", "Common Cold", 65, "Persistent cough with tiredness"],
+    
+    ["SYM004", "0001004", "Rafiul Islam", 
+     [{name: "Chest pain", severity: "Severe", duration: 1}],
+     "2024-01-15", "Cardiac Issue", 92, "Sudden chest pain, referred to cardiology"],
+    
+    ["SYM005", "0001005", "Tahmina Sultana", 
+     [{name: "Shortness of breath", severity: "Moderate", duration: 2},
+      {name: "Wheezing", severity: "Moderate", duration: 2}],
+     "2024-01-05", "Asthma", 78, "Breathing difficulties, especially at night"],
+    
+    ["SYM006", "0001006", "Arif Chowdhury", 
+     [{name: "Joint pain", severity: "Moderate", duration: 7},
+      {name: "Fatigue", severity: "Mild", duration: 7}],
+     "2023-12-20", "Arthritis", 81, "Multiple joint pain, worse in mornings"],
+    
+    ["SYM007", "0001007", "Nasrin Jahan", 
+     [{name: "Abdominal pain", severity: "Severe", duration: 1}],
+     "2024-01-14", "Appendicitis", 95, "Localized right lower quadrant pain"],
+    
+    ["SYM008", "0001008", "Sabbir Ahmed", 
+     [{name: "Dizziness", severity: "Mild", duration: 3},
+      {name: "Headache", severity: "Mild", duration: 3}],
+     "2024-01-16", "Vertigo", 68, "Episodes of dizziness when changing position"],
+    
+    ["SYM009", "0001009", "Tania Rahman", 
+     [{name: "Skin rash", severity: "Moderate", duration: 2}],
+     "2024-01-11", "Allergic Reaction", 75, "Itchy red rash on arms and torso"],
+    
+    ["SYM010", "0001010", "Mahmud Hasan", 
+     [{name: "Sore throat", severity: "Mild", duration: 4},
+      {name: "Cough", severity: "Mild", duration: 4}],
+     "2024-01-09", "Pharyngitis", 70, "Painful swallowing, no fever"]
+  ];
+
+  function getFilteredData() {
+    const term = searchInput.value.toLowerCase();
+    let filtered = symptomsEntries.filter(p => {
+      const matchesSearch = p.some((field, index) => {
+        if (index === 3) { // Symptoms array
+          return field.some(symptom => 
+            symptom.name.toLowerCase().includes(term) ||
+            symptom.severity.toLowerCase().includes(term)
+          );
+        }
+        return String(field).toLowerCase().includes(term);
+      });
+      
+      let matchesFilter = true;
+      if (currentFilter === 'mild') {
+        matchesFilter = p[3].some(s => s.severity === 'Mild');
+      } else if (currentFilter === 'moderate') {
+        matchesFilter = p[3].some(s => s.severity === 'Moderate');
+      } else if (currentFilter === 'severe') {
+        matchesFilter = p[3].some(s => s.severity === 'Severe');
+      } else if (currentFilter === 'predicted') {
+        matchesFilter = p[5] !== null && p[5] !== '';
+      }
+      
+      return matchesSearch && matchesFilter;
+    });
+    return filtered;
+  }
+
+  function updateStats() {
+    const filtered = getFilteredData();
+    const totalPages = recordsPerPage === 'all' ? 1 : Math.ceil(filtered.length / recordsPerPage);
+    
+    document.getElementById('statTotal').textContent = symptomsEntries.length;
+    document.getElementById('statShowing').textContent = filtered.length;
+    document.getElementById('statPage').textContent = currentPage;
+    document.getElementById('statPages').textContent = totalPages;
+
+    // Update filter counts
+    document.getElementById('countAll').textContent = symptomsEntries.length;
+    
+    const mildCount = symptomsEntries.filter(p => 
+      p[3].some(s => s.severity === 'Mild')
+    ).length;
+    document.getElementById('countMild').textContent = mildCount;
+    
+    const moderateCount = symptomsEntries.filter(p => 
+      p[3].some(s => s.severity === 'Moderate')
+    ).length;
+    document.getElementById('countModerate').textContent = moderateCount;
+    
+    const severeCount = symptomsEntries.filter(p => 
+      p[3].some(s => s.severity === 'Severe')
+    ).length;
+    document.getElementById('countSevere').textContent = severeCount;
+    
+    const predictedCount = symptomsEntries.filter(p => 
+      p[5] !== null && p[5] !== ''
+    ).length;
+    document.getElementById('countPredicted').textContent = predictedCount;
+  }
+
+  function highlightText(text, searchTerm) {
+    if (!searchTerm) return text;
+    
+    const regex = new RegExp(`(${searchTerm})`, 'gi');
+    return text.replace(regex, '<span class="highlight">$1</span>');
+  }
+
+  function renderTable() {
+    const filtered = getFilteredData();
+    const startIndex = recordsPerPage === 'all' ? 0 : (currentPage - 1) * recordsPerPage;
+    const endIndex = recordsPerPage === 'all' ? filtered.length : startIndex + recordsPerPage;
+    const paginatedData = filtered.slice(startIndex, endIndex);
+    const searchTerm = searchInput.value.toLowerCase();
+
+    tbody.innerHTML = "";
+    
+    if (paginatedData.length === 0) {
+      noResults.classList.remove('hidden');
+      document.getElementById('paginationContainer').classList.add('hidden');
+    } else {
+      noResults.classList.add('hidden');
+      document.getElementById('paginationContainer').classList.remove('hidden');
+      
+      paginatedData.forEach((p, index) => {
+        // Get overall severity (highest severity among symptoms)
+        const severities = p[3].map(s => s.severity);
+        const overallSeverity = severities.includes('Severe') ? 'Severe' : 
+                               severities.includes('Moderate') ? 'Moderate' : 'Mild';
+        
+        const severityClass = overallSeverity === 'Mild' ? 'severity-mild' : 
+                             overallSeverity === 'Moderate' ? 'severity-moderate' : 'severity-severe';
+        
+        const severityIcon = overallSeverity === 'Mild' ? 'ph-info' : 
+                            overallSeverity === 'Moderate' ? 'ph-warning' : 'ph-warning-circle';
+        
+        // Confidence level styling
+        const confidence = p[6] || 0;
+        const confidenceClass = confidence >= 80 ? 'confidence-high' : 
+                               confidence >= 60 ? 'confidence-medium' : 'confidence-low';
+        
+        tbody.innerHTML += `
+          <tr class="compact-row transition-all duration-200" style="animation: fadeIn 0.3s ease ${index * 0.05}s both">
+            <td class="compact-cell font-mono text-sm col-symptom-id">${highlightText(p[0], searchTerm)}</td>
+            <td class="compact-cell font-mono text-sm col-patient-id">${highlightText(p[1], searchTerm)}</td>
+            <td class="compact-cell font-medium col-patient-name">${highlightText(p[2], searchTerm)}</td>
+            <td class="compact-cell text-sm col-symptoms">${formatSymptoms(p[3])}</td>
+            <td class="compact-cell col-severity">
+              <span class="badge ${severityClass} px-2 py-1 rounded-full text-xs font-medium flex items-center space-x-1 w-fit">
+                <i class="ph ${severityIcon}"></i>
+                <span>${overallSeverity}</span>
+              </span>
+            </td>
+            <td class="compact-cell text-sm col-date">${formatDate(p[4])}</td>
+            <td class="compact-cell font-medium col-prediction">${p[5] || 'No prediction'}</td>
+            <td class="compact-cell col-confidence">
+              ${p[5] ? `
+              <span class="badge ${confidenceClass} px-2 py-1 rounded-md text-xs font-medium flex items-center space-x-1 w-fit">
+                <span>${p[6]}%</span>
+              </span>
+              ` : '-'}
+            </td>
+            <td class="compact-cell text-center space-x-2 no-print col-actions">
+              <button class="bg-blue-400 hover:bg-blue-500 text-white px-2 py-1 rounded-md transition transform hover:scale-105 viewBtn" title="View Details" data-id="${p[0]}">
+                <i class="ph ph-eye"></i>
+              </button>
+              <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded-md transition transform hover:scale-105 editBtn" title="Edit Entry" data-id="${p[0]}">
+                <i class="ph ph-pencil"></i>
+              </button>
+              <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded-md transition transform hover:scale-105 deleteBtn" title="Delete Entry" data-id="${p[0]}" data-info="${p[2]} - ${p[3].length} symptoms">
+                <i class="ph ph-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+    
+    updatePagination();
+    updateStats();
+  }
+
+  function updatePagination() {
+    const filtered = getFilteredData();
+    const totalPages = recordsPerPage === 'all' ? 1 : Math.ceil(filtered.length / recordsPerPage);
+    const pageNumbers = document.getElementById('pageNumbers');
+    pageNumbers.innerHTML = '';
+
+    if (recordsPerPage !== 'all') {
+      let startPage = Math.max(1, currentPage - 2);
+      let endPage = Math.min(totalPages, startPage + 4);
+      
+      if (endPage - startPage < 4) {
+        startPage = Math.max(1, endPage - 4);
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.className = `pagination-btn px-4 py-2 rounded-md transition ${
+          i === currentPage 
+            ? 'bg-indigo-600 text-white' 
+            : 'bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-300'
+        }`;
+        btn.onclick = () => {
+          currentPage = i;
+          renderTable();
+        };
+        pageNumbers.appendChild(btn);
+      }
+    }
+
+    document.getElementById('firstPage').disabled = currentPage === 1;
+    document.getElementById('prevPage').disabled = currentPage === 1;
+    document.getElementById('nextPage').disabled = currentPage === totalPages || recordsPerPage === 'all';
+    document.getElementById('lastPage').disabled = currentPage === totalPages || recordsPerPage === 'all';
+  }
+
+  // Simulate IoT device data updates
+  function updateIoTData() {
+    // Generate random but realistic health metrics
+    const heartRate = Math.floor(Math.random() * 40) + 60; // 60-100 BPM
+    const oxygen = Math.floor(Math.random() * 5) + 95; // 95-100%
+    const temp = (Math.random() * 1.5) + 36.0; // 36.0-37.5°C
+    const systolic = Math.floor(Math.random() * 30) + 110; // 110-140
+    const diastolic = Math.floor(Math.random() * 20) + 70; // 70-90
+    
+    // Update display
+    document.getElementById('iotHeartRate').textContent = `${heartRate} BPM`;
+    document.getElementById('realTimeHeartRate').textContent = heartRate;
+    document.getElementById('realTimeOxygen').textContent = `${oxygen}%`;
+    document.getElementById('realTimeTemp').textContent = `${temp.toFixed(1)}°C`;
+    document.getElementById('realTimeBP').textContent = `${systolic}/${diastolic}`;
+    
+    // Update glucose with some variation
+    const glucose = Math.floor(Math.random() * 40) + 80; // 80-120 mg/dL
+    document.getElementById('iotGlucose').textContent = `${glucose} mg/dL`;
+    
+    // Update steps with incremental increase
+    const stepsElement = document.getElementById('iotSteps');
+    const currentSteps = parseInt(stepsElement.textContent.replace(',', '')) || 0;
+    const newSteps = currentSteps + Math.floor(Math.random() * 50);
+    stepsElement.textContent = newSteps.toLocaleString();
+  }
+
+  // Update IoT data every 5 seconds
+  setInterval(updateIoTData, 5000);
+  // Initial update
+  updateIoTData();
+
+  // Search functionality
+  searchInput.addEventListener('input', () => {
+    currentPage = 1;
+    renderTable();
+    clearSearch.classList.toggle('hidden', searchInput.value === '');
+  });
+
+  clearSearch.addEventListener('click', () => {
+    searchInput.value = '';
+    clearSearch.classList.add('hidden');
+    currentPage = 1;
+    renderTable();
+  });
+
+  // Sort functionality
+  sortSelect.addEventListener('change', () => {
+    const key = sortSelect.value;
+    let index;
+    
+    switch(key) {
+      case 'id': index = 0; break;
+      case 'date': index = 4; break;
+      case 'patientId': index = 1; break;
+      case 'severity': 
+        // Custom sort by severity
+        symptomsEntries.sort((a, b) => {
+          const severityOrder = { 'Severe': 3, 'Moderate': 2, 'Mild': 1 };
+          const aMax = Math.max(...a[3].map(s => severityOrder[s.severity]));
+          const bMax = Math.max(...b[3].map(s => severityOrder[s.severity]));
+          return bMax - aMax;
+        });
+        break;
+      default: index = 0;
+    }
+    
+    if (key !== 'severity') {
+      symptomsEntries.sort((a, b) => {
+        if (key === 'date') {
+          return new Date(a[index]) - new Date(b[index]);
+        }
+        return a[index].toString().localeCompare(b[index].toString());
+      });
+    }
+    
+    currentPage = 1;
+    renderTable();
+    showToast(`Sorted by ${key}`, 'info');
+  });
+
+  // Per page selector
+  perPageSelect.addEventListener('change', () => {
+    recordsPerPage = perPageSelect.value === 'all' ? 'all' : parseInt(perPageSelect.value);
+    currentPage = 1;
+    renderTable();
+  });
+
+  // Filter chips
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      currentFilter = chip.dataset.filter;
+      currentPage = 1;
+      
+      document.querySelectorAll('.filter-chip').forEach(c => {
+        c.classList.remove('ring-2', 'ring-indigo-500');
+      });
+      chip.classList.add('ring-2', 'ring-indigo-500');
+      
+      renderTable();
+      
+      const filterNames = {
+        all: 'all symptom entries',
+        mild: 'mild symptom entries',
+        moderate: 'moderate symptom entries',
+        severe: 'severe symptom entries',
+        predicted: 'entries with predictions'
+      };
+      showToast(`Showing ${filterNames[currentFilter]}`, 'info');
+    });
+  });
+
+  // Pagination buttons
+  document.getElementById('firstPage').addEventListener('click', () => {
+    currentPage = 1;
+    renderTable();
+  });
+
+  document.getElementById('prevPage').addEventListener('click', () => {
+    if (currentPage > 1) {
+      currentPage--;
+      renderTable();
+    }
+  });
+
+  document.getElementById('nextPage').addEventListener('click', () => {
+    const filtered = getFilteredData();
+    const totalPages = Math.ceil(filtered.length / recordsPerPage);
+    if (currentPage < totalPages) {
+      currentPage++;
+      renderTable();
+    }
+  });
+
+  document.getElementById('lastPage').addEventListener('click', () => {
+    const filtered = getFilteredData();
+    const totalPages = Math.ceil(filtered.length / recordsPerPage);
+    currentPage = totalPages;
+    renderTable();
+  });
+
+  // Table actions
+  tbody.addEventListener('click', (e) => {
+    const row = e.target.closest('tr');
+    if (!row) return;
+
+    const symptomId = e.target.closest('.viewBtn')?.dataset.id || 
+                     e.target.closest('.editBtn')?.dataset.id || 
+                     e.target.closest('.deleteBtn')?.dataset.id;
+    const symptomInfo = e.target.closest('.deleteBtn')?.dataset.info;
+
+    if (e.target.closest('.viewBtn')) {
+      viewSymptoms(symptomId);
+    } else if (e.target.closest('.editBtn')) {
+      editSymptoms(symptomId);
+    } else if (e.target.closest('.deleteBtn')) {
+      deleteSymptomId = symptomId;
+      deleteSymptomInfo = symptomInfo;
+      confirmText.textContent = `You are about to delete symptom entry ${deleteSymptomId} (${deleteSymptomInfo}). This action is irreversible. Please provide a reason for this deletion.`;
+      confirmModal.classList.remove('hidden');
+      
+      // Reset deletion form
+      deleteReason.value = '';
+      otherReasonContainer.classList.add('hidden');
+      otherReason.value = '';
+      deletionNotes.value = '';
+    }
+  });
+
+  // View symptoms function
+  function viewSymptoms(id) {
+    const entry = symptomsEntries.find(p => p[0] === id);
+    if (!entry) return;
+    
+    let symptomsHTML = '';
+    entry[3].forEach(symptom => {
+      const severityClass = symptom.severity === 'Mild' ? 'severity-mild' : 
+                           symptom.severity === 'Moderate' ? 'severity-moderate' : 'severity-severe';
+      symptomsHTML += `
+        <div class="bg-gray-50 p-3 rounded-lg mb-2">
+          <div class="flex justify-between items-center">
+            <div class="font-medium">${symptom.name}</div>
+            <span class="badge ${severityClass} px-2 py-1 rounded-full text-xs font-medium">
+              ${symptom.severity}
+            </span>
+          </div>
+          <div class="text-sm text-gray-600 mt-1">
+            <span class="font-medium">Duration:</span> ${symptom.duration} day(s)
+          </div>
+        </div>
+      `;
+    });
+    
+    // Confidence level styling
+    const confidence = entry[6] || 0;
+    const confidenceClass = confidence >= 80 ? 'confidence-high' : 
+                           confidence >= 60 ? 'confidence-medium' : 'confidence-low';
+    
+    symptomsDetails.innerHTML = `
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Symptom Entry ID</label>
+          <p class="mt-1 font-mono">${entry[0]}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Date Recorded</label>
+          <p class="mt-1">${formatDate(entry[4])}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Patient</label>
+          <p class="mt-1">${entry[2]} (ID: ${entry[1]})</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">AI Prediction</label>
+          <p class="mt-1 font-medium">${entry[5] || 'No prediction available'}</p>
+        </div>
+        ${entry[5] ? `
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Confidence Level</label>
+          <p class="mt-1">
+            <span class="badge ${confidenceClass} px-2 py-1 rounded-md text-xs font-medium">
+              ${confidence}%
+            </span>
+          </p>
+        </div>
+        ` : ''}
+      </div>
+      
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Symptoms</label>
+        ${symptomsHTML}
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
+        <p class="text-gray-600">${entry[7] || 'No additional notes provided.'}</p>
+      </div>
+      
+      ${entry[5] ? `
+      <div class="mt-6 pt-4 border-t border-gray-200">
+        <h4 class="text-sm font-medium text-gray-700 mb-2">AI Analysis</h4>
+        <div class="bg-blue-50 p-3 rounded-lg">
+          <p class="text-sm text-blue-800">
+            Based on the reported symptoms, our AI model has identified potential matches with known conditions. 
+            This prediction should be reviewed by a healthcare professional for accurate diagnosis.
+          </p>
+        </div>
+      </div>
+      ` : ''}
+    `;
+    
+    viewSymptomsModal.classList.remove('hidden');
+  }
+
+  // Delete reason change handler
+  deleteReason.addEventListener('change', () => {
+    if (deleteReason.value === 'other') {
+      otherReasonContainer.classList.remove('hidden');
+    } else {
+      otherReasonContainer.classList.add('hidden');
+    }
+  });
+
+  // Add symptom row function
+  function addSymptomRow(name = '', severity = 'Mild', duration = '') {
+    const symptomRow = document.createElement('div');
+    symptomRow.className = 'flex space-x-2';
+    symptomRow.innerHTML = `
+      <select class="symptom-name flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <option value="">Select Symptom</option>
+        <option value="Fever" ${name === 'Fever' ? 'selected' : ''}>Fever</option>
+        <option value="Headache" ${name === 'Headache' ? 'selected' : ''}>Headache</option>
+        <option value="Cough" ${name === 'Cough' ? 'selected' : ''}>Cough</option>
+        <option value="Shortness of breath" ${name === 'Shortness of breath' ? 'selected' : ''}>Shortness of breath</option>
+        <option value="Chest pain" ${name === 'Chest pain' ? 'selected' : ''}>Chest pain</option>
+        <option value="Fatigue" ${name === 'Fatigue' ? 'selected' : ''}>Fatigue</option>
+        <option value="Nausea" ${name === 'Nausea' ? 'selected' : ''}>Nausea</option>
+        <option value="Dizziness" ${name === 'Dizziness' ? 'selected' : ''}>Dizziness</option>
+        <option value="Joint pain" ${name === 'Joint pain' ? 'selected' : ''}>Joint pain</option>
+        <option value="Abdominal pain" ${name === 'Abdominal pain' ? 'selected' : ''}>Abdominal pain</option>
+        <option value="Other" ${name === 'Other' ? 'selected' : ''}>Other</option>
+      </select>
+      <select class="symptom-severity w-32 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <option value="Mild" ${severity === 'Mild' ? 'selected' : ''}>Mild</option>
+        <option value="Moderate" ${severity === 'Moderate' ? 'selected' : ''}>Moderate</option>
+        <option value="Severe" ${severity === 'Severe' ? 'selected' : ''}>Severe</option>
+      </select>
+      <input type="number" class="symptom-duration w-32 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Duration (days)" min="0" step="1" value="${duration}">
+      <button type="button" class="remove-symptom bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-md transition">
+        <i class="ph ph-trash"></i>
+      </button>
+    `;
+    symptomsContainer.appendChild(symptomRow);
+    
+    // Add event listener to remove button
+    symptomRow.querySelector('.remove-symptom').addEventListener('click', function() {
+      if (symptomsContainer.children.length > 1) {
+        symptomRow.remove();
+      } else {
+        showToast('At least one symptom is required', 'warning');
+      }
+    });
+  }
+
+  // Edit symptoms function
+  function editSymptoms(id) {
+    const entry = symptomsEntries.find(p => p[0] === id);
+    if (!entry) return;
+    
+    isEditing = true;
+    editingSymptomId = id;
+    modalTitle.textContent = 'Edit Symptom Entry';
+    
+    // Clear existing symptoms
+    symptomsContainer.innerHTML = '';
+    
+    // Fill form with entry data
+    document.getElementById('symptomId').value = entry[0];
+    document.getElementById('patientId').value = entry[1];
+    document.getElementById('patientName').value = entry[2];
+    document.getElementById('dateRecorded').value = entry[4];
+    document.getElementById('additionalNotes').value = entry[7] || '';
+    
+    // Add symptoms
+    entry[3].forEach(symptom => {
+      addSymptomRow(symptom.name, symptom.severity, symptom.duration);
+    });
+    
+    symptomsModal.classList.remove('hidden');
+  }
+
+  // Add symptom button
+  addSymptomBtnModal.addEventListener('click', () => {
+    addSymptomRow();
+  });
+
+  // Add symptoms modal
+  addSymptomBtn.addEventListener('click', () => {
+    isEditing = false;
+    editingSymptomId = null;
+    modalTitle.textContent = 'Add New Symptoms';
+    symptomsForm.reset();
+    
+    // Clear symptoms and add one empty row
+    symptomsContainer.innerHTML = '';
+    addSymptomRow();
+    
+    // Set default date
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('dateRecorded').value = today;
+    
+    symptomsModal.classList.remove('hidden');
+  });
+
+  // Close modals
+  closeModal.addEventListener('click', () => {
+    symptomsModal.classList.add('hidden');
+  });
+
+  closeViewModal.addEventListener('click', () => {
+    viewSymptomsModal.classList.add('hidden');
+  });
+
+  closeConfirmModal.addEventListener('click', () => {
+    confirmModal.classList.add('hidden');
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    symptomsModal.classList.add('hidden');
+  });
+
+  confirmNo.addEventListener('click', () => {
+    confirmModal.classList.add('hidden');
+  });
+
+  // Save symptoms form
+  symptomsForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    // Collect symptoms data
+    const symptoms = [];
+    const symptomRows = symptomsContainer.querySelectorAll('.flex.space-x-2');
+    symptomRows.forEach(row => {
+      const name = row.querySelector('.symptom-name').value;
+      const severity = row.querySelector('.symptom-severity').value;
+      const duration = parseInt(row.querySelector('.symptom-duration').value) || 0;
+      
+      if (name && severity) {
+        symptoms.push({ name, severity, duration });
+      }
+    });
+    
+    if (symptoms.length === 0) {
+      showToast('Please add at least one symptom', 'error');
+      return;
+    }
+    
+    const formData = {
+      id: document.getElementById('symptomId').value,
+      patientId: document.getElementById('patientId').value,
+      patientName: document.getElementById('patientName').value,
+      symptoms: symptoms,
+      dateRecorded: document.getElementById('dateRecorded').value,
+      additionalNotes: document.getElementById('additionalNotes').value,
+      heartRate: document.getElementById('heartRate').value,
+      bloodPressure: document.getElementById('bloodPressure').value,
+      temperature: document.getElementById('temperature').value,
+      oxygenSaturation: document.getElementById('oxygenSaturation').value
+    };
+    
+    // Simulate AI prediction based on symptoms
+    let prediction = '';
+    let confidence = 0;
+    
+    if (symptoms.some(s => s.name === 'Fever' && s.name === 'Cough')) {
+      prediction = 'Influenza';
+      confidence = 85;
+    } else if (symptoms.some(s => s.name === 'Headache' && s.severity === 'Severe')) {
+      prediction = 'Migraine';
+      confidence = 75;
+    } else if (symptoms.some(s => s.name === 'Chest pain' && s.severity === 'Severe')) {
+      prediction = 'Cardiac Issue';
+      confidence = 90;
+    } else if (symptoms.some(s => s.name === 'Shortness of breath')) {
+      prediction = 'Respiratory Issue';
+      confidence = 70;
+    }
+    
+    if (isEditing) {
+      // Update existing entry
+      const index = symptomsEntries.findIndex(p => p[0] === editingSymptomId);
+      if (index !== -1) {
+        symptomsEntries[index] = [
+          formData.id,
+          formData.patientId,
+          formData.patientName,
+          formData.symptoms,
+          formData.dateRecorded,
+          prediction,
+          confidence,
+          formData.additionalNotes
+        ];
+        showToast(`Symptom entry ${formData.id} updated successfully!`, 'success');
+      }
+    } else {
+      // Add new entry
+      // Check if ID already exists
+      if (symptomsEntries.some(p => p[0] === formData.id)) {
+        showToast(`Symptom ID ${formData.id} already exists!`, 'error');
+        return;
+      }
+      
+      symptomsEntries.push([
+        formData.id,
+        formData.patientId,
+        formData.patientName,
+        formData.symptoms,
+        formData.dateRecorded,
+        prediction,
+        confidence,
+        formData.additionalNotes
+      ]);
+      showToast(`Symptom entry ${formData.id} added successfully!`, 'success');
+    }
+    
+    symptomsModal.classList.add('hidden');
+    renderTable();
+  });
+
+  confirmYes.addEventListener('click', () => {
+    // Validate deletion reason
+    if (!deleteReason.value) {
+      showToast('Please select a reason for deletion', 'error');
+      return;
+    }
+    
+    if (deleteReason.value === 'other' && !otherReason.value.trim()) {
+      showToast('Please specify the deletion reason', 'error');
+      return;
+    }
+    
+    const finalReason = deleteReason.value === 'other' ? otherReason.value : deleteReason.options[deleteReason.selectedIndex].text;
+    const notes = deletionNotes.value;
+    
+    const index = symptomsEntries.findIndex(p => p[0] === deleteSymptomId);
+    if (index !== -1) {
+      // Log deletion for audit purposes
+      console.log(`Symptom entry deleted: ${deleteSymptomId} (${deleteSymptomInfo})`);
+      console.log(`Reason: ${finalReason}`);
+      console.log(`Notes: ${notes}`);
+      console.log(`Deleted by: Hospital Administrator`);
+      console.log(`Timestamp: ${new Date().toISOString()}`);
+      
+      symptomsEntries.splice(index, 1);
+      
+      const filtered = getFilteredData();
+      const totalPages = recordsPerPage === 'all' ? 1 : Math.ceil(filtered.length / recordsPerPage);
+      if (currentPage > totalPages && totalPages > 0) {
+        currentPage = totalPages;
+      }
+      
+      renderTable();
+      confirmModal.classList.add('hidden');
+      showToast(`Symptom entry "${deleteSymptomId}" deleted successfully! Reason: ${finalReason}`, 'success');
+    }
+  });
+
+  // Export functionality
+  exportBtn.addEventListener('click', () => {
+    const filtered = getFilteredData();
+    let csv = 'Symptom ID,Patient ID,Patient Name,Symptoms,Date Recorded,AI Prediction,Confidence,Notes\n';
+    filtered.forEach(row => {
+      const symptoms = row[3].map(s => `${s.name} (${s.severity}, ${s.duration} days)`).join('; ');
+      csv += `"${row[0]}","${row[1]}","${row[2]}","${symptoms}","${row[4]}","${row[5] || ''}","${row[6] || ''}","${row[7] || ''}"\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `symptoms_data_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    showToast(`Exported ${filtered.length} symptom entries successfully!`, 'success');
+  });
+
+  // Print functionality
+  printBtn.addEventListener('click', () => {
+    window.print();
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      searchInput.focus();
+    }
+    
+    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+      e.preventDefault();
+      window.print();
+    }
+    
+    if (e.key === 'Escape') {
+      if (!confirmModal.classList.contains('hidden')) {
+        confirmModal.classList.add('hidden');
+      }
+      if (!symptomsModal.classList.contains('hidden')) {
+        symptomsModal.classList.add('hidden');
+      }
+      if (!viewSymptomsModal.classList.contains('hidden')) {
+        viewSymptomsModal.classList.add('hidden');
+      }
+    }
+  });
+
+  // Toast notification system
+  function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    const colors = {
+      success: 'bg-green-500',
+      error: 'bg-red-500',
+      warning: 'bg-yellow-500',
+      info: 'bg-blue-500'
+    };
+    const icons = {
+      success: 'check-circle',
+      error: 'x-circle',
+      warning: 'warning',
+      info: 'info'
+    };
+    
+    toast.className = `${colors[type]} text-white px-6 py-4 rounded-lg shadow-2xl font-medium flex items-center space-x-3 pointer-events-auto transform transition-all duration-300 mb-2`;
+    toast.style.animation = 'slideInRight 0.3s ease-out';
+    toast.innerHTML = `
+      <i class="ph ph-${icons[type]} text-xl"></i>
+      <span>${message}</span>
+    `;
+    
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.animation = 'slideOutRight 0.3s ease-in';
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+
+  // Add animation keyframes
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideInRight {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    @keyframes slideOutRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Initial render
+  renderTable();
+  
+  // Set first filter chip as active
+  document.querySelector('.filter-chip[data-filter="all"]').classList.add('ring-2', 'ring-indigo-500');
+
+  // Welcome message
+  setTimeout(() => {
+    showToast('Symptoms input system loaded successfully!', 'success');
+  }, 500);
+</script>
+</body>
+</html>
