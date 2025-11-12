@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Notifications | Insurance Dashboard</title>
+  <title>Notifications | Smart Healthcare Insurance</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/phosphor-icons"></script>
 
@@ -12,8 +12,8 @@
       transition: all 0.3s ease;
     }
     .card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     }
     .menu-enter {
       max-height: 0;
@@ -27,7 +27,7 @@
       position: fixed;
       top: 20px;
       right: 20px;
-      background-color: #16a34a;
+      background-color: #2563eb;
       color: white;
       padding: 12px 20px;
       border-radius: 8px;
@@ -45,10 +45,10 @@
   </style>
 </head>
 
-<body class="bg-gray-100 text-gray-800 min-h-screen">
+<body class="bg-gray-100 text-gray-800">
 
   <!-- Navbar -->
-  <nav class="bg-sky-700 text-white shadow-md sticky top-0 z-50">
+  <nav class="bg-sky-700 text-white shadow-md sticky top-0 z-40">
     <div class="container mx-auto px-4 py-3 flex justify-between items-center">
       <h1 class="text-2xl font-semibold flex items-center gap-2">
         <i class="ph ph-building-office text-white"></i> Insurance Company
@@ -58,71 +58,70 @@
       <button id="menuBtn" class="sm:hidden text-2xl focus:outline-none">
         <i class="ph ph-list"></i>
       </button>
+    </div>
 
-      <!-- Desktop Nav -->
-      <div class="hidden sm:flex flex-wrap justify-center items-center space-x-2">
-        <a href="insurance-dashboard.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-gauge"></i> Dashboard</a>
-        <a href="view-claims.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-file-text"></i> View Claims</a>
-        <a href="approve-claims.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-check-square"></i> Approve / Reject Claims</a>
-        <a href="claim-history.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-clock-counter-clockwise"></i> Claim History</a>
-        <a href="policyholders.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-identification-badge"></i> Policyholder Info</a>
-        <a href="payments.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-credit-card"></i> Payment Records</a>
-        <a href="insurance-notifications.html" class="px-3 py-2 rounded bg-blue-500 flex items-center gap-2 font-medium"><i class="ph ph-bell"></i> Notifications</a>
-        <a href="insurance-reports.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-chart-bar"></i> Reports / Analytics</a>
-        <a href="logout.html" class="px-3 py-2 rounded hover:bg-red-600 flex items-center gap-2"><i class="ph ph-sign-out"></i> Logout</a>
-      </div>
+    <!-- Desktop Nav -->
+    <div class="hidden sm:flex overflow-x-auto whitespace-nowrap bg-sky-600 px-2 py-2 space-x-2">
+      <a href="insurance-dashboard.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2 shrink-0"><i class="ph ph-gauge"></i> Dashboard</a>
+      <a href="view-claims.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2 shrink-0"><i class="ph ph-file-text"></i> View Claims</a>
+      <a href="approve-claims.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2 shrink-0"><i class="ph ph-check-square"></i> Approve / Reject Claims</a>
+      <a href="claim-history.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2 shrink-0"><i class="ph ph-clock-counter-clockwise"></i> Claim History</a>
+      <a href="policyholders.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2 shrink-0"><i class="ph ph-identification-badge"></i> Policyholder Info</a>
+      <a href="payments.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2 shrink-0"><i class="ph ph-credit-card"></i> Payment Records</a>
+      <a href="insurance-notifications.html" class="px-3 py-2 rounded bg-sky-500 flex items-center gap-2 font-medium shrink-0"><i class="ph ph-bell"></i> Notifications</a>
+      <a href="insurance-reports.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2 shrink-0"><i class="ph ph-chart-bar"></i> Reports / Analytics</a>
+      <a href="logout.html" class="px-3 py-2 rounded hover:bg-red-600 flex items-center gap-2 shrink-0"><i class="ph ph-sign-out"></i> Logout</a>
     </div>
 
     <!-- Mobile Menu -->
     <div id="mobileMenu" class="menu-enter sm:hidden bg-sky-600">
-      <a href="insurance-dashboard.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-gauge"></i> Dashboard</a>
-      <a href="view-claims.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-file-text"></i> View Claims</a>
-      <a href="approve-claims.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-check-square"></i> Approve / Reject Claims</a>
-      <a href="claim-history.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-clock-counter-clockwise"></i> Claim History</a>
-      <a href="policyholders.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-identification-badge"></i> Policyholder Info</a>
-      <a href="payments.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-credit-card"></i> Payment Records</a>
-      <a href="insurance-notifications.html" class="block px-4 py-2 bg-blue-500"><i class="ph ph-bell"></i> Notifications</a>
-      <a href="insurance-reports.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-chart-bar"></i> Reports / Analytics</a>
+      <a href="insurance-dashboard.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-gauge"></i> Dashboard</a>
+      <a href="view-claims.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-file-text"></i> View Claims</a>
+      <a href="approve-claims.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-check-square"></i> Approve / Reject Claims</a>
+      <a href="claim-history.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-clock-counter-clockwise"></i> Claim History</a>
+      <a href="policyholders.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-identification-badge"></i> Policyholder Info</a>
+      <a href="payments.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-credit-card"></i> Payment Records</a>
+      <a href="insurance-notifications.html" class="block px-4 py-2 bg-sky-500"><i class="ph ph-bell"></i> Notifications</a>
+      <a href="insurance-reports.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-chart-bar"></i> Reports / Analytics</a>
       <a href="logout.html" class="block px-4 py-2 hover:bg-red-600"><i class="ph ph-sign-out"></i> Logout</a>
     </div>
   </nav>
 
-  <!-- Main Content -->
+  <!-- Page Content -->
   <main class="container mx-auto px-4 py-10">
-
-    <div class="text-center mb-6">
-      <h1 class="text-4xl font-bold text-blue-700 mb-2 flex justify-center items-center gap-2">
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-sky-700 flex justify-center items-center gap-2">
         <i class="ph ph-bell"></i> Notifications
       </h1>
-      <p class="text-gray-600">View all your system alerts and updates.</p>
+      <p class="text-gray-600 mt-1">Stay updated with recent alerts and actions.</p>
     </div>
 
-    <div class="space-y-4 max-w-3xl mx-auto">
-      <!-- Notification Item -->
-      <div class="card bg-white p-4 rounded-lg shadow flex justify-between items-center">
+    <!-- Notifications List -->
+    <div class="max-w-3xl mx-auto space-y-4">
+      <div class="card bg-white p-5 rounded-lg shadow flex justify-between items-center">
         <div>
-          <h3 class="font-semibold text-gray-800">Claim #1023 Approved</h3>
-          <p class="text-gray-500 text-sm">Your claim submitted on Nov 02, 2025 has been approved.</p>
+          <h3 class="font-semibold text-gray-800">Claim #1050 Approved ✅</h3>
+          <p class="text-gray-500 text-sm">Approved on Nov 10, 2025 at 2:45 PM.</p>
         </div>
         <button class="mark-read-btn bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded flex items-center gap-1">
           <i class="ph ph-check-circle"></i> Mark Read
         </button>
       </div>
 
-      <div class="card bg-white p-4 rounded-lg shadow flex justify-between items-center">
+      <div class="card bg-white p-5 rounded-lg shadow flex justify-between items-center">
         <div>
-          <h3 class="font-semibold text-gray-800">Claim #1024 Pending Review</h3>
-          <p class="text-gray-500 text-sm">Your claim submitted on Nov 03, 2025 is pending review.</p>
+          <h3 class="font-semibold text-gray-800">Pending Claim Review 🕒</h3>
+          <p class="text-gray-500 text-sm">A new claim has been submitted for review.</p>
         </div>
         <button class="mark-read-btn bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded flex items-center gap-1">
           <i class="ph ph-check-circle"></i> Mark Read
         </button>
       </div>
 
-      <div class="card bg-white p-4 rounded-lg shadow flex justify-between items-center">
+      <div class="card bg-white p-5 rounded-lg shadow flex justify-between items-center">
         <div>
-          <h3 class="font-semibold text-gray-800">New System Update</h3>
-          <p class="text-gray-500 text-sm">A new reporting feature has been added to your dashboard.</p>
+          <h3 class="font-semibold text-gray-800">System Update 🚀</h3>
+          <p class="text-gray-500 text-sm">New analytics features added to your dashboard.</p>
         </div>
         <button class="mark-read-btn bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded flex items-center gap-1">
           <i class="ph ph-check-circle"></i> Mark Read
@@ -131,11 +130,12 @@
     </div>
   </main>
 
-  <!-- Toast -->
+  <!-- Toast Notification -->
   <div id="toast" class="toast"><i class="ph ph-check-circle mr-1"></i> Notification marked as read!</div>
 
+  <!-- Footer -->
   <footer class="mt-16 text-center py-4 text-gray-500">
-    © 2025 Smart Healthcare Insurance. All Rights Reserved.
+    © 2025 Smart Healthcare Insurance Division. All Rights Reserved.
   </footer>
 
   <script>
@@ -147,13 +147,11 @@
       mobileMenu.classList.toggle("menu-open");
     });
 
-    // Mark notification as read
+    // Toast notification for "Mark Read"
     document.querySelectorAll(".mark-read-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         toast.classList.add("show");
-        setTimeout(() => {
-          toast.classList.remove("show");
-        }, 2500);
+        setTimeout(() => toast.classList.remove("show"), 2500);
       });
     });
   </script>
