@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Doctors | Receptionist</title>
+  <title>Patients</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/phosphor-icons"></script>
@@ -11,54 +11,134 @@
 
 <body class="bg-gray-100">
 
-<nav class="bg-teal-700 text-white px-6 py-3 flex justify-between">
-  <div class="text-xl font-semibold flex items-center gap-2">
-    <i class="ph ph-hospital"></i> Receptionist Panel
-  </div>
+<!-- NAV -->
+<nav class="bg-teal-700 text-white px-6 py-3 flex justify-between items-center">
+  <div class="text-xl font-semibold">Receptionist Panel</div>
 
   <div class="flex gap-6">
-    <a href="receptionist-dashboard.html" class="hover:underline">Dashboard</a>
-    <a href="manage-appointments.html" class="hover:underline">Appointments</a>
-    <a href="patients.html" class="hover:underline">Patients</a>
-    <a href="doctors.html" class="underline font-bold">Doctors</a>
-    <a href="billing.html" class="hover:underline">Billing</a>
-    <a href="notifications.html" class="hover:underline">Notifications</a>
-    <a href="profile.html" class="hover:underline">Profile</a>
+    <a href="receptionist-dashboard.html">Dashboard</a>
+    <a href="manage-appointments.html">Appointments</a>
+    <a href="patients.html" class="underline">Patients</a>
+    <a href="doctors.html">Doctors</a>
+    <a href="billing.html">Billing</a>
+    <a href="notifications.html">Notifications</a>
+    <a href="profile.html">Profile</a>
   </div>
 </nav>
 
-<main class="p-10">
-  <h1 class="text-3xl font-bold text-teal-700 mb-6 flex items-center gap-2">
-    <i class="ph ph-stethoscope"></i> Doctor Schedules
-  </h1>
-
-  <div class="bg-white p-6 rounded-lg shadow">
-    <table class="w-full">
-      <thead>
-        <tr class="bg-teal-100 text-teal-700">
-          <th class="p-2">Name</th>
-          <th class="p-2">Specialization</th>
-          <th class="p-2">Available</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr class="border-b hover:bg-gray-50">
-          <td class="p-2">Dr. Ahmed</td>
-          <td class="p-2">Cardiology</td>
-          <td class="p-2">Sun–Wed (10 AM – 3 PM)</td>
-        </tr>
-
-        <tr class="border-b hover:bg-gray-50">
-          <td class="p-2">Dr. Saima</td>
-          <td class="p-2">Dermatology</td>
-          <td class="p-2">Tue–Thu (12 PM – 5 PM)</td>
-        </tr>
-      </tbody>
-    </table>
+<main class="p-8">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-teal-700">Patient Records</h1>
+    <button onclick="openForm()" class="bg-teal-600 text-white px-4 py-2 rounded">+ Add Patient</button>
   </div>
 
+  <table class="w-full bg-white shadow rounded">
+    <thead class="bg-teal-600 text-white">
+      <tr>
+        <th class="p-3">Name</th>
+        <th class="p-3">Age</th>
+        <th class="p-3">Contact</th>
+        <th class="p-3">Actions</th>
+      </tr>
+    </thead>
+
+    <tbody id="patientTable"></tbody>
+  </table>
 </main>
+
+<!-- POPUP FORM -->
+<div id="formPopup" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+  <div class="bg-white p-6 rounded shadow w-96">
+    <h2 id="formTitle" class="text-xl font-bold mb-4">Add Patient</h2>
+
+    <input id="name" class="w-full border p-2 mb-3" placeholder="Name">
+    <input id="age" type="number" class="w-full border p-2 mb-3" placeholder="Age">
+    <input id="contact" class="w-full border p-2 mb-3" placeholder="Contact Number">
+
+    <div class="flex justify-end gap-3">
+      <button onclick="closeForm()" class="px-3 py-1 border rounded">Cancel</button>
+      <button onclick="savePatient()" class="px-3 py-1 bg-teal-600 text-white rounded">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let patients = [
+  { name: "John Doe", age: 35, contact: "017xxxxxxxx" },
+  { name: "Mary Smith", age: 29, contact: "018xxxxxxxx" }
+];
+
+let editIndex = null;
+
+function renderTable() {
+  const table = document.getElementById("patientTable");
+  table.innerHTML = "";
+
+  patients.forEach((p, i) => {
+    table.innerHTML += `
+      <tr class="border-b">
+        <td class="p-3">${p.name}</td>
+        <td class="p-3">${p.age}</td>
+        <td class="p-3">${p.contact}</td>
+        <td class="p-3 flex gap-3">
+          <button class="text-blue-600" onclick="editForm(${i})">Edit</button>
+          <button class="text-red-600" onclick="deletePatient(${i})">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function openForm() {
+  document.getElementById("formPopup").classList.remove("hidden");
+  document.getElementById("formTitle").innerText = "Add Patient";
+  editIndex = null;
+
+  name.value = "";
+  age.value = "";
+  contact.value = "";
+}
+
+function closeForm() {
+  document.getElementById("formPopup").classList.add("hidden");
+}
+
+function savePatient() {
+  const p = {
+    name: name.value,
+    age: age.value,
+    contact: contact.value
+  };
+
+  if (editIndex === null) patients.push(p);
+  else patients[editIndex] = p;
+
+  closeForm();
+  renderTable();
+}
+
+function editForm(i) {
+  const p = patients[i];
+  editIndex = i;
+
+  document.getElementById("formTitle").innerText = "Edit Patient";
+
+  name.value = p.name;
+  age.value = p.age;
+  contact.value = p.contact;
+
+  openForm();
+}
+
+function deletePatient(i) {
+  if (confirm("Delete this patient?")) {
+    patients.splice(i, 1);
+    renderTable();
+  }
+}
+
+renderTable();
+</script>
 
 </body>
 </html>
