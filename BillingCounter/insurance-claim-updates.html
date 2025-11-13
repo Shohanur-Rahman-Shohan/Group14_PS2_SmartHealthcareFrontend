@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Insurance Claim Updates | Smart Healthcare</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/phosphor-icons"></script>
+  <style>
+    a, .card, button { transition: all 0.3s ease; }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
+    .menu-enter { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+    .menu-open { max-height: 500px; }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800 min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="bg-sky-700 text-white shadow-md sticky top-0 z-40">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <h1 class="text-2xl font-semibold flex items-center gap-2"><i class="ph ph-currency-circle-dollar"></i> Billing Counter</h1>
+      <button id="menuBtn" class="sm:hidden text-2xl focus:outline-none"><i class="ph ph-list"></i></button>
+
+      <!-- Desktop Nav -->
+      <div class="hidden sm:flex flex-wrap justify-center items-center space-x-2">
+        <a href="billing-dashboard.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-gauge"></i> Dashboard</a>
+        <a href="generate-bill.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-file-text"></i> Generate Bill</a>
+        <a href="view-edit-bills.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-pencil"></i> View/Edit Bills</a>
+        <a href="payment-processing.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-credit-card"></i> Payment</a>
+        <a href="insurance-claim-updates.html" class="px-3 py-2 rounded bg-sky-500 font-medium flex items-center gap-2"><i class="ph ph-shield-check"></i> Claim Updates</a>
+        <a href="transaction-history.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-clock"></i> History</a>
+        <a href="patient-billing-records.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-users"></i> Patient Records</a>
+        <a href="reports-summaries.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-chart-bar"></i> Reports</a>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="menu-enter sm:hidden bg-sky-600">
+      <a href="billing-dashboard.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-gauge"></i> Dashboard</a>
+      <a href="generate-bill.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-file-text"></i> Generate Bill</a>
+      <a href="view-edit-bills.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-pencil"></i> View/Edit Bills</a>
+      <a href="payment-processing.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-credit-card"></i> Payment</a>
+      <a href="insurance-claim-updates.html" class="block px-4 py-2 bg-sky-500"><i class="ph ph-shield-check"></i> Claim Updates</a>
+      <a href="transaction-history.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-clock"></i> History</a>
+      <a href="patient-billing-records.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-users"></i> Patient Records</a>
+      <a href="reports-summaries.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-chart-bar"></i> Reports</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-10">
+    <h1 class="text-4xl font-bold text-sky-700 mb-8 flex items-center gap-2 justify-center">
+      <i class="ph ph-shield-check"></i> Insurance Claim Updates
+    </h1>
+
+    <div class="bg-white p-6 rounded-lg shadow overflow-x-auto">
+      <table class="min-w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-sky-100 text-sky-700">
+            <th class="px-4 py-2">Claim ID</th>
+            <th class="px-4 py-2">Patient</th>
+            <th class="px-4 py-2">Bill ID</th>
+            <th class="px-4 py-2">Amount</th>
+            <th class="px-4 py-2">Status</th>
+            <th class="px-4 py-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-4 py-2">C-501</td>
+            <td class="px-4 py-2">Sadia Rahman</td>
+            <td class="px-4 py-2">B-101</td>
+            <td class="px-4 py-2">$65.00</td>
+            <td class="px-4 py-2 text-yellow-600 font-medium">Pending</td>
+            <td class="px-4 py-2 flex gap-2">
+              <button class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 flex items-center gap-1">
+                <i class="ph ph-check-circle"></i> Approve
+              </button>
+              <button class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 flex items-center gap-1">
+                <i class="ph ph-x-circle"></i> Reject
+              </button>
+            </td>
+          </tr>
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-4 py-2">C-502</td>
+            <td class="px-4 py-2">Rafiul Hasan</td>
+            <td class="px-4 py-2">B-102</td>
+            <td class="px-4 py-2">$40.00</td>
+            <td class="px-4 py-2 text-green-600 font-medium">Approved</td>
+            <td class="px-4 py-2 flex gap-2">
+              <button class="bg-gray-400 text-white px-3 py-1 rounded cursor-not-allowed" disabled>Approved</button>
+              <button class="bg-gray-400 text-white px-3 py-1 rounded cursor-not-allowed" disabled>Reject</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <footer class="mt-16 text-center py-4 text-gray-500">
+    © 2025 Smart Healthcare. All Rights Reserved.
+  </footer>
+
+  <script>
+    const menuBtn = document.getElementById("menuBtn");
+    const mobileMenu = document.getElementById("mobileMenu");
+    menuBtn.addEventListener("click", () => {
+      mobileMenu.classList.toggle("menu-open");
+    });
+  </script>
+</body>
+</html>

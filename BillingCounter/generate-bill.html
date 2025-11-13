@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generate Bill | Smart Healthcare</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/phosphor-icons"></script>
+  <style>
+    a, .card, button { transition: all 0.3s ease; }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
+    .menu-enter { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+    .menu-open { max-height: 500px; }
+  </style>
+</head>
+
+<body class="bg-gray-100 text-gray-800 min-h-screen">
+  <!-- Navbar -->
+  <nav class="bg-sky-700 text-white shadow-md sticky top-0 z-40">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <h1 class="text-2xl font-semibold flex items-center gap-2"><i class="ph ph-currency-circle-dollar"></i> Billing Counter</h1>
+      <button id="menuBtn" class="sm:hidden text-2xl focus:outline-none"><i class="ph ph-list"></i></button>
+
+      <!-- Desktop Nav -->
+      <div class="hidden sm:flex flex-wrap justify-center items-center space-x-2">
+        <a href="billing-dashboard.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-gauge"></i> Dashboard</a>
+        <a href="generate-bill.html" class="px-3 py-2 rounded bg-sky-500 font-medium flex items-center gap-2"><i class="ph ph-file-text"></i> Generate Bill</a>
+        <a href="view-edit-bills.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-pencil"></i> View/Edit Bills</a>
+        <a href="payment-processing.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-credit-card"></i> Payment</a>
+        <a href="insurance-claim-updates.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-shield-check"></i> Claim Updates</a>
+        <a href="transaction-history.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-clock"></i> History</a>
+        <a href="patient-billing-records.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-users"></i> Patient Records</a>
+        <a href="reports-summaries.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-chart-bar"></i> Reports</a>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="menu-enter sm:hidden bg-sky-600">
+      <a href="billing-dashboard.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-gauge"></i> Dashboard</a>
+      <a href="generate-bill.html" class="block px-4 py-2 bg-sky-500"><i class="ph ph-file-text"></i> Generate Bill</a>
+      <a href="view-edit-bills.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-pencil"></i> View/Edit Bills</a>
+      <a href="payment-processing.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-credit-card"></i> Payment</a>
+      <a href="insurance-claim-updates.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-shield-check"></i> Claim Updates</a>
+      <a href="transaction-history.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-clock"></i> History</a>
+      <a href="patient-billing-records.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-users"></i> Patient Records</a>
+      <a href="reports-summaries.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-chart-bar"></i> Reports</a>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="container mx-auto px-4 py-10">
+    <h1 class="text-4xl font-bold text-sky-700 mb-8 flex items-center gap-2 justify-center">
+      <i class="ph ph-file-text"></i> Generate New Bill
+    </h1>
+
+    <!-- Billing Form -->
+    <div class="bg-white p-8 rounded-lg shadow-md max-w-3xl mx-auto">
+      <form class="space-y-6">
+        <!-- Patient Info -->
+        <div>
+          <h2 class="text-xl font-semibold text-sky-700 mb-3 flex items-center gap-2"><i class="ph ph-user"></i> Patient Information</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="text" placeholder="Patient Name" class="border rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-sky-500" required>
+            <input type="text" placeholder="Patient ID" class="border rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-sky-500" required>
+            <input type="text" placeholder="Doctor Name" class="border rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-sky-500">
+            <input type="date" class="border rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-sky-500">
+          </div>
+        </div>
+
+        <!-- Service Details -->
+        <div>
+          <h2 class="text-xl font-semibold text-sky-700 mb-3 flex items-center gap-2"><i class="ph ph-list-dashes"></i> Service Details</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="text" placeholder="Service Name" class="border rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-sky-500">
+            <input type="number" placeholder="Service Cost ($)" class="border rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-sky-500">
+            <input type="number" placeholder="Additional Charges ($)" class="border rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-sky-500">
+            <input type="number" placeholder="Discount (%)" class="border rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-sky-500">
+          </div>
+        </div>
+
+        <!-- Payment Summary -->
+        <div>
+          <h2 class="text-xl font-semibold text-sky-700 mb-3 flex items-center gap-2"><i class="ph ph-calculator"></i> Payment Summary</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input type="text" placeholder="Subtotal ($)" class="border rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-sky-500">
+            <input type="text" placeholder="Tax (5%)" class="border rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-sky-500">
+            <input type="text" placeholder="Total ($)" class="border rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-sky-500">
+          </div>
+        </div>
+
+        <div class="text-center pt-4">
+          <button type="submit" class="bg-sky-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-sky-700 flex items-center gap-2 mx-auto">
+            <i class="ph ph-check-circle"></i> Generate Bill
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer class="mt-16 text-center py-4 text-gray-500">
+    © 2025 Smart Healthcare. All Rights Reserved.
+  </footer>
+
+  <script>
+    const menuBtn = document.getElementById("menuBtn");
+    const mobileMenu = document.getElementById("mobileMenu");
+    menuBtn.addEventListener("click", () => {
+      mobileMenu.classList.toggle("menu-open");
+    });
+  </script>
+</body>
+</html>
