@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Doctor Dashboard | SHMS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  .animate-slideUp {
+    animation: slideUp 0.7s ease-out forwards;
+  }
+  .dropdownContent {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none;
+    position: absolute;
+    z-index: 50;
+    left: 0;
+  }
+  .dropdownContent.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .card-hover {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  .stat-number {
+    font-feature-settings: 'tnum';
+    font-variant-numeric: tabular-nums;
+  }
+  .gradient-border {
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899) border-box;
+    border: 2px solid transparent;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #6366f1;
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+  }
+
+  /* Floating animation for icons */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  .float-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Chart containers */
+  .chart-container {
+    position: relative;
+    height: 300px;
+  }
+  
+  /* Model status indicators */
+  .status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+  .status-training {
+    background-color: #f59e0b;
+  }
+  .status-deployed {
+    background-color: #10b981;
+  }
+  .status-error {
+    background-color: #ef4444;
+  }
+  .status-idle {
+    background-color: #6b7280;
+  }
+</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen flex flex-col">
+
+<!-- Loading Animation -->
+<div id="loadingScreen" class="fixed inset-0 bg-indigo-700 flex flex-col items-center justify-center text-white z-50 transition-opacity duration-700">
+  <div class="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mb-4"></div>
+  <p class="text-lg font-semibold tracking-wide">Loading Doctor Dashboard...</p>
+</div>
+
+<!-- Top Navbar -->
+<nav class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+  <h1 class="text-2xl font-bold tracking-wide flex items-center space-x-2">
+    <i class="ph ph-stethoscope text-3xl"></i>
+    <span>SHMS</span>
+  </h1>
+  <span class="text-xl font-bold flex items-center space-x-2">
+    <i class="ph ph-user-circle"></i>
+    <span>Doctor</span>
+  </span>
+  <div class="relative">
+    <button id="menuBtn" class="text-white text-2xl focus:outline-none hover:bg-indigo-600 rounded-full p-2 transition" aria-label="Menu">
+      <i class="ph ph-dots-three-vertical"></i>
+    </button>
+    <div id="menuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded-md shadow-lg z-50">
+      <a href="Profile.html" class="block px-4 py-2 hover:bg-indigo-100 rounded-t-md flex items-center space-x-2">
+        <i class="ph ph-user"></i>
+        <span>Profile</span>
+      </a>
+      <a href="Report.html" class="block px-4 py-2 hover:bg-indigo-100 flex items-center space-x-2">
+        <i class="ph ph-chart-bar"></i>
+        <span>Reports</span>
+      </a>
+      <a href="../login.html" class="block px-4 py-2 hover:bg-indigo-100 text-red-600 rounded-b-md flex items-center space-x-2">
+        <i class="ph ph-sign-out"></i>
+        <span>Logout</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- Feature Navbar for Doctor -->
+<nav id="featureNavbar" class="bg-indigo-800 text-white shadow-md sticky top-0 z-40 transition-transform duration-300" style="top: 64px;">
+  <div class="container mx-auto flex flex-wrap justify-center md:justify-start items-center px-4 py-2 space-x-2">
+    <div class="relative">
+      <a href="Home.html" class="px-4 py-2 rounded-md bg-indigo-600 font-semibold block">Dashboard</a>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Appointments</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="Appointments.html" class="block px-4 py-2 hover:bg-indigo-100">View / Manage Appointments</a>
+        <a href="BookAppointment.html" class="block px-4 py-2 hover:bg-indigo-100">Book Appointment</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Patients</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="PatientMedicalHistory.html" class="block px-4 py-2 hover:bg-indigo-100">Patient Medical History</a>
+        <a href="PatientList.html" class="block px-4 py-2 hover:bg-indigo-100">Patient List</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Prescriptions</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="CreatePrescription.html" class="block px-4 py-2 hover:bg-indigo-100">Create Prescription</a>
+        <a href="ViewPrescriptions.html" class="block px-4 py-2 hover:bg-indigo-100">View Prescriptions</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Investigations</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="InvestigationReports.html" class="block px-4 py-2 hover:bg-indigo-100">Upload / View Reports</a>
+        <a href="OrderInvestigation.html" class="block px-4 py-2 hover:bg-indigo-100">Order Investigation</a>
+      </div>
+    </div>
+    <div class="relative">
+      <button class="px-3 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">AI Insights</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="AIDiseasePrediction.html" class="block px-4 py-2 hover:bg-indigo-100">AI Disease Prediction</a>
+        <a href="SmartRecommendations.html" class="block px-4 py-2 hover:bg-indigo-100">Smart Recommendations</a>
+      </div>
+    </div>
+    <a href="MessagesNotifications.html" class="px-3 py-2 rounded-md hover:bg-indigo-700">Messages / Notifications</a>
+    <a href="ProfileSettings.html" class="px-3 py-2 rounded-md hover:bg-indigo-700">Profile / Settings</a>
+  </div>
+</nav>
+
+<!-- Current Time Display -->
+<div class="container mx-auto px-6 pt-4">
+  <div class="bg-gradient-to-r from-purple-900 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white rounded-lg shadow-md p-4 flex justify-between items-center transition-colors duration-300">
+    <div class="flex items-center space-x-4">
+      <div class="bg-purple-100 p-3 rounded-full">
+        <i class="ph ph-calendar-check text-purple-700 text-2xl"></i>
+      </div>
+      <div>
+        <p class="text-sm text-white/80">Doctor Dashboard</p>
+        <p id="currentDateTime" class="text-lg font-semibold text-white"></p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2">
+      <span class="relative flex h-3 w-3">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+      </span>
+      <span class="text-sm font-medium text-white/90">System Online</span>
+    </div>
+  </div>
+</div>
+
+<!-- Hero Section -->
+<section class="px-6 py-8 text-center animate-fadeIn">
+  <div class="max-w-4xl mx-auto">
+    <h2 class="text-4xl md:text-5xl font-bold gradient-text mb-4">
+      Welcome, Doctor!
+    </h2>
+    <p class="text-gray-700 text-lg max-w-3xl mx-auto leading-relaxed">
+      Manage your appointments, patient medical history, prescriptions, and leverage AI insights for better care.
+    </p>
+  </div>
+</section>
+
+<!-- Quick Stats Overview -->
+<section class="px-6 pb-4">
+  <div class="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-5 rounded-xl shadow-lg card-hover">
+      <div class="flex justify-between items-start mb-3">
+        <div>
+          <p class="text-blue-100 text-sm font-medium">Total Patients</p>
+          <p class="text-3xl font-bold stat-number mt-1">1,247</p>
+        </div>
+        <div class="bg-blue-400 bg-opacity-40 p-3 rounded-lg float-animation">
+          <i class="ph ph-users text-2xl"></i>
+        </div>
+      </div>
+      <div class="flex items-center text-sm">
+        <i class="ph ph-trend-up mr-1"></i>
+        <span>+12% from last month</span>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-green-500 to-green-600 text-white p-5 rounded-xl shadow-lg card-hover">
+      <div class="flex justify-between items-start mb-3">
+        <div>
+          <p class="text-green-100 text-sm font-medium">Today's Appointments</p>
+          <p class="text-3xl font-bold stat-number mt-1">43</p>
+        </div>
+        <div class="bg-green-400 bg-opacity-40 p-3 rounded-lg float-animation" style="animation-delay: 0.2s;">
+          <i class="ph ph-calendar-check text-2xl"></i>
+        </div>
+      </div>
+      <div class="flex items-center text-sm">
+        <i class="ph ph-clock mr-1"></i>
+        <span>8 pending confirmations</span>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-5 rounded-xl shadow-lg card-hover">
+      <div class="flex justify-between items-start mb-3">
+        <div>
+          <p class="text-purple-100 text-sm font-medium">Active Prescriptions</p>
+          <p class="text-3xl font-bold stat-number mt-1">87</p>
+        </div>
+        <div class="bg-purple-400 bg-opacity-40 p-3 rounded-lg float-animation" style="animation-delay: 0.4s;">
+          <i class="ph ph-prescription text-2xl"></i>
+        </div>
+      </div>
+      <div class="flex items-center text-sm">
+        <i class="ph ph-check-circle mr-1"></i>
+        <span>All active patients</span>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-5 rounded-xl shadow-lg card-hover">
+      <div class="flex justify-between items-start mb-3">
+        <div>
+          <p class="text-orange-100 text-sm font-medium">Avg. Consultation Time</p>
+          <p class="text-3xl font-bold stat-number mt-1">15 min</p>
+        </div>
+        <div class="bg-orange-400 bg-opacity-40 p-3 rounded-lg float-animation" style="animation-delay: 0.6s;">
+          <i class="ph ph-timer text-2xl"></i>
+        </div>
+      </div>
+      <div class="flex items-center text-sm">
+        <i class="ph ph-trend-up mr-1"></i>
+        <span>+1 min from yesterday</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Dashboard Cards -->
+<main class="px-6 py-4">
+  <div class="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="bg-white p-6 rounded-2xl shadow-lg card-hover cursor-pointer gradient-border" style="animation: fadeIn 0.6s ease-out 0.1s both;">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-indigo-700">Upcoming Appointments</h3>
+        <div class="bg-indigo-100 p-2 rounded-lg">
+          <i class="ph ph-calendar-plus text-indigo-700 text-xl"></i>
+        </div>
+      </div>
+      <p class="text-gray-500 text-sm mb-4">Your next patient consultations</p>
+      <div class="space-y-3">
+        <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition">
+          <div class="flex items-center space-x-3">
+            <i class="ph ph-user text-blue-600 text-xl"></i>
+            <span class="text-gray-700 font-medium">John Doe</span>
+          </div>
+          <span class="text-sm font-medium text-blue-600">10:00 AM</span>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg hover:bg-green-100 transition">
+          <div class="flex items-center space-x-3">
+            <i class="ph ph-user text-green-600 text-xl"></i>
+            <span class="text-gray-700 font-medium">Jane Smith</span>
+          </div>
+          <span class="text-sm font-medium text-green-600">11:30 AM</span>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-purple-50 rounded-lg hover:bg-purple-100 transition">
+          <div class="flex items-center space-x-3">
+            <i class="ph ph-user text-purple-600 text-xl"></i>
+            <span class="text-gray-700 font-medium">Peter Jones</span>
+          </div>
+          <span class="text-sm font-medium text-purple-600">02:00 PM</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow-lg card-hover cursor-pointer gradient-border" style="animation: fadeIn 0.6s ease-out 0.2s both;">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-indigo-700">Patient Alerts</h3>
+        <div class="bg-purple-100 p-2 rounded-lg">
+          <i class="ph ph-bell-ringing text-purple-700 text-xl"></i>
+        </div>
+      </div>
+      <p class="text-gray-500 text-sm mb-4">Important notifications regarding your patients</p>
+      <div class="space-y-3">
+        <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg hover:bg-red-100 transition">
+          <div class="flex items-center space-x-3">
+            <span class="status-indicator status-error"></span>
+            <span class="text-gray-700 font-medium">Emergency Case</span>
+          </div>
+          <span class="text-sm font-medium text-red-600">Patient: A. Khan</span>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition">
+          <div class="flex items-center space-x-3">
+            <span class="status-indicator status-training"></span>
+            <span class="text-gray-700 font-medium">New Lab Results</span>
+          </div>
+          <span class="text-sm font-medium text-yellow-600">Patient: B. Rahman</span>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition">
+          <div class="flex items-center space-x-3">
+            <span class="status-indicator status-idle"></span>
+            <span class="text-gray-700 font-medium">Follow-up Due</span>
+          </div>
+          <span class="text-sm font-medium text-blue-600">Patient: C. Islam</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow-lg card-hover cursor-pointer gradient-border" style="animation: fadeIn 0.6s ease-out 0.3s both;">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-indigo-700">Recent Prescriptions</h3>
+        <div class="bg-green-100 p-2 rounded-lg">
+          <i class="ph ph-prescription text-green-700 text-xl"></i>
+        </div>
+      </div>
+      <p class="text-gray-500 text-sm mb-4">Recently issued medications</p>
+      <div class="space-y-3">
+        <div class="flex items-center justify-between p-3 bg-teal-50 rounded-lg hover:bg-teal-100 transition">
+          <div class="flex items-center space-x-3">
+            <i class="ph ph-pill text-teal-600 text-xl"></i>
+            <span class="text-gray-700 font-medium">Amoxicillin</span>
+          </div>
+          <span class="text-sm font-medium text-teal-600">Patient: D. Haque</span>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition">
+          <div class="flex items-center space-x-3">
+            <i class="ph ph-pill text-blue-600 text-xl"></i>
+            <span class="text-gray-700 font-medium">Metformin</span>
+          </div>
+          <span class="text-sm font-medium text-blue-600">Patient: E. Begum</span>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg hover:bg-green-100 transition">
+          <div class="flex items-center space-x-3">
+            <i class="ph ph-pill text-green-600 text-xl"></i>
+            <span class="text-gray-700 font-medium">Lisinopril</span>
+          </div>
+          <span class="text-sm font-medium text-green-600">Patient: F. Ahmed</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Recent Activity Log -->
+<section class="px-6 py-8">
+  <div class="container mx-auto">
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden" style="animation: fadeIn 0.8s ease-out 0.4s both;">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center space-x-3">
+            <div class="bg-indigo-100 p-2 rounded-lg">
+              <i class="ph ph-activity text-indigo-700 text-2xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-indigo-700">Recent Activity Log</h3>
+          </div>
+          <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition flex items-center space-x-2">
+            <i class="ph ph-arrow-clockwise"></i>
+            <span>Refresh</span>
+          </button>
+        </div>
+        
+        <div class="space-y-4">
+          <!-- Activity 1 -->
+          <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+            <div class="flex items-center space-x-4">
+              <div class="bg-blue-100 p-3 rounded-lg">
+                <i class="ph ph-calendar-plus text-blue-700 text-xl"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-blue-700">New Appointment Booked</h4>
+                <p class="text-sm text-gray-600">Patient John Doe for 10:00 AM today</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-sm font-medium text-gray-600">5 min ago</span>
+            </div>
+          </div>
+          
+          <!-- Activity 2 -->
+          <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+            <div class="flex items-center space-x-4">
+              <div class="bg-green-100 p-3 rounded-lg">
+                <i class="ph ph-prescription text-green-700 text-xl"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-green-700">Prescription Issued</h4>
+                <p class="text-sm text-gray-600">Amoxicillin for Patient D. Haque</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-sm font-medium text-gray-600">15 min ago</span>
+            </div>
+          </div>
+          
+          <!-- Activity 3 -->
+          <div class="flex items-center justify-between p-4 bg-orange-50 rounded-lg">
+            <div class="flex items-center space-x-4">
+              <div class="bg-orange-100 p-3 rounded-lg">
+                <i class="ph ph-file-text text-orange-700 text-xl"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-orange-700">New Lab Report</h4>
+                <p class="text-sm text-gray-600">Patient B. Rahman's blood test results</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-sm font-medium text-gray-600">30 min ago</span>
+            </div>
+          </div>
+          
+          <!-- Activity 4 -->
+          <div class="flex items-center justify-between p-4 bg-purple-50 rounded-lg">
+            <div class="flex items-center space-x-4">
+              <div class="bg-purple-100 p-3 rounded-lg">
+                <i class="ph ph-brain text-purple-700 text-xl"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-purple-700">AI Recommendation Generated</h4>
+                <p class="text-sm text-gray-600">For Patient C. Islam: Annual preventive screening</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-sm font-medium text-gray-600">1 hour ago</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Analytics Section -->
+<section class="px-6 py-6">
+  <div class="container mx-auto" style="animation: fadeIn 0.8s ease-out 0.5s both;">
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center space-x-3">
+        <div class="bg-indigo-100 p-3 rounded-lg">
+          <i class="ph ph-chart-line-up text-indigo-700 text-2xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-indigo-700">Doctor Performance Analytics</h3>
+      </div>
+      <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition flex items-center space-x-2">
+        <i class="ph ph-download-simple"></i>
+        <span>Export Data</span>
+      </button>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Appointment Trends -->
+      <div class="bg-white p-6 rounded-2xl shadow-lg card-hover">
+        <div class="flex items-center justify-between mb-4">
+          <h4 class="text-lg font-semibold text-indigo-700 flex items-center space-x-2">
+            <i class="ph ph-trend-up"></i>
+            <span>Appointment Trend (Last 6 Months)</span>
+          </h4>
+          <span class="text-sm text-gray-500">Total Appointments</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="appointmentTrendChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Patient Demographics -->
+      <div class="bg-white p-6 rounded-2xl shadow-lg card-hover">
+        <div class="flex items-center justify-between mb-4">
+          <h4 class="text-lg font-semibold text-indigo-700 flex items-center space-x-2">
+            <i class="ph ph-chart-pie"></i>
+            <span>Patient Demographics (Age Groups)</span>
+          </h4>
+          <span class="text-sm text-gray-500">Active Patients</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="patientDemographicsChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Prescription Trends -->
+      <div class="md:col-span-2 bg-white p-6 rounded-2xl shadow-lg card-hover">
+        <div class="flex items-center justify-between mb-4">
+          <h4 class="text-lg font-semibold text-indigo-700 flex items-center space-x-2">
+            <i class="ph ph-prescription"></i>
+            <span>Prescription Trends (Top 5 Medications)</span>
+          </h4>
+          <span class="text-sm text-gray-500">Last 30 days</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="prescriptionTrendChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="text-center py-6 bg-gradient-to-r from-indigo-700 to-indigo-600 text-white">
+  <div class="container mx-auto px-6">
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 mb-6">
+      <div class="flex items-center space-x-2">
+        <i class="ph ph-stethoscope text-2xl"></i>
+        <span class="font-semibold">SHMS Doctor Platform</span>
+      </div>
+      <div class="text-sm">
+        © 2025 SHMS | Doctor Division
+      </div>
+    </div>
+    
+    <div class="text-center text-sm text-indigo-200 mt-6 border-t border-indigo-700 pt-4">
+      © 2025 Smart Healthcare Management System | Doctor Portal
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Update current date and time
+  function updateDateTime() {
+    const now = new Date();
+    const options = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    };
+    document.getElementById('currentDateTime').textContent = now.toLocaleDateString('en-US', options);
+  }
+  updateDateTime();
+  setInterval(updateDateTime, 1000);
+
+  // Top menu toggle
+  const menuBtn = document.getElementById('menuBtn');
+  const menuDropdown = document.getElementById('menuDropdown');
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuDropdown.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+      menuDropdown.classList.add('hidden');
+    }
+  });
+
+  // Dropdown functionality
+  const dropdownButtons = document.querySelectorAll('.dropdownBtn');
+  let activeDropdown = null;
+
+  dropdownButtons.forEach(btn => {
+    const dropdown = btn.nextElementSibling;
+    if (!dropdown) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeDropdown && activeDropdown !== dropdown) {
+        activeDropdown.classList.remove('show');
+      }
+      if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        activeDropdown = null;
+      } else {
+        dropdown.classList.add('show');
+        activeDropdown = dropdown;
+      }
+    });
+
+    btn.addEventListener('mouseenter', () => dropdown.classList.add('show'));
+    btn.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!dropdown.matches(':hover')) {
+          dropdown.classList.remove('show');
+        }
+      }, 100);
+    });
+    
+    if (dropdown) {
+      dropdown.addEventListener('mouseleave', () => {
+        dropdown.classList.remove('show');
+        if (activeDropdown === dropdown) activeDropdown = null;
+      });
+    }
+  });
+
+  document.body.addEventListener('click', () => {
+    if (activeDropdown) {
+      activeDropdown.classList.remove('show');
+      activeDropdown = null;
+    }
+  });
+
+  // Hide/show navbar on scroll
+  let lastScroll = 0;
+  const featureNavbar = document.getElementById('featureNavbar');
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+    if (currentScroll > lastScroll && currentScroll > 100) {
+      featureNavbar.style.transform = 'translateY(-100%)';
+    } else {
+      featureNavbar.style.transform = 'translateY(0)';
+    }
+    lastScroll = currentScroll;
+  });
+
+  // Animate numbers on scroll
+  const animateValue = (element, start, end, duration) => {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const value = Math.floor(progress * (end - start) + start);
+      element.textContent = value.toLocaleString();
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+    window.requestAnimationFrame(step);
+  };
+
+  // Observe stats for animation
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const statNumber = entry.target;
+        const targetValue = parseInt(statNumber.textContent.replace(/,/g, ''));
+        animateValue(statNumber, 0, targetValue, 1500);
+        observer.unobserve(statNumber);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('.stat-number').forEach(stat => {
+    observer.observe(stat);
+  });
+
+  // Chart.js configurations
+  const chartColors = {
+    primary: '#6366F1',
+    secondary: '#8B5CF6',
+    success: '#10B981',
+    warning: '#F59E0B',
+    danger: '#EF4444',
+    info: '#3B82F6'
+  };
+
+  // Appointment Trend Chart
+  const appointmentTrendCtx = document.getElementById('appointmentTrendChart').getContext('2d');
+  new Chart(appointmentTrendCtx, {
+    type: 'line',
+    data: {
+      labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      datasets: [
+        {
+          label: 'Appointments',
+          data: [150, 165, 180, 170, 190, 210],
+          borderColor: chartColors.primary,
+          backgroundColor: 'rgba(99, 102, 241, 0.1)',
+          borderWidth: 3,
+          tension: 0.4,
+          fill: true,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        tooltip: {
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          padding: 12,
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: 'rgba(0, 0, 0, 0.05)',
+          },
+          ticks: {
+            callback: function(value) {
+              return value;
+            }
+          }
+        },
+        x: {
+          grid: {
+            display: false,
+          }
+        }
+      }
+    }
+  });
+
+  // Patient Demographics Chart
+  const patientDemographicsCtx = document.getElementById('patientDemographicsChart').getContext('2d');
+  new Chart(patientDemographicsCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['0-18', '19-40', '41-60', '61+'],
+      datasets: [{
+        data: [15, 40, 30, 15],
+        backgroundColor: [
+          chartColors.primary,
+          chartColors.success,
+          chartColors.warning,
+          chartColors.info
+        ],
+        borderWidth: 0,
+        hoverOffset: 10
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+        }
+      },
+      cutout: '60%',
+    }
+  });
+
+  // Prescription Trend Chart
+  const prescriptionTrendCtx = document.getElementById('prescriptionTrendChart').getContext('2d');
+  new Chart(prescriptionTrendCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Amoxicillin', 'Metformin', 'Lisinopril', 'Atorvastatin', 'Ibuprofen'],
+      datasets: [
+        {
+          label: 'Prescriptions Issued',
+          data: [120, 90, 75, 60, 50],
+          backgroundColor: chartColors.primary,
+          borderRadius: 8,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false,
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: 'rgba(0, 0, 0, 0.05)',
+          },
+          ticks: {
+            callback: function(value) {
+              return value;
+            }
+          }
+        },
+        x: {
+          grid: {
+            display: false,
+          }
+        }
+      }
+    }
+  });
+
+  // Add hover effect to dashboard cards
+  const dashboardCards = document.querySelectorAll('.card-hover');
+  dashboardCards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transition = 'all 0.3s ease';
+    });
+  });
+
+  // Loading animation
+  window.addEventListener('load', () => {
+    const loader = document.getElementById('loadingScreen');
+    loader.classList.add('opacity-0');
+    setTimeout(() => {
+      loader.style.display = 'none';
+    }, 700);
+    document.body.classList.add('loaded');
+  });
+</script>
+</body>
+</html>
