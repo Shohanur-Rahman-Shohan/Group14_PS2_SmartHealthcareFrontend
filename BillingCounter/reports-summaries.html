@@ -6,6 +6,7 @@
   <title>Reports & Summaries | Smart Healthcare</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/phosphor-icons"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     a, .card, button { transition: all 0.3s ease; }
     .card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
@@ -74,14 +75,13 @@
       </div>
     </div>
 
-    <!-- Placeholder for Charts -->
-    <div class="bg-white p-6 rounded-lg shadow mb-10">
-      <h2 class="text-2xl font-semibold text-sky-700 mb-4">Financial Overview</h2>
-      <div class="h-64 bg-gray-100 rounded flex items-center justify-center text-gray-400 font-medium">
-        Chart Placeholder (e.g., Payments vs Pending, Claims Status)
-      </div>
+    <!-- Financial Overview Chart (Compact) -->
+    <div class="bg-white p-6 rounded-lg shadow mb-10 w-1/2 mx-auto">
+      <h2 class="text-2xl font-semibold text-sky-700 mb-4 text center">Financial Overview</h2>
+      <canvas id="financialChart" style="width:300px; height:150px;"></canvas> <!-- Compact size -->
     </div>
-
+    
+    <!-- Monthly Summary Table -->
     <div class="bg-white p-6 rounded-lg shadow">
       <h2 class="text-2xl font-semibold text-sky-700 mb-4">Monthly Summary</h2>
       <table class="min-w-full text-left border-collapse">
@@ -109,7 +109,6 @@
             <td class="px-4 py-2">20</td>
             <td class="px-4 py-2">45</td>
           </tr>
-          <!-- More months can be added -->
         </tbody>
       </table>
     </div>
@@ -120,10 +119,45 @@
   </footer>
 
   <script>
+    // Mobile Menu Toggle
     const menuBtn = document.getElementById("menuBtn");
     const mobileMenu = document.getElementById("mobileMenu");
     menuBtn.addEventListener("click", () => {
       mobileMenu.classList.toggle("menu-open");
+    });
+
+    // Chart.js Financial Overview
+    const ctx = document.getElementById('financialChart').getContext('2d');
+    const financialChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['October 2025', 'November 2025'],
+        datasets: [
+          {
+            label: 'Payments Completed',
+            data: [100, 140],
+            backgroundColor: 'rgba(34,197,94,0.7)',
+          },
+          {
+            label: 'Pending Payments',
+            data: [20, 20],
+            backgroundColor: 'rgba(239,68,68,0.7)',
+          },
+          {
+            label: 'Claims Processed',
+            data: [30, 45],
+            backgroundColor: 'rgba(250,204,21,0.7)',
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'top' },
+          tooltip: { mode: 'index', intersect: false }
+        },
+        scales: { y: { beginAtZero: true } }
+      }
     });
   </script>
 </body>
