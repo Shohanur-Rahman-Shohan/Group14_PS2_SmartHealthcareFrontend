@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Prescriptions | Smart Healthcare</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/phosphor-icons"></script>
+</head>
+
+<body class="bg-gray-100 text-gray-800 min-h-screen">
+  <nav class="bg-emerald-700 text-white shadow-md">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <h1 class="text-2xl font-semibold flex items-center gap-2">
+        <i class="ph ph-pill"></i> Smart Healthcare (Pharmacist)
+      </h1>
+      <a href="pharmacist-dashboard.html" class="text-white hover:underline">← Back to Dashboard</a>
+    </div>
+  </nav>
+
+  <main class="container mx-auto px-4 py-10">
+    <h1 class="text-3xl font-bold text-emerald-700 mb-6 flex items-center gap-2"><i class="ph ph-notepad"></i> Manage Prescriptions</h1>
+
+    <div class="bg-white p-6 rounded-lg shadow overflow-x-auto">
+      <table class="w-full border-collapse min-w-[700px]">
+        <thead>
+          <tr class="bg-emerald-100 text-emerald-700">
+            <th class="px-4 py-2">Prescription ID</th>
+            <th class="px-4 py-2">Patient</th>
+            <th class="px-4 py-2">Doctor</th>
+            <th class="px-4 py-2">Medicine</th>
+            <th class="px-4 py-2">Date</th>
+            <th class="px-4 py-2">Status</th>
+            <th class="px-4 py-2">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-4 py-2">RX-1045</td>
+            <td class="px-4 py-2">Sadia Rahman</td>
+            <td class="px-4 py-2">Dr. Ahmed</td>
+            <td class="px-4 py-2">Metformin 500mg</td>
+            <td class="px-4 py-2">13 Nov 2025</td>
+            <td class="px-4 py-2 text-yellow-600 font-medium">Pending</td>
+            <td class="px-4 py-2"><button class="bg-emerald-600 text-white px-3 py-1 rounded hover:bg-emerald-700">Mark as Dispensed</button></td>
+          </tr>
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-4 py-2">RX-1042</td>
+            <td class="px-4 py-2">Mahmud Hasan</td>
+            <td class="px-4 py-2">Dr. Farhana</td>
+            <td class="px-4 py-2">Atorvastatin 10mg</td>
+            <td class="px-4 py-2">12 Nov 2025</td>
+            <td class="px-4 py-2 text-green-600 font-medium">Dispensed</td>
+            <td class="px-4 py-2"><button class="bg-gray-300 text-gray-700 px-3 py-1 rounded cursor-not-allowed">Completed</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>
