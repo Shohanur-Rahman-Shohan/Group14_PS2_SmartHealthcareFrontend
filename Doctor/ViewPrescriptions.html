@@ -6,10 +6,73 @@
     <title>View Prescriptions | Doctor Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 flex items-center justify-center h-screen">
-    <div class="text-center">
-        <h1 class="text-4xl font-bold text-indigo-700 mb-4">View Prescriptions Page</h1>
-        <p class="text-gray-600 text-lg">This page is under construction. Please check back later!</p>
+<body class="bg-gray-100 min-h-screen p-8">
+    <div class="container mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h1 class="text-4xl font-bold text-indigo-700 mb-6 text-center">View Prescriptions</h1>
+        
+        <div class="mb-6 flex justify-between items-center">
+            <h2 class="text-2xl font-semibold text-gray-800">All Issued Prescriptions</h2>
+            <button class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Create New Prescription</button>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                <thead>
+                    <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                        <th class="py-3 px-6 text-left">Prescription ID</th>
+                        <th class="py-3 px-6 text-left">Patient Name</th>
+                        <th class="py-3 px-6 text-left">Medication</th>
+                        <th class="py-3 px-6 text-left">Dosage</th>
+                        <th class="py-3 px-6 text-left">Date Issued</th>
+                        <th class="py-3 px-6 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-600 text-sm font-light">
+                    <tr class="border-b border-gray-200 hover:bg-gray-100">
+                        <td class="py-3 px-6 text-left whitespace-nowrap">RX001</td>
+                        <td class="py-3 px-6 text-left">John Doe</td>
+                        <td class="py-3 px-6 text-left">Amoxicillin</td>
+                        <td class="py-3 px-6 text-left">250mg, twice daily</td>
+                        <td class="py-3 px-6 text-left">2025-11-10</td>
+                        <td class="py-3 px-6 text-center">
+                            <div class="flex item-center justify-center">
+                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"><i class="ph ph-eye"></i></button>
+                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"><i class="ph ph-pencil"></i></button>
+                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"><i class="ph ph-printer"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="border-b border-gray-200 hover:bg-gray-100">
+                        <td class="py-3 px-6 text-left whitespace-nowrap">RX002</td>
+                        <td class="py-3 px-6 text-left">Jane Smith</td>
+                        <td class="py-3 px-6 text-left">Metformin</td>
+                        <td class="py-3 px-6 text-left">500mg, daily</td>
+                        <td class="py-3 px-6 text-left">2025-11-08</td>
+                        <td class="py-3 px-6 text-center">
+                            <div class="flex item-center justify-center">
+                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"><i class="ph ph-eye"></i></button>
+                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"><i class="ph ph-pencil"></i></button>
+                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"><i class="ph ph-printer"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="border-b border-gray-200 hover:bg-gray-100">
+                        <td class="py-3 px-6 text-left whitespace-nowrap">RX003</td>
+                        <td class="py-3 px-6 text-left">Peter Jones</td>
+                        <td class="py-3 px-6 text-left">Lisinopril</td>
+                        <td class="py-3 px-6 text-left">10mg, daily</td>
+                        <td class="py-3 px-6 text-left">2025-11-05</td>
+                        <td class="py-3 px-6 text-center">
+                            <div class="flex item-center justify-center">
+                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"><i class="ph ph-eye"></i></button>
+                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"><i class="ph ph-pencil"></i></button>
+                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"><i class="ph ph-printer"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
         <a href="Home.html" class="mt-6 inline-block bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 transition">Go to Dashboard</a>
     </div>
 </body>
