@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patients | Smart Healthcare</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/phosphor-icons"></script>
+</head>
+
+<body class="bg-gray-100 text-gray-800 min-h-screen">
+  <!-- Navbar -->
+  <nav class="bg-emerald-700 text-white shadow-md">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <h1 class="text-2xl font-semibold flex items-center gap-2"><i class="ph ph-users"></i> Patients</h1>
+      <a href="pharmacist-dashboard.html" class="hover:underline">← Back</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-10">
+    <h1 class="text-3xl font-bold text-emerald-700 mb-6 flex items-center gap-2">
+      <i class="ph ph-folder"></i> Patient Records
+    </h1>
+
+    <div class="bg-white p-6 rounded-lg shadow overflow-x-auto">
+      <table class="w-full border-collapse min-w-[800px]">
+        <thead>
+          <tr class="bg-emerald-100 text-emerald-700">
+            <th class="px-4 py-2">Patient ID</th>
+            <th class="px-4 py-2">Name</th>
+            <th class="px-4 py-2">Age</th>
+            <th class="px-4 py-2">Gender</th>
+            <th class="px-4 py-2">Medical History</th>
+            <th class="px-4 py-2">Recent Prescription</th>
+            <th class="px-4 py-2">Contact</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-4 py-2">P-1001</td>
+            <td class="px-4 py-2">Sadia Rahman</td>
+            <td class="px-4 py-2">34</td>
+            <td class="px-4 py-2">Female</td>
+            <td class="px-4 py-2">Diabetes Type 2</td>
+            <td class="px-4 py-2">Metformin 500mg</td>
+            <td class="px-4 py-2">017XXXXXXXX</td>
+          </tr>
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-4 py-2">P-1002</td>
+            <td class="px-4 py-2">Mahmud Hasan</td>
+            <td class="px-4 py-2">45</td>
+            <td class="px-4 py-2">Male</td>
+            <td class="px-4 py-2">High Cholesterol</td>
+            <td class="px-4 py-2">Atorvastatin 10mg</td>
+            <td class="px-4 py-2">018XXXXXXXX</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>
