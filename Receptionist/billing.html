@@ -1,72 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Billing | Receptionist</title>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Billing & Insurance</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/phosphor-icons"></script>
 </head>
 
 <body class="bg-gray-100">
 
-<nav class="bg-teal-700 text-white px-6 py-3 flex justify-between">
-  <div class="text-xl font-semibold flex items-center gap-2">
-    <i class="ph ph-hospital"></i> Receptionist Panel
-  </div>
+<!-- NAVBAR -->
+<nav class="bg-teal-700 text-white px-6 py-3 flex justify-between items-center">
+  <div class="text-xl font-semibold">Receptionist Panel</div>
 
   <div class="flex gap-6">
-    <a href="receptionist-dashboard.html" class="hover:underline">Dashboard</a>
-    <a href="manage-appointments.html" class="hover:underline">Appointments</a>
-    <a href="patients.html" class="hover:underline">Patients</a>
-    <a href="doctors.html" class="hover:underline">Doctors</a>
-    <a href="billing.html" class="underline font-bold">Billing</a>
-    <a href="notifications.html" class="hover:underline">Notifications</a>
-    <a href="profile.html" class="hover:underline">Profile</a>
+    <a href="receptionist-dashboard.html">Dashboard</a>
+    <a href="manage-appointments.html">Appointments</a>
+    <a href="patients.html">Patients</a>
+    <a href="doctors.html">Doctors</a>
+    <a href="billing.html" class="underline">Billing</a>
+    <a href="notifications.html">Notifications</a>
+    <a href="profile.html">Profile</a>
   </div>
 </nav>
 
-<main class="p-10">
-  <h1 class="text-3xl font-bold text-teal-700 mb-6 flex items-center gap-2">
-    <i class="ph ph-receipt"></i> Billing & Insurance
-  </h1>
+<main class="p-8">
+  <div class="flex justify-between mb-6">
+    <h1 class="text-2xl font-bold text-teal-700">Billing & Insurance</h1>
 
-  <div class="bg-white p-6 rounded-lg shadow">
-
-    <table class="w-full">
-      <thead>
-        <tr class="bg-teal-100 text-teal-700">
-          <th class="p-2">Patient</th>
-          <th class="p-2">Service</th>
-          <th class="p-2">Amount</th>
-          <th class="p-2">Insurance</th>
-          <th class="p-2">Status</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr class="border-b hover:bg-gray-50">
-          <td class="p-2">Sadia Rahman</td>
-          <td class="p-2">Consultation</td>
-          <td class="p-2">800 BDT</td>
-          <td class="p-2">Yes</td>
-          <td class="p-2 text-green-600">Paid</td>
-        </tr>
-
-        <tr class="border-b hover:bg-gray-50">
-          <td class="p-2">Mahmud Hasan</td>
-          <td class="p-2">Lab Test</td>
-          <td class="p-2">1500 BDT</td>
-          <td class="p-2">No</td>
-          <td class="p-2 text-yellow-600">Pending</td>
-        </tr>
-      </tbody>
-    </table>
-
+    <button onclick="openForm()" class="bg-teal-600 text-white px-4 py-2 rounded">
+      + Add Invoice
+    </button>
   </div>
 
+  <table class="w-full bg-white rounded shadow">
+    <thead class="bg-teal-600 text-white">
+      <tr>
+        <th class="p-3">Patient</th>
+        <th class="p-3">Service</th>
+        <th class="p-3">Amount</th>
+        <th class="p-3">Status</th>
+        <th class="p-3">Actions</th>
+      </tr>
+    </thead>
+
+    <tbody id="billTable"></tbody>
+  </table>
 </main>
+
+<!-- POPUP FORM -->
+<div id="formPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+  <div class="bg-white p-6 rounded w-96 shadow">
+    <h2 id="formTitle" class="text-xl font-bold mb-4">Add Invoice</h2>
+
+    <input id="patient" class="w-full border p-2 mb-3" placeholder="Patient Name">
+    <input id="service" class="w-full border p-2 mb-3" placeholder="Service">
+    <input id="amount" type="number" class="w-full border p-2 mb-3" placeholder="Amount">
+    <select id="status" class="w-full border p-2 mb-3">
+      <option>Paid</option>
+      <option>Unpaid</option>
+      <option>Pending Insurance</option>
+    </select>
+
+    <div class="flex justify-end gap-3">
+      <button onclick="closeForm()" class="border px-3 py-1 rounded">Cancel</button>
+      <button onclick="saveBill()" class="bg-teal-600 text-white px-3 py-1 rounded">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let bills = [
+  { patient: "John Doe", service: "Consultation", amount: 700, status: "Paid" },
+  { patient: "Mary Smith", service: "X-Ray", amount: 1500, status: "Pending Insurance" }
+];
+
+let editIndex = null;
+
+function render() {
+  billTable.innerHTML = "";
+  bills.forEach((b, i) => {
+    billTable.innerHTML += `
+      <tr class="border-b">
+        <td class="p-3">${b.patient}</td>
+        <td class="p-3">${b.service}</td>
+        <td class="p-3">${b.amount} BDT</td>
+        <td class="p-3">${b.status}</td>
+        <td class="p-3 flex gap-3">
+          <button class="text-blue-600" onclick="editBill(${i})">Edit</button>
+          <button class="text-red-600" onclick="deleteBill(${i})">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function openForm() {
+  formPopup.classList.remove("hidden");
+  formTitle.innerText = "Add Invoice";
+  editIndex = null;
+
+  patient.value = "";
+  service.value = "";
+  amount.value = "";
+  status.value = "Paid";
+}
+
+function closeForm() {
+  formPopup.classList.add("hidden");
+}
+
+function saveBill() {
+  const b = {
+    patient: patient.value,
+    service: service.value,
+    amount: amount.value,
+    status: status.value
+  };
+
+  if (editIndex === null) bills.push(b);
+  else bills[editIndex] = b;
+
+  render();
+  closeForm();
+}
+
+function editBill(i) {
+  const b = bills[i];
+  editIndex = i;
+
+  formTitle.innerText = "Edit Invoice";
+
+  patient.value = b.patient;
+  service.value = b.service;
+  amount.value = b.amount;
+  status.value = b.status;
+
+  openForm();
+}
+
+function deleteBill(i) {
+  if (confirm("Delete this invoice?")) {
+    bills.splice(i, 1);
+    render();
+  }
+}
+
+render();
+</script>
 
 </body>
 </html>
