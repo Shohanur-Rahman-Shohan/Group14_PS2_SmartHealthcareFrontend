@@ -3,75 +3,148 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Manage Appointments | Receptionist</title>
-
+  <title>Manage Appointments</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/phosphor-icons"></script>
 </head>
 
 <body class="bg-gray-100">
 
-  <!-- NAVBAR -->
-  <nav class="bg-teal-700 text-white px-6 py-3 flex justify-between items-center">
-    <div class="text-xl font-semibold flex items-center gap-2">
-      <i class="ph ph-hospital"></i> Receptionist Panel
+<!-- NAVBAR -->
+<nav class="bg-teal-700 text-white px-6 py-3 flex justify-between items-center">
+  <div class="text-xl font-semibold">Receptionist Panel</div>
+
+  <div class="flex gap-6">
+    <a href="receptionist-dashboard.html">Dashboard</a>
+    <a href="manage-appointments.html" class="underline font-bold">Appointments</a>
+    <a href="patients.html">Patients</a>
+    <a href="doctors.html">Doctors</a>
+    <a href="billing.html">Billing</a>
+    <a href="notifications.html">Notifications</a>
+    <a href="profile.html">Profile</a>
+  </div>
+</nav>
+
+<main class="p-8">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-teal-700">Manage Appointments</h1>
+    <button onclick="openForm()" class="bg-teal-600 text-white px-4 py-2 rounded shadow hover:bg-teal-700">
+      + Add Appointment
+    </button>
+  </div>
+
+  <table class="w-full bg-white shadow rounded">
+    <thead class="bg-teal-600 text-white">
+      <tr>
+        <th class="p-3">Patient</th>
+        <th class="p-3">Doctor</th>
+        <th class="p-3">Date</th>
+        <th class="p-3">Time</th>
+        <th class="p-3">Actions</th>
+      </tr>
+    </thead>
+
+    <tbody id="appointmentTable"></tbody>
+  </table>
+</main>
+
+<!-- FORM POPUP -->
+<div id="formPopup"
+     class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+  <div class="bg-white p-6 rounded shadow w-96">
+    <h2 class="text-xl font-bold mb-4" id="formTitle">Add Appointment</h2>
+
+    <input id="patient" class="w-full border p-2 mb-3" placeholder="Patient Name">
+    <input id="doctor" class="w-full border p-2 mb-3" placeholder="Doctor Name">
+    <input id="date" type="date" class="w-full border p-2 mb-3">
+    <input id="time" type="time" class="w-full border p-2 mb-3">
+
+    <div class="flex justify-end gap-3">
+      <button onclick="closeForm()" class="px-3 py-1 border rounded">Cancel</button>
+      <button onclick="saveAppointment()" class="px-3 py-1 bg-teal-600 text-white rounded">Save</button>
     </div>
+  </div>
+</div>
 
-    <div class="flex gap-6 text-lg">
-      <a href="receptionist-dashboard.html" class="hover:underline">Dashboard</a>
-      <a href="manage-appointments.html" class="underline font-bold">Appointments</a>
-      <a href="patients.html" class="hover:underline">Patients</a>
-      <a href="doctors.html" class="hover:underline">Doctors</a>
-      <a href="billing.html" class="hover:underline">Billing</a>
-      <a href="notifications.html" class="hover:underline">Notifications</a>
-      <a href="profile.html" class="hover:underline">Profile</a>
-    </div>
-  </nav>
+<script>
+let editIndex = null;
+let appointments = [
+  { patient: "John Doe", doctor: "Dr. Smith", date: "2025-05-01", time: "10:00" },
+  { patient: "Sarah Lee", doctor: "Dr. Adams", date: "2025-05-02", time: "12:00" }
+];
 
-  <main class="p-10">
-    <h1 class="text-3xl font-bold text-teal-700 mb-6 flex items-center gap-2">
-      <i class="ph ph-calendar-check"></i> Manage Appointments
-    </h1>
+function renderTable() {
+  const table = document.getElementById("appointmentTable");
+  table.innerHTML = "";
 
-    <div class="bg-white p-6 rounded-lg shadow">
-      <table class="w-full border-collapse">
-        <thead>
-          <tr class="bg-teal-100 text-teal-700">
-            <th class="p-2">Patient</th>
-            <th class="p-2">Doctor</th>
-            <th class="p-2">Date</th>
-            <th class="p-2">Time</th>
-            <th class="p-2">Status</th>
-            <th class="p-2">Action</th>
-          </tr>
-        </thead>
+  appointments.forEach((appt, i) => {
+    table.innerHTML += `
+      <tr class="border-b">
+        <td class="p-3">${appt.patient}</td>
+        <td class="p-3">${appt.doctor}</td>
+        <td class="p-3">${appt.date}</td>
+        <td class="p-3">${appt.time}</td>
+        <td class="p-3 flex gap-2">
+          <button class="text-blue-600" onclick="editForm(${i})">Edit</button>
+          <button class="text-red-600" onclick="deleteAppointment(${i})">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+}
 
-        <tbody>
-          <tr class="border-b hover:bg-gray-50">
-            <td class="p-2">Sadia Rahman</td>
-            <td class="p-2">Dr. Ahmed (Cardiology)</td>
-            <td class="p-2">2025-02-15</td>
-            <td class="p-2">10:30 AM</td>
-            <td class="p-2 text-green-600">Confirmed</td>
-            <td class="p-2">
-              <button class="text-teal-700 hover:underline">Edit</button>
-            </td>
-          </tr>
+function openForm() {
+  document.getElementById("formPopup").classList.remove("hidden");
+  document.getElementById("formTitle").innerText = "Add Appointment";
+  editIndex = null;
 
-          <tr class="border-b hover:bg-gray-50">
-            <td class="p-2">Mahmud Hasan</td>
-            <td class="p-2">Dr. Saima (Dermatology)</td>
-            <td class="p-2">2025-02-17</td>
-            <td class="p-2">03:00 PM</td>
-            <td class="p-2 text-yellow-600">Pending</td>
-            <td class="p-2">
-              <button class="text-teal-700 hover:underline">Edit</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </main>
+  document.getElementById("patient").value = "";
+  document.getElementById("doctor").value = "";
+  document.getElementById("date").value = "";
+  document.getElementById("time").value = "";
+}
+
+function closeForm() {
+  document.getElementById("formPopup").classList.add("hidden");
+}
+
+function saveAppointment() {
+  const appt = {
+    patient: document.getElementById("patient").value,
+    doctor: document.getElementById("doctor").value,
+    date: document.getElementById("date").value,
+    time: document.getElementById("time").value
+  };
+
+  if (editIndex === null) appointments.push(appt);
+  else appointments[editIndex] = appt;
+
+  renderTable();
+  closeForm();
+}
+
+function editForm(i) {
+  const appt = appointments[i];
+  editIndex = i;
+
+  document.getElementById("formTitle").innerText = "Edit Appointment";
+  document.getElementById("patient").value = appt.patient;
+  document.getElementById("doctor").value = appt.doctor;
+  document.getElementById("date").value = appt.date;
+  document.getElementById("time").value = appt.time;
+
+  openForm();
+}
+
+function deleteAppointment(i) {
+  if (confirm("Delete this appointment?")) {
+    appointments.splice(i, 1);
+    renderTable();
+  }
+}
+
+renderTable();
+</script>
 
 </body>
 </html>
