@@ -37,7 +37,18 @@ const USERS = [
     email: 'ai.ml@gmail.com',
     password: 'aiml',
     redirect: 'AI_&_ML_Developer/Home.html'
+  },
+  {
+    email:'patient@gmail.com',
+    password:'patient',
+    redirect:'Patient/Home.html'
+  },
+  {
+    email:'insurance@gmail.com',
+    password:'insurance',
+    redirect:'InsuranceCompany/insurance-dashboard.html'
   }
+ 
 ];
 
 loginForm.addEventListener('submit', (e) => {
