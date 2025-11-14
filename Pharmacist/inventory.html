@@ -1,46 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Medicine Inventory | Smart Healthcare</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Inventory | Pharmacist</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/phosphor-icons"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style> body{font-family:'Poppins',sans-serif;} .glass{background:rgba(255,255,255,0.16);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.08);} </style>
 </head>
+<body class="bg-gradient-to-br from-emerald-600 to-sky-700 min-h-screen text-white">
 
-<body class="bg-gray-100 text-gray-800 min-h-screen">
-  <nav class="bg-emerald-700 text-white shadow-md">
-    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-      <h1 class="text-2xl font-semibold flex items-center gap-2"><i class="ph ph-capsules"></i> Medicine Inventory</h1>
-      <a href="pharmacist-dashboard.html" class="hover:underline">← Back</a>
+  <nav class="glass fixed top-0 left-0 right-0 px-8 py-4 flex justify-between items-center z-40 shadow-lg">
+    <div class="text-2xl font-bold">Pharmacist Panel</div>
+    <div class="flex gap-6 font-medium">
+      <a href="pharmacist-dashboard.html">Dashboard</a>
+      <a href="patients.html">Patients</a>
+      <a href="inventory.html" class="text-yellow-200">Inventory</a>
+      <a href="billing.html">Billing</a>
+      <a href="ai-insights.html">AI Insights</a>
+      <a href="profile.html">Profile</a>
     </div>
   </nav>
 
-  <main class="container mx-auto px-4 py-10">
-    <h1 class="text-3xl font-bold text-emerald-700 mb-6 flex items-center gap-2"><i class="ph ph-capsules"></i> Inventory Overview</h1>
+  <main class="pt-28 px-10 pb-20 container mx-auto">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-semibold">Medicine Inventory</h1>
+      <div class="flex gap-3">
+        <input id="invSearch" onkeyup="renderInventory()" placeholder="Search medicine..." class="rounded-lg p-2 text-black" />
+        <button onclick="openInvForm()" class="bg-emerald-400 text-black px-4 py-2 rounded-lg">+ Add Item</button>
+      </div>
+    </div>
 
-    <div class="bg-white p-6 rounded-lg shadow overflow-x-auto">
-      <table class="w-full border-collapse min-w-[700px]">
-        <thead>
-          <tr class="bg-emerald-100 text-emerald-700">
-            <th class="px-4 py-2">Medicine Name</th>
-            <th class="px-4 py-2">Category</th>
-            <th class="px-4 py-2">Stock</th>
-            <th class="px-4 py-2">Expiry</th>
-            <th class="px-4 py-2">Action</th>
+    <div class="glass p-6 rounded-2xl overflow-x-auto">
+      <table class="w-full">
+        <thead class="text-emerald-100/90 border-b border-white/20">
+          <tr>
+            <th class="py-2">SKU</th><th>Medicine</th><th>Category</th><th>Stock</th><th>Expiry</th><th>Threshold</th><th>Actions</th>
           </tr>
         </thead>
-        <tbody>
-          <tr class="border-b hover:bg-gray-50">
-            <td class="px-4 py-2">Paracetamol 500mg</td>
-            <td class="px-4 py-2">Pain Relief</td>
-            <td class="px-4 py-2 text-red-600 font-medium">15</td>
-            <td class="px-4 py-2">Jan 2026</td>
-            <td class="px-4 py-2"><a href="#" class="text-emerald-600 hover:underline">Restock</a></td>
-          </tr>
-        </tbody>
+        <tbody id="invTable"></tbody>
       </table>
     </div>
   </main>
+
+  <!-- Inventory form modal -->
+  <div id="invModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center">
+    <div class="glass p-6 rounded-2xl w-96 text-black">
+      <h2 id="invTitle" class="text-xl font-semibold mb-4">Add Item</h2>
+      <input id="i_name" placeholder="Medicine name" class="w-full mb-3 p-2 rounded" />
+      <input id="i_cat" placeholder="Category" class="w-full mb-3 p-2 rounded" />
+      <input id="i_stock" type="number" placeholder="Stock" class="w-full mb-3 p-2 rounded" />
+      <input id="i_exp" type="month" class="w-full mb-3 p-2 rounded" />
+      <input id="i_thresh" type="number" placeholder="Reorder threshold" class="w-full mb-4 p-2 rounded" />
+      <div class="flex justify-end gap-3">
+        <button onclick="closeInvForm()" class="px-3 py-1 border rounded">Cancel</button>
+        <button onclick="saveInv()" class="px-3 py-1 bg-emerald-500 rounded text-white">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Inventory CRUD using localStorage
+    let inventory = JSON.parse(localStorage.getItem('ph_inventory')||'[]');
+    let editingInvSku = null;
+    function saveInvToStorage(){ localStorage.setItem('ph_inventory', JSON.stringify(inventory)); }
+
+    function generateSKU(){ return 'SKU-'+Math.floor(Math.random()*90000+10000); }
+
+    function renderInventory(){
+      const q = (document.getElementById('invSearch').value||'').toLowerCase();
+      invTable.innerHTML = '';
+      inventory.filter(it => it.name.toLowerCase().includes(q) || it.sku.toLowerCase().includes(q))
+               .forEach(it=>{
+        const lowFlag = Number(it.stock) <= (Number(it.threshold)||20);
+        const tr = document.createElement('tr'); tr.className='border-b border-white/10 hover:bg-white/5';
+        tr.innerHTML = `
+          <td class="py-2">${it.sku}</td>
+          <td>${it.name}</td>
+          <td>${it.category}</td>
+          <td class="${lowFlag?'text-red-300 font-semibold':''}">${it.stock}</td>
+          <td>${it.expiry || '-'}</td>
+          <td>${it.threshold||20}</td>
+          <td>
+            <button class="text-emerald-200 mr-3" onclick='editInv("${it.sku}")'>✏ Edit</button>
+            <button class="text-red-300" onclick='deleteInv("${it.sku}")'>🗑 Delete</button>
+          </td>
+        `;
+        invTable.appendChild(tr);
+      });
+      // update snapshot on dashboard via localStorage event
+      localStorage.setItem('ph_inventory', JSON.stringify(inventory));
+      window.dispatchEvent(new Event('storage'));
+    }
+
+    // Demo seed if empty
+    if(inventory.length===0){
+      inventory = [
+        { sku: 'SKU-10001', name:'Paracetamol 500mg', category:'Pain Relief', stock:15, expiry:'2026-01', threshold:20 },
+        { sku: 'SKU-10002', name:'Amoxicillin 250mg', category:'Antibiotic', stock:120, expiry:'2027-03', threshold:30 },
+        { sku: 'SKU-10003', name:'Metformin 500mg', category:'Diabetes', stock:8, expiry:'2026-06', threshold:25 }
+      ];
+      saveInvToStorage();
+    }
+
+    function openInvForm(){ editingInvSku=null; document.getElementById('invTitle').innerText='Add Item'; i_name.value=''; i_cat.value=''; i_stock.value=''; i_exp.value=''; i_thresh.value=''; invModal.classList.remove('hidden'); invModal.classList.add('flex'); }
+    function closeInvForm(){ invModal.classList.add('hidden'); invModal.classList.remove('flex'); }
+
+    function saveInv(){
+      const name = i_name.value.trim(), cat=i_cat.value.trim(), stock=i_stock.value||0, exp=i_exp.value, thresh=i_thresh.value||20;
+      if(!name){ alert('Name required'); return; }
+      if(editingInvSku){
+        const idx=inventory.findIndex(x=>x.sku===editingInvSku);
+        inventory[idx] = {...inventory[idx], name, category:cat, stock, expiry:exp, threshold:thresh};
+      } else {
+        inventory.push({ sku: generateSKU(), name, category:cat, stock, expiry:exp, threshold:thresh });
+      }
+      saveInvToStorage(); renderInventory(); closeInvForm();
+    }
+
+    function editInv(sku){
+      const it = inventory.find(x=>x.sku===sku); if(!it) return;
+      editingInvSku = sku; document.getElementById('invTitle').innerText='Edit Item';
+      i_name.value = it.name; i_cat.value = it.category; i_stock.value = it.stock; i_exp.value = it.expiry; i_thresh.value = it.threshold;
+      invModal.classList.remove('hidden'); invModal.classList.add('flex');
+    }
+
+    function deleteInv(sku){
+      if(confirm('Delete this inventory item?')){
+        inventory = inventory.filter(x=>x.sku!==sku); saveInvToStorage(); renderInventory();
+      }
+    }
+
+    renderInventory();
+  </script>
 </body>
 </html>
