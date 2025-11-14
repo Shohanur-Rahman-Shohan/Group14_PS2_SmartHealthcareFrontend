@@ -3,64 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profile | Receptionist</title>
+  <title>Profile | Receptionist Panel</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 
-<body class="bg-gray-100">
+<body class="bg-gradient-to-br from-pink-600 to-purple-700 min-h-screen text-white">
 
-<nav class="bg-teal-700 text-white px-6 py-3 flex justify-between items-center">
-  <div class="text-xl font-semibold">Receptionist Panel</div>
-
-  <div class="flex gap-6">
+<nav class="glass fixed top-0 left-0 right-0 px-8 py-4 flex justify-between items-center shadow-lg">
+  <h1 class="text-2xl font-bold">Receptionist Panel</h1>
+  <div class="flex gap-6 font-semibold">
     <a href="receptionist-dashboard.html">Dashboard</a>
     <a href="manage-appointments.html">Appointments</a>
     <a href="patients.html">Patients</a>
     <a href="doctors.html">Doctors</a>
     <a href="billing.html">Billing</a>
     <a href="notifications.html">Notifications</a>
-    <a href="profile.html" class="underline">Profile</a>
+    <a href="profile.html" class="text-yellow-300 underline">Profile</a>
   </div>
 </nav>
 
-<main class="p-8 max-w-xl mx-auto">
-  <h1 class="text-3xl font-bold text-teal-700 mb-6">Profile Settings</h1>
+<main class="pt-28 px-10 pb-10">
+  <h2 class="text-4xl font-bold mb-6">Profile Settings</h2>
 
-  <div class="bg-white shadow p-6 rounded">
-    <label class="block mb-2">Full Name</label>
-    <input id="name" class="w-full border p-2 mb-4" value="Receptionist User">
+  <div class="glass p-8 rounded-2xl w-full md:w-1/2">
+    <label class="block mb-4">
+      <span>Name</span>
+      <input class="w-full p-2 rounded bg-white/20 text-white" value="Receptionist User">
+    </label>
 
-    <label class="block mb-2">Email</label>
-    <input id="email" class="w-full border p-2 mb-4" value="reception@example.com">
+    <label class="block mb-4">
+      <span>Email</span>
+      <input class="w-full p-2 rounded bg-white/20 text-white" value="reception@mail.com">
+    </label>
 
-    <label class="block mb-2">Phone</label>
-    <input id="phone" class="w-full border p-2 mb-4" value="017xxxxxxxx">
+    <label class="block mb-4">
+      <span>Change Password</span>
+      <input type="password" class="w-full p-2 rounded bg-white/20 text-white" placeholder="••••••••">
+    </label>
 
-    <button onclick="saveProfile()" class="bg-teal-600 text-white px-4 py-2 rounded">Save Changes</button>
-  </div>
-
-  <h2 class="text-xl mt-8 font-bold">Change Password</h2>
-  <div class="bg-white shadow p-6 rounded mt-3">
-    <input id="pass1" type="password" placeholder="New Password" class="w-full border p-2 mb-3">
-    <input id="pass2" type="password" placeholder="Confirm Password" class="w-full border p-2 mb-4">
-
-    <button onclick="changePass()" class="bg-teal-600 text-white px-4 py-2 rounded">Update Password</button>
+    <button class="px-6 py-2 bg-green-500 hover:bg-green-600 rounded-lg mt-4">Save Changes</button>
   </div>
 </main>
-
-<script>
-function saveProfile() {
-  alert("Profile updated successfully!");
-}
-
-function changePass() {
-  if (pass1.value === pass2.value && pass1.value.length >= 6) {
-    alert("Password updated!");
-  } else {
-    alert("Passwords do not match or too short.");
-  }
-}
-</script>
 
 </body>
 </html>
