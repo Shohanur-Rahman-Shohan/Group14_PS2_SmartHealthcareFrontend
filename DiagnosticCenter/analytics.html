@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analytics | Smart Healthcare</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/phosphor-icons"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    a, .card {
+      transition: all 0.4s ease;
+    }
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .menu-enter {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+    .menu-open {
+      max-height: 500px;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 min-h-screen font-sans">
+
+  <!-- Navbar -->
+  <nav class="bg-gradient-to-r from-sky-600 to-sky-700 text-white shadow-lg sticky top-0 z-50">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold flex items-center gap-2">
+        <i class="ph ph-chart-bar text-white"></i> Analytics
+      </h1>
+
+      <div class="hidden sm:flex items-center space-x-3">
+        <a href="dashboard.html" class="px-4 py-2 rounded bg-white text-sky-700 flex items-center gap-2 font-medium shadow hover:bg-gray-100"><i class="ph ph-gauge"></i> Dashboard</a>
+        <a href="view-requests.html" class="px-4 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-flask"></i> Test Requests</a>
+        <a href="manage-lab.html" class="px-4 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-lab"></i> Lab Results</a>
+        <a href="patient-records.html" class="px-4 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-file-text"></i> Patient Records</a>
+        <a href="pricing.html" class="px-4 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-tag"></i> Pricing</a>
+        <a href="analytics.html" class="px-4 py-2 rounded bg-white text-sky-700 flex items-center gap-2 font-medium shadow"><i class="ph ph-chart-bar"></i> Analytics</a>
+        <a href="logout.html" class="px-4 py-2 rounded hover:bg-red-500 flex items-center gap-2"><i class="ph ph-sign-out"></i> Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container mx-auto px-6 py-10">
+
+    <!-- Title -->
+    <div class="text-center mb-12">
+      <h1 class="text-5xl font-bold text-sky-700 mb-2 flex justify-center items-center gap-3"><i class="ph ph-chart-bar"></i> Analytics Dashboard</h1>
+      <p class="text-gray-600 text-lg">Visual insights into lab operations and patient data</p>
+    </div>
+
+    <!-- Metrics Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+      <div class="card bg-gradient-to-r from-sky-400 to-sky-500 p-6 rounded-2xl shadow-xl text-center text-white">
+        <i class="ph ph-flask text-5xl mb-3"></i>
+        <h3 class="text-3xl font-bold">15</h3>
+        <p class="text-white/80 mt-1">Pending Tests</p>
+      </div>
+      <div class="card bg-gradient-to-r from-green-400 to-green-500 p-6 rounded-2xl shadow-xl text-center text-white">
+        <i class="ph ph-check-square text-5xl mb-3"></i>
+        <h3 class="text-3xl font-bold">8</h3>
+        <p class="text-white/80 mt-1">Reports Uploaded</p>
+      </div>
+      <div class="card bg-gradient-to-r from-purple-400 to-purple-500 p-6 rounded-2xl shadow-xl text-center text-white">
+        <i class="ph ph-file-text text-5xl mb-3"></i>
+        <h3 class="text-3xl font-bold">23</h3>
+        <p class="text-white/80 mt-1">Patient Records</p>
+      </div>
+      <div class="card bg-gradient-to-r from-yellow-400 to-yellow-500 p-6 rounded-2xl shadow-xl text-center text-white">
+        <i class="ph ph-gauge text-5xl mb-3"></i>
+        <h3 class="text-3xl font-bold">5</h3>
+        <p class="text-white/80 mt-1">Analytics Reports</p>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+
+      <!-- Test Requests Chart -->
+      <div class="bg-white p-8 rounded-2xl shadow-xl">
+        <h2 class="text-2xl font-semibold text-sky-700 mb-5">Test Requests Over Time</h2>
+        <canvas id="requestsChart" class="w-full"></canvas>
+      </div>
+
+      <!-- Patient Records Chart -->
+      <div class="bg-white p-8 rounded-2xl shadow-xl">
+        <h2 class="text-2xl font-semibold text-sky-700 mb-5">Patient Records by Month</h2>
+        <canvas id="patientsChart" class="w-full"></canvas>
+      </div>
+
+      <!-- Revenue Chart -->
+      <div class="bg-white p-8 rounded-2xl shadow-xl md:col-span-2">
+        <h2 class="text-2xl font-semibold text-sky-700 mb-5">Revenue by Package</h2>
+        <canvas id="revenueChart" class="w-full"></canvas>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="mt-16 text-center py-8 text-gray-500 border-t border-gray-200">
+    © 2025 Diagnostic Center. All Rights Reserved.
+  </footer>
+
+  <script>
+    // Mobile Menu Toggle
+    const menuBtn = document.getElementById("menuBtn");
+    const mobileMenu = document.getElementById("mobileMenu");
+    menuBtn?.addEventListener("click", () => {
+      mobileMenu?.classList.toggle("menu-open");
+    });
+
+    // Chart.js data
+    const requestsCtx = document.getElementById('requestsChart').getContext('2d');
+    const requestsChart = new Chart(requestsCtx, {
+      type: 'line',
+      data: {
+        labels: ['Nov 1', 'Nov 3', 'Nov 5', 'Nov 7', 'Nov 9', 'Nov 11', 'Nov 13'],
+        datasets: [{
+          label: 'Test Requests',
+          data: [5, 8, 6, 12, 7, 15, 10],
+          backgroundColor: 'rgba(56, 189, 248, 0.3)',
+          borderColor: 'rgba(14, 165, 233, 1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { display: true } } }
+    });
+
+    const patientsCtx = document.getElementById('patientsChart').getContext('2d');
+    const patientsChart = new Chart(patientsCtx, {
+      type: 'bar',
+      data: {
+        labels: ['July', 'Aug', 'Sep', 'Oct', 'Nov'],
+        datasets: [{
+          label: 'New Patients',
+          data: [12, 18, 15, 20, 23],
+          backgroundColor: 'rgba(139, 92, 246, 0.7)'
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    const revenueChart = new Chart(revenueCtx, {
+      type: 'pie',
+      data: {
+        labels: ['Basic Check', 'Advanced Check', 'Full Body', 'Cardiac', 'Diabetic'],
+        datasets: [{
+          label: 'Revenue (BDT)',
+          data: [1500, 2500, 5000, 3000, 2000],
+          backgroundColor: [
+            'rgba(14, 165, 233, 0.7)',
+            'rgba(34, 197, 94, 0.7)',
+            'rgba(139, 92, 246, 0.7)',
+            'rgba(251, 191, 36, 0.7)',
+            'rgba(239, 68, 68, 0.7)'
+          ]
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+  </script>
+
+</body>
+</html>

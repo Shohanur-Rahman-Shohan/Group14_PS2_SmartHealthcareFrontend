@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pricing | Smart Healthcare</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/phosphor-icons"></script>
+  <style>
+    a, .card, th {
+      transition: all 0.4s ease;
+      cursor: pointer;
+    }
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .menu-enter {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+    .menu-open {
+      max-height: 500px;
+    }
+    th.sorted-asc::after {
+      content: ' ▲';
+    }
+    th.sorted-desc::after {
+      content: ' ▼';
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen font-sans">
+
+  <!-- Navbar -->
+  <nav class="bg-gradient-to-r from-sky-600 to-sky-700 text-white shadow-lg sticky top-0 z-50">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold flex items-center gap-2">
+        <i class="ph ph-tag text-white"></i> Pricing
+      </h1>
+      <a href="dashboard.html" class="bg-white text-sky-700 px-4 py-2 rounded shadow hover:bg-gray-200">Back</a>
+    </div>
+  </nav>
+
+  <main class="container mx-auto px-6 py-10">
+    <!-- Title -->
+    <div class="text-center mb-12">
+      <h1 class="text-5xl font-bold text-sky-700 mb-2 flex justify-center items-center gap-3"><i class="ph ph-tag"></i> Test Packages</h1>
+      <p class="text-gray-600 text-lg">Explore our lab test packages and pricing options</p>
+    </div>
+
+    <!-- Sorting Instructions -->
+    <div class="mb-4 text-right">
+      <span class="text-gray-600 mr-2">Click column headers to sort by Name / Price</span>
+    </div>
+
+    <!-- Packages Tables -->
+    <div class="space-y-12">
+
+      <!-- Basic & Advanced Packages -->
+      <div class="bg-white p-8 rounded-2xl shadow-xl overflow-x-auto">
+        <h2 class="text-3xl font-semibold text-sky-700 mb-5">General Health Packages</h2>
+        <table class="w-full min-w-[700px] text-left border-collapse" id="general-packages">
+          <thead class="bg-sky-100 text-sky-700 text-lg">
+            <tr>
+              <th class="px-6 py-3 rounded-tl-lg" onclick="sortTable('general-packages', 0)">Package Name</th>
+              <th class="px-6 py-3">Tests Included</th>
+              <th class="px-6 py-3" onclick="sortTable('general-packages', 2)">Price (BDT)</th>
+              <th class="px-6 py-3 rounded-tr-lg">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b hover:bg-gray-50 transition">
+              <td class="px-6 py-3">Basic Health Check</td>
+              <td class="px-6 py-3">Blood Test, Urine Test</td>
+              <td class="px-6 py-3">1500</td>
+              <td class="px-6 py-3 flex gap-2">
+                <button onclick="alert('Viewing Basic Health Check')" class="px-3 py-1 bg-sky-600 text-white rounded"><i class="ph ph-eye"></i> View</button>
+                <button onclick="alert('Proceed to purchase Basic Health Check')" class="px-3 py-1 bg-green-600 text-white rounded"><i class="ph ph-credit-card"></i> Buy</button>
+              </td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50 transition">
+              <td class="px-6 py-3">Advanced Health Check</td>
+              <td class="px-6 py-3">Blood Test, Urine Test, X-Ray</td>
+              <td class="px-6 py-3">2500</td>
+              <td class="px-6 py-3 flex gap-2">
+                <button onclick="alert('Viewing Advanced Health Check')" class="px-3 py-1 bg-sky-600 text-white rounded"><i class="ph ph-eye"></i> View</button>
+                <button onclick="alert('Proceed to purchase Advanced Health Check')" class="px-3 py-1 bg-green-600 text-white rounded"><i class="ph ph-credit-card"></i> Buy</button>
+              </td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50 transition">
+              <td class="px-6 py-3">Full Body Check</td>
+              <td class="px-6 py-3">All Lab Tests</td>
+              <td class="px-6 py-3">5000</td>
+              <td class="px-6 py-3 flex gap-2">
+                <button onclick="alert('Viewing Full Body Check')" class="px-3 py-1 bg-sky-600 text-white rounded"><i class="ph ph-eye"></i> View</button>
+                <button onclick="alert('Proceed to purchase Full Body Check')" class="px-3 py-1 bg-green-600 text-white rounded"><i class="ph ph-credit-card"></i> Buy</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Specialized Packages -->
+      <div class="bg-white p-8 rounded-2xl shadow-xl overflow-x-auto">
+        <h2 class="text-3xl font-semibold text-sky-700 mb-5">Specialized Test Packages</h2>
+        <table class="w-full min-w-[700px] text-left border-collapse" id="special-packages">
+          <thead class="bg-sky-100 text-sky-700 text-lg">
+            <tr>
+              <th class="px-6 py-3 rounded-tl-lg" onclick="sortTable('special-packages', 0)">Package Name</th>
+              <th class="px-6 py-3">Tests Included</th>
+              <th class="px-6 py-3" onclick="sortTable('special-packages', 2)">Price (BDT)</th>
+              <th class="px-6 py-3 rounded-tr-lg">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b hover:bg-gray-50 transition">
+              <td class="px-6 py-3">Cardiac Checkup</td>
+              <td class="px-6 py-3">ECG, Blood Test</td>
+              <td class="px-6 py-3">3000</td>
+              <td class="px-6 py-3 flex gap-2">
+                <button onclick="alert('Viewing Cardiac Checkup')" class="px-3 py-1 bg-sky-600 text-white rounded"><i class="ph ph-eye"></i> View</button>
+                <button onclick="alert('Proceed to purchase Cardiac Checkup')" class="px-3 py-1 bg-green-600 text-white rounded"><i class="ph ph-credit-card"></i> Buy</button>
+              </td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50 transition">
+              <td class="px-6 py-3">Diabetic Panel</td>
+              <td class="px-6 py-3">Blood Sugar, HbA1c</td>
+              <td class="px-6 py-3">2000</td>
+              <td class="px-6 py-3 flex gap-2">
+                <button onclick="alert('Viewing Diabetic Panel')" class="px-3 py-1 bg-sky-600 text-white rounded"><i class="ph ph-eye"></i> View</button>
+                <button onclick="alert('Proceed to purchase Diabetic Panel')" class="px-3 py-1 bg-green-600 text-white rounded"><i class="ph ph-credit-card"></i> Buy</button>
+              </td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50 transition">
+              <td class="px-6 py-3">Thyroid Checkup</td>
+              <td class="px-6 py-3">TSH, T3, T4</td>
+              <td class="px-6 py-3">2200</td>
+              <td class="px-6 py-3 flex gap-2">
+                <button onclick="alert('Viewing Thyroid Checkup')" class="px-3 py-1 bg-sky-600 text-white rounded"><i class="ph ph-eye"></i> View</button>
+                <button onclick="alert('Proceed to purchase Thyroid Checkup')" class="px-3 py-1 bg-green-600 text-white rounded"><i class="ph ph-credit-card"></i> Buy</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="mt-16 text-center py-8 text-gray-500 border-t border-gray-200">
+    © 2025 Diagnostic Center. All Rights Reserved.
+  </footer>
+
+  <script>
+    const menuBtn = document.getElementById("menuBtn");
+    const mobileMenu = document.getElementById("mobileMenu");
+    menuBtn?.addEventListener("click", () => {
+      mobileMenu.classList.toggle("menu-open");
+    });
+
+    // Sort Table Function
+    function sortTable(tableId, colIndex) {
+      const table = document.getElementById(tableId);
+      let rows = Array.from(table.tBodies[0].rows);
+      let asc = !table.dataset.sortAsc || table.dataset.sortCol != colIndex;
+
+      rows.sort((a, b) => {
+        let valA = a.cells[colIndex].textContent.trim();
+        let valB = b.cells[colIndex].textContent.trim();
+        if (colIndex === 2) { // Price column
+          valA = parseInt(valA);
+          valB = parseInt(valB);
+        }
+        return asc ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
+      });
+
+      rows.forEach(r => table.tBodies[0].appendChild(r));
+      table.dataset.sortAsc = asc;
+      table.dataset.sortCol = colIndex;
+
+      // Update header arrow
+      Array.from(table.tHead.rows[0].cells).forEach((th, i) => {
+        th.classList.remove('sorted-asc', 'sorted-desc');
+        if (i === colIndex) th.classList.add(asc ? 'sorted-asc' : 'sorted-desc');
+      });
+    }
+  </script>
+</body>
+</html>

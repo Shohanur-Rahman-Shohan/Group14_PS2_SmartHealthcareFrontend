@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Lab Results</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/phosphor-icons"></script>
+</head>
+
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="bg-gradient-to-r from-sky-600 to-sky-700 text-white shadow-lg">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold flex items-center gap-2">
+        <i class="ph ph-lab"></i> Manage Lab Results
+      </h1>
+      <a href="dashboard.html" class="bg-white text-sky-700 px-4 py-2 font-semibold rounded shadow hover:bg-gray-200">
+        Back to Dashboard
+      </a>
+    </div>
+  </nav>
+
+  <main class="container mx-auto px-6 py-10">
+
+    <!-- Page Header -->
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-3xl font-semibold text-sky-700 flex items-center gap-2">
+        <i class="ph ph-flask"></i> Lab Results List
+      </h2>
+
+      <!-- Sort Dropdown -->
+      <select id="sortBy" class="px-4 py-2 border rounded shadow-sm">
+        <option value="name">Sort by Patient Name</option>
+        <option value="test">Sort by Test Type</option>
+        <option value="date">Sort by Date</option>
+        <option value="status">Sort by Status</option>
+      </select>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white p-8 rounded-2xl shadow-lg overflow-x-auto">
+      <table id="resultsTable" class="w-full text-left border-collapse min-w-[700px]">
+        <thead class="bg-sky-100 text-sky-700">
+          <tr>
+            <th class="px-6 py-3">Patient Name</th>
+            <th class="px-6 py-3">Test Type</th>
+            <th class="px-6 py-3">Uploaded Date</th>
+            <th class="px-6 py-3">Status</th>
+            <th class="px-6 py-3">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody id="tableBody">
+          <tr class="border-b">
+            <td class="px-6 py-3">Ayesha Khan</td>
+            <td class="px-6 py-3">Blood Test</td>
+            <td class="px-6 py-3">Nov 13, 2025</td>
+            <td class="px-6 py-3"><span class="bg-green-500 text-white px-3 py-1 rounded-full">Completed</span></td>
+            <td class="px-6 py-3 flex gap-3">
+              <button onclick="downloadReport()" class="px-3 py-1 bg-sky-600 text-white rounded hover:bg-sky-700">
+                <i class="ph ph-download"></i>
+              </button>
+
+              <button onclick="openUpload()" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
+                <i class="ph ph-upload"></i>
+              </button>
+            </td>
+          </tr>
+
+          <tr class="border-b">
+            <td class="px-6 py-3">Rafi Ahmed</td>
+            <td class="px-6 py-3">X-Ray</td>
+            <td class="px-6 py-3">Nov 11, 2025</td>
+            <td class="px-6 py-3"><span class="bg-yellow-500 text-white px-3 py-1 rounded-full">Pending</span></td>
+            <td class="px-6 py-3 flex gap-3">
+              <button onclick="downloadReport()" class="px-3 py-1 bg-sky-600 text-white rounded hover:bg-sky-700">
+                <i class="ph ph-download"></i>
+              </button>
+
+              <button onclick="openUpload()" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
+                <i class="ph ph-upload"></i>
+              </button>
+            </td>
+          </tr>
+
+          <tr class="border-b">
+            <td class="px-6 py-3">Sarah Tanvir</td>
+            <td class="px-6 py-3">MRI Scan</td>
+            <td class="px-6 py-3">Nov 09, 2025</td>
+            <td class="px-6 py-3"><span class="bg-red-500 text-white px-3 py-1 rounded-full">Delayed</span></td>
+            <td class="px-6 py-3 flex gap-3">
+              <button onclick="downloadReport()" class="px-3 py-1 bg-sky-600 text-white rounded hover:bg-sky-700">
+                <i class="ph ph-download"></i>
+              </button>
+
+              <button onclick="openUpload()" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">
+                <i class="ph ph-upload"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Hidden Upload Input -->
+  <input type="file" id="uploadInput" class="hidden" />
+
+  <script>
+    // ---------------------------
+    // SORTING LOGIC
+    // ---------------------------
+    const sortSelect = document.getElementById("sortBy");
+    const tableBody = document.getElementById("tableBody");
+
+    sortSelect.addEventListener("change", () => {
+      const rows = Array.from(tableBody.querySelectorAll("tr"));
+      const sortType = sortSelect.value;
+
+      rows.sort((a, b) => {
+        const colIndex = {
+          name: 0,
+          test: 1,
+          date: 2,
+          status: 3,
+        }[sortType];
+
+        let A = a.children[colIndex].innerText.trim();
+        let B = b.children[colIndex].innerText.trim();
+
+        return A.localeCompare(B);
+      });
+
+      tableBody.innerHTML = "";
+      rows.forEach(row => tableBody.appendChild(row));
+    });
+
+    // ---------------------------
+    // DOWNLOAD BUTTON (works)
+    // ---------------------------
+    function downloadReport() {
+      const link = document.createElement("a");
+      link.href = "sample-report.pdf"; // put your actual file
+      link.download = "Lab-Report.pdf";
+      link.click();
+    }
+
+    // ---------------------------
+    // UPLOAD BUTTON (file picker)
+    // ---------------------------
+    function openUpload() {
+      document.getElementById("uploadInput").click();
+    }
+
+    // When file is selected
+    document.getElementById("uploadInput").addEventListener("change", function () {
+      alert("File uploaded successfully: " + this.files[0].name);
+    });
+  </script>
+
+</body>
+</html>

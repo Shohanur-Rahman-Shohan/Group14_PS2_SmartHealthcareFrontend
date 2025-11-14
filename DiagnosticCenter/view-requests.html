@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>View Test Requests | Diagnostic Center</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/phosphor-icons"></script>
+
+  <style>
+    a, .card {
+      transition: all 0.4s ease;
+    }
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .menu-enter {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+    .menu-open {
+      max-height: 500px;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 min-h-screen font-sans">
+
+  <!-- Navbar -->
+  <nav class="bg-gradient-to-r from-sky-600 to-sky-700 text-white shadow-lg sticky top-0 z-50">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold flex items-center gap-2">
+        <i class="ph ph-heartbeat text-white"></i> Diagnostic Center
+      </h1>
+
+      <button id="menuBtn" class="sm:hidden text-2xl focus:outline-none">
+        <i class="ph ph-list"></i>
+      </button>
+
+      <div class="hidden sm:flex items-center space-x-3">
+        <a href="dashboard.html" class="px-4 py-2 rounded hover:bg-sky-500 flex items-center gap-2">Dashboard</a>
+        <a href="view-requests.html" class="px-4 py-2 rounded bg-white text-sky-700 font-medium shadow flex items-center gap-2">
+          <i class="ph ph-flask"></i> Test Requests
+        </a>
+        <a href="manage-lab.html" class="px-4 py-2 rounded hover:bg-sky-500 flex items-center gap-2">Lab Results</a>
+        <a href="patient-records.html" class="px-4 py-2 rounded hover:bg-sky-500 flex items-center gap-2">Patient Records</a>
+        <a href="pricing.html" class="px-4 py-2 rounded hover:bg-sky-500 flex items-center gap-2">Pricing</a>
+        <a href="analytics.html" class="px-4 py-2 rounded hover:bg-sky-500 flex items-center gap-2">Analytics</a>
+        <a href="logout.html" class="px-4 py-2 rounded hover:bg-red-500 flex items-center gap-2">Logout</a>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="menu-enter sm:hidden bg-sky-600">
+      <a href="dashboard.html" class="block px-4 py-2 hover:bg-sky-500">Dashboard</a>
+      <a href="view-requests.html" class="block px-4 py-2 bg-white text-sky-700">Test Requests</a>
+      <a href="manage-lab.html" class="block px-4 py-2 hover:bg-sky-500">Lab Results</a>
+      <a href="patient-records.html" class="block px-4 py-2 hover:bg-sky-500">Patient Records</a>
+      <a href="pricing.html" class="block px-4 py-2 hover:bg-sky-500">Pricing</a>
+      <a href="analytics.html" class="block px-4 py-2 hover:bg-sky-500">Analytics</a>
+      <a href="logout.html" class="block px-4 py-2 hover:bg-red-500">Logout</a>
+    </div>
+  </nav>
+
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-6 py-10">
+
+    <div class="text-center mb-12">
+      <h1 class="text-5xl font-bold text-sky-700 mb-2 flex justify-center items-center gap-3">
+        <i class="ph ph-flask"></i> Test Requests
+      </h1>
+      <p class="text-gray-600 text-lg">Manage all patient test requests in real-time</p>
+    </div>
+
+    <!-- Test Requests Table -->
+    <div class="bg-white p-8 rounded-2xl shadow-xl overflow-x-auto">
+      <h2 class="text-3xl font-semibold text-sky-700 mb-5 flex items-center gap-2">
+        <i class="ph ph-clipboard-text"></i> All Requests
+      </h2>
+
+      <table class="w-full text-left border-collapse min-w-[750px]">
+        <thead class="bg-sky-100 text-sky-700 text-lg">
+          <tr>
+            <th class="px-6 py-3 rounded-tl-lg">Patient Name</th>
+            <th class="px-6 py-3">Test Type</th>
+            <th class="px-6 py-3">Assigned Doctor</th>
+            <th class="px-6 py-3">Date</th>
+            <th class="px-6 py-3 rounded-tr-lg">Status</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr class="border-b hover:bg-gray-50 transition">
+            <td class="px-6 py-3">Ayesha Khan</td>
+            <td class="px-6 py-3">Blood Test</td>
+            <td class="px-6 py-3">Dr. Salman</td>
+            <td class="px-6 py-3">Nov 12, 2025</td>
+            <td class="px-6 py-3">
+              <span class="bg-yellow-500 text-white px-3 py-1 rounded-full font-semibold text-sm">Pending</span>
+            </td>
+          </tr>
+
+          <tr class="border-b hover:bg-gray-50 transition">
+            <td class="px-6 py-3">Rafi Ahmed</td>
+            <td class="px-6 py-3">X-Ray</td>
+            <td class="px-6 py-3">Dr. Tamim</td>
+            <td class="px-6 py-3">Nov 10, 2025</td>
+            <td class="px-6 py-3">
+              <span class="bg-green-500 text-white px-3 py-1 rounded-full font-semibold text-sm">Completed</span>
+            </td>
+          </tr>
+
+          <tr class="border-b hover:bg-gray-50 transition">
+            <td class="px-6 py-3">Sarah Tanvir</td>
+            <td class="px-6 py-3">MRI Scan</td>
+            <td class="px-6 py-3">Dr. Zahin</td>
+            <td class="px-6 py-3">Nov 11, 2025</td>
+            <td class="px-6 py-3">
+              <span class="bg-red-500 text-white px-3 py-1 rounded-full font-semibold text-sm">Delayed</span>
+            </td>
+          </tr>
+
+          <tr class="border-b hover:bg-gray-50 transition">
+            <td class="px-6 py-3">Imran Hossain</td>
+            <td class="px-6 py-3">Urine Test</td>
+            <td class="px-6 py-3">Dr. Tania</td>
+            <td class="px-6 py-3">Nov 13, 2025</td>
+            <td class="px-6 py-3">
+              <span class="bg-blue-500 text-white px-3 py-1 rounded-full font-semibold text-sm">Processing</span>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+
+
+  <footer class="mt-16 text-center py-8 text-gray-500 border-t border-gray-200">
+    © 2025 Diagnostic Center. All Rights Reserved.
+  </footer>
+
+  <script>
+    const menuBtn = document.getElementById("menuBtn");
+    const mobileMenu = document.getElementById("mobileMenu");
+
+    menuBtn.addEventListener("click", () => {
+      mobileMenu.classList.toggle("menu-open");
+    });
+  </script>
+</body>
+</html>
