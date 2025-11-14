@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Available Doctors / Beds</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f9fbff, #eef5ff);
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: #0a3d62;
+      color: white;
+      text-align: center;
+      padding: 20px 0;
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .container {
+      max-width: 1200px;
+      background: #fff;
+      margin: 40px auto;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      color: #0a3d62;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .filters {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+      gap: 10px;
+    }
+
+    input, select {
+      padding: 10px 15px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+      transition: 0.3s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #0a3d62;
+      box-shadow: 0 0 8px rgba(10, 61, 98, 0.2);
+    }
+
+    /* Doctor Section */
+    .section-title {
+      font-size: 22px;
+      color: #0a3d62;
+      font-weight: 600;
+      margin-top: 30px;
+      margin-bottom: 15px;
+      border-left: 5px solid #0a3d62;
+      padding-left: 10px;
+    }
+
+    .doctor-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .doctor-card {
+      background: #f8fbff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s;
+    }
+
+    .doctor-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .doctor-card h3 {
+      color: #0a3d62;
+      margin-bottom: 6px;
+    }
+
+    .doctor-card p {
+      color: #555;
+      margin: 3px 0;
+      font-size: 14px;
+    }
+
+    .availability {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 15px;
+      font-size: 13px;
+      color: white;
+      font-weight: 600;
+      margin-top: 5px;
+    }
+
+    .available { background: #27ae60; }
+    .busy { background: #e74c3c; }
+    .on-call { background: #f39c12; }
+
+    /* Bed Section */
+    .bed-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+      text-align: center;
+    }
+
+    th {
+      background: #0a3d62;
+      color: white;
+    }
+
+    tr:hover {
+      background: #f1f9ff;
+    }
+
+    .status {
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .free { background: #27ae60; }
+    .occupied { background: #e74c3c; }
+    .cleaning { background: #f39c12; }
+
+    footer {
+      text-align: center;
+      color: #777;
+      margin-top: 40px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>View Available Doctors / Beds</header>
+
+  <div class="container">
+    <h2>Current Availability Overview</h2>
+
+    <!-- Filters -->
+    <div class="filters">
+      <input type="text" placeholder="Search Doctor by Name...">
+      <select>
+        <option value="">All Departments</option>
+        <option value="emergency">Emergency</option>
+        <option value="cardiology">Cardiology</option>
+        <option value="neurology">Neurology</option>
+        <option value="orthopedic">Orthopedic</option>
+      </select>
+      <select>
+        <option value="">All Availability</option>
+        <option value="available">Available</option>
+        <option value="busy">Busy</option>
+        <option value="on-call">On Call</option>
+      </select>
+    </div>
+
+    <!-- Doctors Section -->
+    <div class="section-title">Available Doctors</div>
+
+    <div class="doctor-grid">
+      <div class="doctor-card">
+        <h3>Dr. Rahman</h3>
+        <p>Specialty: Cardiology</p>
+        <p>Shift: Morning</p>
+        <span class="availability available">Available</span>
+      </div>
+
+      <div class="doctor-card">
+        <h3>Dr. Nabila Hasan</h3>
+        <p>Specialty: Emergency Medicine</p>
+        <p>Shift: Night</p>
+        <span class="availability on-call">On Call</span>
+      </div>
+
+      <div class="doctor-card">
+        <h3>Dr. Tanvir Alam</h3>
+        <p>Specialty: Neurology</p>
+        <p>Shift: Evening</p>
+        <span class="availability busy">Busy</span>
+      </div>
+
+      <div class="doctor-card">
+        <h3>Dr. Farzana Rahim</h3>
+        <p>Specialty: Pediatrics</p>
+        <p>Shift: Morning</p>
+        <span class="availability available">Available</span>
+      </div>
+    </div>
+
+    <!-- Beds Section -->
+    <div class="section-title">Hospital Bed Availability</div>
+
+    <table class="bed-table">
+      <thead>
+        <tr>
+          <th>Ward</th>
+          <th>Bed No.</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>Last Updated</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>ICU</td>
+          <td>ICU-01</td>
+          <td>Critical Care</td>
+          <td><span class="status occupied">Occupied</span></td>
+          <td>2 mins ago</td>
+        </tr>
+        <tr>
+          <td>General Ward</td>
+          <td>GW-12</td>
+          <td>Standard</td>
+          <td><span class="status free">Free</span></td>
+          <td>5 mins ago</td>
+        </tr>
+        <tr>
+          <td>Emergency</td>
+          <td>EM-07</td>
+          <td>Observation</td>
+          <td><span class="status cleaning">Cleaning</span></td>
+          <td>10 mins ago</td>
+        </tr>
+        <tr>
+          <td>Recovery</td>
+          <td>RC-04</td>
+          <td>Post Surgery</td>
+          <td><span class="status free">Free</span></td>
+          <td>Just now</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    © 2025 Smart Healthcare

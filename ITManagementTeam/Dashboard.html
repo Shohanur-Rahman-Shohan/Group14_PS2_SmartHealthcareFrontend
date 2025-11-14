@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IT Management Dashboard | Smart Healthcare</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/phosphor-icons"></script>
+
+  <style>
+    /* Smooth transitions */
+    a, .card {
+      transition: all 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    }
+    .menu-enter {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+    .menu-open {
+      max-height: 500px;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 text-gray-800 min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="bg-sky-700 text-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <h1 class="text-2xl font-semibold flex items-center gap-2">
+        <i class="ph ph-gear text-white"></i> IT Management Team
+      </h1>
+
+      <!-- Mobile Toggle -->
+      <button id="menuBtn" class="sm:hidden text-2xl focus:outline-none">
+        <i class="ph ph-list"></i>
+      </button>
+
+      <!-- Desktop Nav -->
+      <div class="hidden sm:flex flex-wrap justify-center items-center space-x-2">
+        <a href="it-dashboard.html" class="px-3 py-2 rounded bg-sky-500 flex items-center gap-2 font-medium"><i class="ph ph-gauge"></i> Dashboard</a>
+        <a href="user-management.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-users"></i> User Account Management</a>
+        <a href="maintenance-logs.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-wrench"></i> System Maintenance Logs</a>
+        <a href="database-monitor.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-database"></i> Database Monitoring</a>
+        <a href="backup-recovery.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-cloud-arrow-up"></i> Backup & Recovery</a>
+        <a href="security-settings.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-lock"></i> Security Settings</a>
+        <a href="access-permissions.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-key"></i> Access Permissions</a>
+        <a href="technical-reports.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-chart-bar"></i> Technical Reports</a>
+        <a href="logout.html" class="px-3 py-2 rounded hover:bg-red-600 flex items-center gap-2"><i class="ph ph-sign-out"></i> Logout</a>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="menu-enter sm:hidden bg-sky-600">
+      <a href="it-dashboard.html" class="block px-4 py-2 bg-sky-500"><i class="ph ph-gauge"></i> Dashboard</a>
+      <a href="user-management.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-users"></i> User Account Management</a>
+      <a href="maintenance-logs.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-wrench"></i> System Maintenance Logs</a>
+      <a href="database-monitor.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-database"></i> Database Monitoring</a>
+      <a href="backup-recovery.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-cloud-arrow-up"></i> Backup & Recovery</a>
+      <a href="security-settings.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-lock"></i> Security Settings</a>
+      <a href="access-permissions.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-key"></i> Access Permissions</a>
+      <a href="technical-reports.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-chart-bar"></i> Technical Reports</a>
+      <a href="logout.html" class="block px-4 py-2 hover:bg-red-600"><i class="ph ph-sign-out"></i> Logout</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-10">
+    <!-- Title -->
+    <div class="mb-8 text-center">
+      <h1 class="text-4xl font-bold text-sky-700 mb-2 flex justify-center items-center gap-2">
+        <i class="ph ph-gauge"></i> IT Management Dashboard
+      </h1>
+      <p class="text-gray-600">Monitor and manage your system performance and infrastructure health.</p>
+    </div>
+
+    <!-- Overview Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+      <div class="card bg-white p-5 rounded-lg shadow text-center">
+        <i class="ph ph-users text-sky-600 text-3xl mb-2"></i>
+        <h3 class="text-xl font-semibold">124</h3>
+        <p class="text-gray-600">Active User Accounts</p>
+      </div>
+      <div class="card bg-white p-5 rounded-lg shadow text-center">
+        <i class="ph ph-database text-sky-600 text-3xl mb-2"></i>
+        <h3 class="text-xl font-semibold">98%</h3>
+        <p class="text-gray-600">Database Uptime</p>
+      </div>
+      <div class="card bg-white p-5 rounded-lg shadow text-center">
+        <i class="ph ph-cloud-arrow-up text-sky-600 text-3xl mb-2"></i>
+        <h3 class="text-xl font-semibold">12</h3>
+        <p class="text-gray-600">Recent Backups</p>
+      </div>
+      <div class="card bg-white p-5 rounded-lg shadow text-center">
+        <i class="ph ph-lock text-sky-600 text-3xl mb-2"></i>
+        <h3 class="text-xl font-semibold">5</h3>
+        <p class="text-gray-600">Security Alerts</p>
+      </div>
+    </div>
+
+    <!-- System Status Table -->
+    <div class="bg-white p-6 rounded-lg shadow mb-10 overflow-x-auto">
+      <h2 class="text-2xl font-semibold text-sky-700 mb-4 flex items-center gap-2">
+        <i class="ph ph-monitor"></i> System Maintenance Logs
+      </h2>
+      <table class="w-full text-left border-collapse min-w-[600px]">
+        <thead>
+          <tr class="bg-sky-100 text-sky-700">
+            <th class="px-4 py-2">Date</th>
+            <th class="px-4 py-2">System</th>
+            <th class="px-4 py-2">Activity</th>
+            <th class="px-4 py-2">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b hover:bg-gray-50 transition">
+            <td class="px-4 py-2">Nov 11, 2025</td>
+            <td class="px-4 py-2">Database</td>
+            <td class="px-4 py-2">Index Optimization</td>
+            <td class="px-4 py-2 text-green-600 font-medium">Completed</td>
+          </tr>
+          <tr class="border-b hover:bg-gray-50 transition">
+            <td class="px-4 py-2">Nov 10, 2025</td>
+            <td class="px-4 py-2">Server</td>
+            <td class="px-4 py-2">Security Patch Installation</td>
+            <td class="px-4 py-2 text-yellow-600 font-medium">In Progress</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Technical Insights -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="card bg-white p-5 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-2 flex items-center gap-2 text-sky-700"><i class="ph ph-server"></i> Server Health</h2>
+        <ul class="text-gray-600 space-y-1">
+          <li>🖥️ CPU Usage: <span class="font-medium">32%</span></li>
+          <li>💾 Memory Usage: <span class="font-medium">58%</span></li>
+          <li>🌐 Network Latency: <span class="font-medium">21ms</span></li>
+        </ul>
+      </div>
+      <div class="card bg-white p-5 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-2 flex items-center gap-2 text-sky-700"><i class="ph ph-cloud"></i> Backup Overview</h2>
+        <p class="text-gray-600 mb-2">Last full system backup completed successfully 3 hours ago.</p>
+        <a href="backup-recovery.html" class="text-sky-600 font-medium hover:underline">View Backup Details →</a>
+      </div>
+      <div class="card bg-white p-5 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-2 flex items-center gap-2 text-sky-700"><i class="ph ph-shield-check"></i> Security Notice</h2>
+        <p class="text-gray-600">All systems are secure. 2 new login attempts detected — review access logs.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="mt-16 text-center py-4 text-gray-500">
+    © 2025 Smart Healthcare IT Division. All Rights Reserved.
+  </footer>
+
+  <script>
+    const menuBtn = document.getElementById("menuBtn");
+    const mobileMenu = document.getElementById("mobileMenu");
+
+    menuBtn.addEventListener("click", () => {
+      mobileMenu.classList.toggle("menu-open");
+    });
+  </script>
+</body>
+</html>
+
+
