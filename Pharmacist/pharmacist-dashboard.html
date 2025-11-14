@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pharmacist Dashboard | Smart Healthcare</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+    .glass { background: rgba(255,255,255,0.18); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.12); }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-emerald-600 to-sky-700 min-h-screen text-white">
+
+  <!-- NAV -->
+  <nav class="glass fixed top-0 left-0 right-0 px-8 py-4 flex justify-between items-center z-40 shadow-lg">
+    <div class="flex items-center gap-3">
+      <div class="text-2xl font-bold">Pharmacist Panel</div>
+      <div class="text-sm text-white/80">Smart Healthcare</div>
+    </div>
+
+    <div class="flex gap-6 font-medium">
+      <a href="pharmacist-dashboard.html" class="hover:text-yellow-200">Dashboard</a>
+      <a href="patients.html" class="hover:text-yellow-200">Patients</a>
+      <a href="inventory.html" class="hover:text-yellow-200">Inventory</a>
+      <a href="billing.html" class="hover:text-yellow-200">Billing</a>
+      <a href="ai-insights.html" class="hover:text-yellow-200">AI Insights</a>
+      <a href="profile.html" class="hover:text-yellow-200">Profile</a>
+    </div>
+  </nav>
+
+  <main class="pt-28 px-10 pb-20 container mx-auto">
+    <header class="mb-8">
+      <h1 class="text-4xl font-bold mb-1">Welcome, Pharmacist</h1>
+      <p class="text-white/90">Overview of prescriptions, inventory, and AI suggestions.</p>
+    </header>
+
+    <!-- Quick Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div class="glass p-6 rounded-2xl shadow-lg hover:scale-105 transition">
+        <div class="text-3xl">💊</div>
+        <h3 class="mt-3 text-xl font-semibold">Prescriptions</h3>
+        <p class="text-white/80 mt-1">Processed today: <strong id="card-prescriptions">24</strong></p>
+        <a href="billing.html" class="inline-block mt-3 text-emerald-100 hover:underline">View Billing →</a>
+      </div>
+
+      <div class="glass p-6 rounded-2xl shadow-lg hover:scale-105 transition">
+        <div class="text-3xl">📦</div>
+        <h3 class="mt-3 text-xl font-semibold">Low Stock</h3>
+        <p class="text-white/80 mt-1">Items below threshold: <strong id="card-lowstock">8</strong></p>
+        <a href="inventory.html" class="inline-block mt-3 text-emerald-100 hover:underline">Manage Inventory →</a>
+      </div>
+
+      <div class="glass p-6 rounded-2xl shadow-lg hover:scale-105 transition">
+        <div class="text-3xl">🧾</div>
+        <h3 class="mt-3 text-xl font-semibold">Billing</h3>
+        <p class="text-white/80 mt-1">Pending claims: <strong id="card-pending">5</strong></p>
+        <a href="billing.html" class="inline-block mt-3 text-emerald-100 hover:underline">Process Claims →</a>
+      </div>
+
+      <div class="glass p-6 rounded-2xl shadow-lg hover:scale-105 transition">
+        <div class="text-3xl">🤖</div>
+        <h3 class="mt-3 text-xl font-semibold">AI Insights</h3>
+        <p class="text-white/80 mt-1">New recommendations: <strong id="card-ai">3</strong></p>
+        <a href="ai-insights.html" class="inline-block mt-3 text-emerald-100 hover:underline">Review AI →</a>
+      </div>
+    </div>
+
+    <!-- Sections: Recent Prescriptions + Inventory Snapshot -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Recent Prescriptions -->
+      <div class="lg:col-span-2 glass p-6 rounded-2xl shadow-lg">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-semibold">Recent Prescriptions</h2>
+          <a href="#" class="text-emerald-100 hover:underline">View All</a>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="text-emerald-100/90">
+              <tr class="border-b border-white/20">
+                <th class="py-2">RX ID</th>
+                <th>Patient</th>
+                <th>Doctor</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="recentPrescriptions">
+              <tr class="border-b border-white/10">
+                <td class="py-2">RX-1045</td>
+                <td>Sadia Rahman</td>
+                <td>Dr. Ahmed</td>
+                <td>2025-11-12</td>
+                <td class="text-green-200">Dispensed</td>
+              </tr>
+              <tr class="border-b border-white/10">
+                <td class="py-2">RX-1046</td>
+                <td>Mahmud Hasan</td>
+                <td>Dr. Farhana</td>
+                <td>2025-11-13</td>
+                <td class="text-yellow-200">Pending</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Inventory Snapshot -->
+      <div class="glass p-6 rounded-2xl shadow-lg">
+        <h3 class="text-2xl font-semibold mb-3">Inventory Snapshot</h3>
+        <ul id="inventorySnapshot" class="space-y-3 text-white/90">
+          <li>Paracetamol 500mg — <strong class="text-red-300">15 left</strong></li>
+          <li>Amoxicillin 250mg — <strong>120 left</strong></li>
+          <li>Metformin 500mg — <strong class="text-amber-200">low</strong></li>
+        </ul>
+        <a href="inventory.html" class="inline-block mt-4 text-emerald-100 hover:underline">Open Inventory →</a>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // For demo, compute low stock & pending values from other pages via localStorage fallback (if present)
+    function updateCards() {
+      const inventory = JSON.parse(localStorage.getItem('ph_inventory')||'[]');
+      const bills = JSON.parse(localStorage.getItem('ph_bills')||'[]');
+      const low = inventory.filter(i => Number(i.stock) <= (i.threshold||20)).length;
+      const pending = bills.filter(b => b.status && b.status.toLowerCase().includes('pending')).length;
+      document.getElementById('card-lowstock').innerText = low;
+      document.getElementById('card-pending').innerText = pending;
+      document.getElementById('card-ai').innerText = JSON.parse(localStorage.getItem('ph_ai')||'[]').length || 3;
+      document.getElementById('card-prescriptions').innerText = JSON.parse(localStorage.getItem('ph_prescriptions')||'[]').length || 24;
+    }
+    updateCards();
+    // update periodically in case other pages change localStorage
+    window.addEventListener('storage', updateCards);
+  </script>
+
+</body>
+</html>
