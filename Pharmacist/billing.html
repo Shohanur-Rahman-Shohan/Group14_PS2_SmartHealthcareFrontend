@@ -1,56 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Billing & Insurance | Smart Healthcare</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Billing | Pharmacist</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/phosphor-icons"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style> body{font-family:'Poppins',sans-serif;} .glass{background:rgba(255,255,255,0.16);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.08);} </style>
 </head>
+<body class="bg-gradient-to-br from-emerald-600 to-sky-700 min-h-screen text-white">
 
-<body class="bg-gray-100 text-gray-800 min-h-screen">
-  <nav class="bg-emerald-700 text-white shadow-md">
-    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-      <h1 class="text-2xl font-semibold flex items-center gap-2"><i class="ph ph-credit-card"></i> Billing & Insurance</h1>
-      <a href="pharmacist-dashboard.html" class="hover:underline">← Back</a>
+  <nav class="glass fixed top-0 left-0 right-0 px-8 py-4 flex justify-between items-center z-40 shadow-lg">
+    <div class="text-2xl font-bold">Pharmacist Panel</div>
+    <div class="flex gap-6 font-medium">
+      <a href="pharmacist-dashboard.html">Dashboard</a>
+      <a href="patients.html">Patients</a>
+      <a href="inventory.html">Inventory</a>
+      <a href="billing.html" class="text-yellow-200">Billing</a>
+      <a href="ai-insights.html">AI Insights</a>
+      <a href="profile.html">Profile</a>
     </div>
   </nav>
 
-  <main class="container mx-auto px-4 py-10">
-    <h1 class="text-3xl font-bold text-emerald-700 mb-6 flex items-center gap-2"><i class="ph ph-receipt"></i> Billing Overview</h1>
+  <main class="pt-28 px-10 pb-20 container mx-auto">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-semibold">Billing & Insurance</h1>
+      <div class="flex gap-3">
+        <input id="billSearch" onkeyup="renderBills()" placeholder="Search invoice..." class="rounded-lg p-2 text-black" />
+        <button onclick="openBillForm()" class="bg-emerald-400 text-black px-4 py-2 rounded-lg">+ New Invoice</button>
+      </div>
+    </div>
 
-    <div class="bg-white p-6 rounded-lg shadow overflow-x-auto">
-      <table class="w-full border-collapse min-w-[800px]">
-        <thead>
-          <tr class="bg-emerald-100 text-emerald-700">
-            <th class="px-4 py-2">Bill ID</th>
-            <th class="px-4 py-2">Patient</th>
-            <th class="px-4 py-2">Total Amount</th>
-            <th class="px-4 py-2">Payment Method</th>
-            <th class="px-4 py-2">Insurance Status</th>
-            <th class="px-4 py-2">Action</th>
+    <div class="glass p-6 rounded-2xl overflow-x-auto">
+      <table class="w-full">
+        <thead class="text-emerald-100/90 border-b border-white/20">
+          <tr>
+            <th class="py-2">Invoice ID</th><th>Patient</th><th>Amount</th><th>Payment</th><th>Status</th><th>Actions</th>
           </tr>
         </thead>
-        <tbody>
-          <tr class="border-b hover:bg-gray-50">
-            <td class="px-4 py-2">B-2101</td>
-            <td class="px-4 py-2">Sadia Rahman</td>
-            <td class="px-4 py-2">৳850</td>
-            <td class="px-4 py-2">Bkash</td>
-            <td class="px-4 py-2 text-yellow-600 font-medium">Pending</td>
-            <td class="px-4 py-2"><button class="bg-emerald-600 text-white px-3 py-1 rounded hover:bg-emerald-700">Verify</button></td>
-          </tr>
-          <tr class="border-b hover:bg-gray-50">
-            <td class="px-4 py-2">B-2102</td>
-            <td class="px-4 py-2">Mahmud Hasan</td>
-            <td class="px-4 py-2">৳1,200</td>
-            <td class="px-4 py-2">Cash</td>
-            <td class="px-4 py-2 text-green-600 font-medium">Approved</td>
-            <td class="px-4 py-2"><button class="bg-gray-300 text-gray-700 px-3 py-1 rounded cursor-not-allowed">Done</button></td>
-          </tr>
-        </tbody>
+        <tbody id="billTable"></tbody>
       </table>
     </div>
   </main>
+
+  <!-- Bill modal -->
+  <div id="billModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center">
+    <div class="glass p-6 rounded-2xl w-96 text-black">
+      <h2 id="billTitle" class="text-xl font-semibold mb-4">New Invoice</h2>
+      <input id="b_patient" placeholder="Patient name" class="w-full mb-3 p-2 rounded" />
+      <input id="b_amount" type="number" placeholder="Amount" class="w-full mb-3 p-2 rounded"/>
+      <select id="b_payment" class="w-full mb-3 p-2 rounded"><option>Cash</option><option>Bkash</option><option>Insurance</option></select>
+      <select id="b_status" class="w-full mb-4 p-2 rounded"><option>Paid</option><option>Pending</option><option>Pending Insurance</option></select>
+      <div class="flex justify-end gap-3">
+        <button onclick="closeBillForm()" class="px-3 py-1 border rounded">Cancel</button>
+        <button onclick="saveBill()" class="px-3 py-1 bg-emerald-500 rounded text-white">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let bills = JSON.parse(localStorage.getItem('ph_bills')||'[]');
+    let editingBillId = null;
+    function saveBills(){ localStorage.setItem('ph_bills', JSON.stringify(bills)); }
+
+    function generateInvoiceId(){ return 'INV-'+Math.floor(Math.random()*90000+10000); }
+
+    function renderBills(){
+      const q=(document.getElementById('billSearch').value||'').toLowerCase();
+      billTable.innerHTML='';
+      bills.filter(b => b.id.toLowerCase().includes(q) || b.patient.toLowerCase().includes(q))
+           .forEach(b=>{
+        const tr=document.createElement('tr'); tr.className='border-b border-white/10 hover:bg-white/5';
+        tr.innerHTML = `
+          <td class="py-2">${b.id}</td>
+          <td>${b.patient}</td>
+          <td>৳ ${b.amount}</td>
+          <td>${b.payment}</td>
+          <td class="${b.status.toLowerCase().includes('paid')?'text-green-200': 'text-yellow-200'}">${b.status}</td>
+          <td>
+            <button class="text-emerald-200 mr-3" onclick='editBill("${b.id}")'>✏ Edit</button>
+            <button class="text-red-300" onclick='deleteBill("${b.id}")'>🗑 Delete</button>
+          </td>
+        `;
+        billTable.appendChild(tr);
+      });
+      localStorage.setItem('ph_bills', JSON.stringify(bills));
+      window.dispatchEvent(new Event('storage'));
+    }
+
+    if(bills.length===0){
+      bills = [
+        { id:'INV-10001', patient:'Sadia Rahman', amount:850, payment:'Bkash', status:'Pending' },
+        { id:'INV-10002', patient:'Mahmud Hasan', amount:1200, payment:'Cash', status:'Paid' }
+      ]; saveBills();
+    }
+
+    function openBillForm(){ editingBillId=null; billTitle.innerText='New Invoice'; b_patient.value=''; b_amount.value=''; b_payment.value='Cash'; b_status.value='Pending'; billModal.classList.remove('hidden'); billModal.classList.add('flex'); }
+    function closeBillForm(){ billModal.classList.add('hidden'); billModal.classList.remove('flex'); }
+
+    function saveBill(){
+      const patient = b_patient.value.trim(), amount = Number(b_amount.value||0), payment = b_payment.value, status = b_status.value;
+      if(!patient || !amount){ alert('Patient and amount required'); return; }
+      if(editingBillId){
+        const idx=bills.findIndex(x=>x.id===editingBillId); bills[idx] = {...bills[idx], patient, amount, payment, status};
+      } else { bills.push({ id: generateInvoiceId(), patient, amount, payment, status }); }
+      saveBills(); renderBills(); closeBillForm();
+    }
+
+    function editBill(id){
+      const b=bills.find(x=>x.id===id); if(!b) return;
+      editingBillId=id; billTitle.innerText='Edit Invoice'; b_patient.value=b.patient; b_amount.value=b.amount; b_payment.value=b.payment; b_status.value=b.status;
+      billModal.classList.remove('hidden'); billModal.classList.add('flex');
+    }
+
+    function deleteBill(id){
+      if(confirm('Delete invoice?')){ bills = bills.filter(x=>x.id!==id); saveBills(); renderBills(); }
+    }
+
+    renderBills();
+  </script>
 </body>
 </html>
