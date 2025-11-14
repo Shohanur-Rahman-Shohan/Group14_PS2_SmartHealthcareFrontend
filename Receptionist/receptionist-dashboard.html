@@ -4,76 +4,91 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Receptionist Dashboard</title>
-
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/phosphor-icons"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+    .glass {
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+  </style>
 </head>
 
-<body class="bg-gray-100 text-gray-900">
+<body class="bg-gradient-to-br from-teal-600 to-blue-700 min-h-screen text-white">
 
-  <!-- NAVBAR -->
-  <nav class="bg-teal-700 text-white px-6 py-3 flex justify-between items-center">
-    <div class="text-xl font-semibold flex items-center gap-2">
-      <i class="ph ph-hospital"></i>
-      Receptionist Panel
-    </div>
+<!-- NAVBAR -->
+<nav class="glass fixed top-0 left-0 right-0 z-50 px-8 py-4 flex justify-between items-center shadow-lg">
+  <h1 class="text-2xl font-bold">Receptionist Panel</h1>
 
-    <div class="flex gap-6 text-lg">
-      <a href="receptionist-dashboard.html" class="hover:underline">Dashboard</a>
-      <a href="manage-appointments.html" class="hover:underline">Appointments</a>
-      <a href="patients.html" class="hover:underline">Patients</a>
-      <a href="doctors.html" class="hover:underline">Doctors</a>
-      <a href="billing.html" class="hover:underline">Billing</a>
-      <a href="notifications.html" class="hover:underline">Notifications</a>
-      <a href="profile.html" class="hover:underline">Profile</a>
-    </div>
-  </nav>
+  <div class="flex gap-6 font-semibold">
+    <a href="receptionist-dashboard.html" class="hover:text-yellow-300 transition">Dashboard</a>
+    <a href="manage-appointments.html" class="hover:text-yellow-300 transition">Appointments</a>
+    <a href="patients.html" class="hover:text-yellow-300 transition">Patients</a>
+    <a href="doctors.html" class="hover:text-yellow-300 transition">Doctors</a>
+    <a href="billing.html" class="hover:text-yellow-300 transition">Billing</a>
+    <a href="notifications.html" class="hover:text-yellow-300 transition">Notifications</a>
+    <a href="profile.html" class="hover:text-yellow-300 transition">Profile</a>
+  </div>
+</nav>
 
-  <!-- MAIN DASHBOARD -->
-  <main class="p-10">
-    <h1 class="text-3xl font-bold text-teal-700 mb-8">Receptionist Dashboard</h1>
+<!-- DASHBOARD CONTENT -->
+<main class="pt-28 px-10 pb-10">
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <!-- HEADER -->
+  <h2 class="text-4xl font-bold mb-8">Welcome Back, Receptionist 👋</h2>
 
-      <a href="manage-appointments.html" class="bg-white p-6 rounded-lg shadow hover:shadow-xl">
-        <i class="ph ph-calendar-check text-4xl text-teal-600"></i>
-        <h2 class="text-xl font-bold mt-3">Manage Appointments</h2>
-        <p class="text-gray-600">Create, edit, reschedule appointments.</p>
-      </a>
+  <!-- CARDS GRID -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
-      <a href="patients.html" class="bg-white p-6 rounded-lg shadow hover:shadow-xl">
-        <i class="ph ph-users text-4xl text-teal-600"></i>
-        <h2 class="text-xl font-bold mt-3">Patient Records</h2>
-        <p class="text-gray-600">Search and view patient information.</p>
-      </a>
+    <!-- APPOINTMENTS -->
+    <a href="manage-appointments.html" class="glass p-6 rounded-2xl shadow-xl hover:scale-105 transition transform cursor-pointer">
+      <div class="text-5xl mb-4">📅</div>
+      <h3 class="text-2xl font-semibold">Manage Appointments</h3>
+      <p class="text-white/90">Create, edit, approve or reschedule appointments.</p>
+    </a>
 
-      <a href="doctors.html" class="bg-white p-6 rounded-lg shadow hover:shadow-xl">
-        <i class="ph ph-stethoscope text-4xl text-teal-600"></i>
-        <h2 class="text-xl font-bold mt-3">Doctor Schedules</h2>
-        <p class="text-gray-600">Check availability & specialties.</p>
-      </a>
+    <!-- PATIENTS -->
+    <a href="patients.html" class="glass p-6 rounded-2xl shadow-xl hover:scale-105 transition transform cursor-pointer">
+      <div class="text-5xl mb-4">🧑‍🤝‍🧑</div>
+      <h3 class="text-2xl font-semibold">Patients</h3>
+      <p class="text-white/90">View patient details, update records and manage files.</p>
+    </a>
 
-      <a href="billing.html" class="bg-white p-6 rounded-lg shadow hover:shadow-xl">
-        <i class="ph ph-receipt text-4xl text-teal-600"></i>
-        <h2 class="text-xl font-bold mt-3">Billing</h2>
-        <p class="text-gray-600">Process payments & insurance claims.</p>
-      </a>
+    <!-- DOCTORS -->
+    <a href="doctors.html" class="glass p-6 rounded-2xl shadow-xl hover:scale-105 transition transform cursor-pointer">
+      <div class="text-5xl mb-4">🩺</div>
+      <h3 class="text-2xl font-semibold">Doctors</h3>
+      <p class="text-white/90">Browse by specialization, schedule updates & availability.</p>
+    </a>
 
-      <a href="notifications.html" class="bg-white p-6 rounded-lg shadow hover:shadow-xl">
-        <i class="ph ph-bell text-4xl text-teal-600"></i>
-        <h2 class="text-xl font-bold mt-3">Notifications</h2>
-        <p class="text-gray-600">Alerts and updates.</p>
-      </a>
+    <!-- BILLING -->
+    <a href="billing.html" class="glass p-6 rounded-2xl shadow-xl hover:scale-105 transition transform cursor-pointer">
+      <div class="text-5xl mb-4">💳</div>
+      <h3 class="text-2xl font-semibold">Billing & Insurance</h3>
+      <p class="text-white/90">Generate invoices, manage payments and insurance claims.</p>
+    </a>
 
-      <a href="profile.html" class="bg-white p-6 rounded-lg shadow hover:shadow-xl">
-        <i class="ph ph-user-circle text-4xl text-teal-600"></i>
-        <h2 class="text-xl font-bold mt-3">Profile</h2>
-        <p class="text-gray-600">Edit your profile and login info.</p>
-      </a>
+    <!-- NOTIFICATIONS -->
+    <a href="notifications.html" class="glass p-6 rounded-2xl shadow-xl hover:scale-105 transition transform cursor-pointer">
+      <div class="text-5xl mb-4">🔔</div>
+      <h3 class="text-2xl font-semibold">Notifications</h3>
+      <p class="text-white/90">Automated reminders, alerts and system notices.</p>
+    </a>
 
-    </div>
-  </main>
+    <!-- PROFILE SETTINGS -->
+    <a href="profile.html" class="glass p-6 rounded-2xl shadow-xl hover:scale-105 transition transform cursor-pointer">
+      <div class="text-5xl mb-4">⚙️</div>
+      <h3 class="text-2xl font-semibold">Profile Settings</h3>
+      <p class="text-white/90">Update personal info, change password, customize preferences.</p>
+    </a>
+
+  </div>
+
+</main>
 
 </body>
 </html>
