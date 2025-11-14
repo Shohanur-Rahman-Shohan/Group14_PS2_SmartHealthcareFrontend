@@ -1,38 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Insights | Smart Healthcare</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI Insights | Pharmacist</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/phosphor-icons"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style> body{font-family:'Poppins',sans-serif;} .glass{background:rgba(255,255,255,0.16);backdrop-filter:blur(10px);} </style>
 </head>
+<body class="bg-gradient-to-br from-emerald-600 to-sky-700 min-h-screen text-white">
 
-<body class="bg-gray-100 text-gray-800 min-h-screen">
-  <nav class="bg-emerald-700 text-white shadow-md">
-    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-      <h1 class="text-2xl font-semibold flex items-center gap-2"><i class="ph ph-brain"></i> AI Insights</h1>
-      <a href="pharmacist-dashboard.html" class="hover:underline">← Back</a>
+  <nav class="glass fixed top-0 left-0 right-0 px-8 py-4 flex justify-between items-center z-40 shadow-lg">
+    <div class="text-2xl font-bold">Pharmacist Panel</div>
+    <div class="flex gap-6 font-medium">
+      <a href="pharmacist-dashboard.html">Dashboard</a>
+      <a href="patients.html">Patients</a>
+      <a href="inventory.html">Inventory</a>
+      <a href="billing.html">Billing</a>
+      <a href="ai-insights.html" class="text-yellow-200">AI Insights</a>
+      <a href="profile.html">Profile</a>
     </div>
   </nav>
 
-  <main class="container mx-auto px-4 py-10">
-    <h1 class="text-3xl font-bold text-emerald-700 mb-6 flex items-center gap-2"><i class="ph ph-lightbulb"></i> Smart AI Suggestions</h1>
-
-    <div class="bg-white p-6 rounded-lg shadow space-y-4">
-      <div class="border-l-4 border-emerald-600 pl-4">
-        <p class="font-semibold text-emerald-700">⚕️ Suggestion 1:</p>
-        <p>Increase stock of <strong>Metformin 500mg</strong> — high prescription rate this week (+23%).</p>
-      </div>
-      <div class="border-l-4 border-emerald-600 pl-4">
-        <p class="font-semibold text-emerald-700">💡 Suggestion 2:</p>
-        <p>Expiring soon: <strong>Paracetamol 500mg (Jan 2026)</strong>. Recommend clearance discount.</p>
-      </div>
-      <div class="border-l-4 border-emerald-600 pl-4">
-        <p class="font-semibold text-emerald-700">📈 Suggestion 3:</p>
-        <p>Patient <strong>Sadia Rahman</strong> refilled twice in a week — check adherence or possible overuse.</p>
+  <main class="pt-28 px-10 pb-20 container mx-auto">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-semibold">AI Insights & Recommendations</h1>
+      <div class="flex gap-3">
+        <input id="aiSearch" onkeyup="renderAI()" placeholder="Filter insights..." class="rounded-lg p-2 text-black" />
+        <button onclick="addAI()" class="bg-emerald-400 text-black px-4 py-2 rounded-lg">+ Add Insight</button>
       </div>
     </div>
+
+    <div id="aiList" class="glass p-6 rounded-2xl space-y-4"></div>
   </main>
+
+  <script>
+    let ai = JSON.parse(localStorage.getItem('ph_ai')||'[]');
+
+    if(ai.length===0){
+      ai = [
+        { id:'AI-101', title:'Restock Metformin', body:'High prescription rate this week. Consider ordering +200 units.' },
+        { id:'AI-102', title:'Clearance Discount', body:'Paracetamol expiring in Jan 2026 — recommend discount/clearance.' },
+        { id:'AI-103', title:'Monitor Antibiotics', body:'Antibiotic usage rising; monitor for overuse trends.' }
+      ];
+      localStorage.setItem('ph_ai', JSON.stringify(ai));
+    }
+
+    function renderAI(){
+      const q=(document.getElementById('aiSearch').value||'').toLowerCase();
+      aiList.innerHTML='';
+      ai.filter(x=>x.title.toLowerCase().includes(q)||x.body.toLowerCase().includes(q))
+        .forEach(x=>{
+          const el = document.createElement('div'); el.className='bg-white/6 p-4 rounded-lg';
+          el.innerHTML = `
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="text-lg font-semibold">${x.title}</h3>
+                <p class="text-white/80 mt-1">${x.body}</p>
+              </div>
+              <div class="flex gap-2">
+                <button class="text-emerald-200" onclick='editAI("${x.id}")'>✏</button>
+                <button class="text-red-300" onclick='deleteAI("${x.id}")'>🗑</button>
+              </div>
+            </div>
+          `;
+          aiList.appendChild(el);
+        });
+    }
+
+    function addAI(){
+      const title = prompt('Title for insight:'); if(!title) return;
+      const body = prompt('Detail / recommendation:'); if(!body) return;
+      const id = 'AI-'+Math.floor(Math.random()*90000+10000);
+      ai.unshift({ id, title, body}); localStorage.setItem('ph_ai', JSON.stringify(ai)); renderAI(); window.dispatchEvent(new Event('storage'));
+    }
+
+    function editAI(id){
+      const item = ai.find(x=>x.id===id); if(!item) return;
+      const title = prompt('Edit title:', item.title); if(!title) return;
+      const body = prompt('Edit detail:', item.body); if(!body) return;
+      item.title = title; item.body = body; localStorage.setItem('ph_ai', JSON.stringify(ai)); renderAI();
+    }
+
+    function deleteAI(id){
+      if(confirm('Delete this insight?')){
+        ai = ai.filter(x=>x.id!==id); localStorage.setItem('ph_ai', JSON.stringify(ai)); renderAI();
+      }
+    }
+
+    renderAI();
+  </script>
 </body>
 </html>
