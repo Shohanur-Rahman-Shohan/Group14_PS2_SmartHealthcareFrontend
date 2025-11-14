@@ -1,63 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Patients | Smart Healthcare</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Patients | Pharmacist</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/phosphor-icons"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+    .glass { background: rgba(255,255,255,0.16); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,0.08); }
+  </style>
 </head>
+<body class="bg-gradient-to-br from-emerald-600 to-sky-700 min-h-screen text-white">
 
-<body class="bg-gray-100 text-gray-800 min-h-screen">
-  <!-- Navbar -->
-  <nav class="bg-emerald-700 text-white shadow-md">
-    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-      <h1 class="text-2xl font-semibold flex items-center gap-2"><i class="ph ph-users"></i> Patients</h1>
-      <a href="pharmacist-dashboard.html" class="hover:underline">← Back</a>
+  <!-- NAV -->
+  <nav class="glass fixed top-0 left-0 right-0 px-8 py-4 flex justify-between items-center z-40 shadow-lg">
+    <div class="text-2xl font-bold">Pharmacist Panel</div>
+    <div class="flex gap-6 font-medium">
+      <a href="pharmacist-dashboard.html">Dashboard</a>
+      <a href="patients.html" class="text-yellow-200">Patients</a>
+      <a href="inventory.html">Inventory</a>
+      <a href="billing.html">Billing</a>
+      <a href="ai-insights.html">AI Insights</a>
+      <a href="profile.html">Profile</a>
     </div>
   </nav>
 
-  <!-- Main Content -->
-  <main class="container mx-auto px-4 py-10">
-    <h1 class="text-3xl font-bold text-emerald-700 mb-6 flex items-center gap-2">
-      <i class="ph ph-folder"></i> Patient Records
-    </h1>
+  <main class="pt-28 px-10 pb-20 container mx-auto">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-semibold">Patient Records</h1>
+      <div class="flex gap-3">
+        <input id="patientSearch" onkeyup="renderPatients()" placeholder="Search patient..." class="rounded-lg p-2 text-black" />
+        <button onclick="openPatientForm()" class="bg-emerald-400 text-black px-4 py-2 rounded-lg">+ Add Patient</button>
+      </div>
+    </div>
 
-    <div class="bg-white p-6 rounded-lg shadow overflow-x-auto">
-      <table class="w-full border-collapse min-w-[800px]">
-        <thead>
-          <tr class="bg-emerald-100 text-emerald-700">
-            <th class="px-4 py-2">Patient ID</th>
-            <th class="px-4 py-2">Name</th>
-            <th class="px-4 py-2">Age</th>
-            <th class="px-4 py-2">Gender</th>
-            <th class="px-4 py-2">Medical History</th>
-            <th class="px-4 py-2">Recent Prescription</th>
-            <th class="px-4 py-2">Contact</th>
+    <div class="glass p-6 rounded-2xl">
+      <table class="w-full">
+        <thead class="text-emerald-100/90 border-b border-white/20">
+          <tr>
+            <th class="py-2">ID</th>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Gender</th>
+            <th>Contact</th>
+            <th>Actions</th>
           </tr>
         </thead>
-        <tbody>
-          <tr class="border-b hover:bg-gray-50">
-            <td class="px-4 py-2">P-1001</td>
-            <td class="px-4 py-2">Sadia Rahman</td>
-            <td class="px-4 py-2">34</td>
-            <td class="px-4 py-2">Female</td>
-            <td class="px-4 py-2">Diabetes Type 2</td>
-            <td class="px-4 py-2">Metformin 500mg</td>
-            <td class="px-4 py-2">017XXXXXXXX</td>
-          </tr>
-          <tr class="border-b hover:bg-gray-50">
-            <td class="px-4 py-2">P-1002</td>
-            <td class="px-4 py-2">Mahmud Hasan</td>
-            <td class="px-4 py-2">45</td>
-            <td class="px-4 py-2">Male</td>
-            <td class="px-4 py-2">High Cholesterol</td>
-            <td class="px-4 py-2">Atorvastatin 10mg</td>
-            <td class="px-4 py-2">018XXXXXXXX</td>
-          </tr>
-        </tbody>
+        <tbody id="patientsTable"></tbody>
       </table>
     </div>
   </main>
+
+  <!-- Patient Form Modal -->
+  <div id="patientModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center">
+    <div class="glass p-6 rounded-2xl w-96 text-black">
+      <h2 id="patientModalTitle" class="text-xl font-semibold mb-4">Add Patient</h2>
+      <input id="p_name" placeholder="Full Name" class="w-full mb-3 p-2 rounded" />
+      <input id="p_age" placeholder="Age" type="number" class="w-full mb-3 p-2 rounded" />
+      <select id="p_gender" class="w-full mb-3 p-2 rounded">
+        <option value="">Select gender</option><option>Female</option><option>Male</option><option>Other</option>
+      </select>
+      <input id="p_contact" placeholder="Phone" class="w-full mb-4 p-2 rounded" />
+      <div class="flex justify-end gap-3">
+        <button onclick="closePatientForm()" class="px-3 py-1 border rounded">Cancel</button>
+        <button onclick="savePatient()" class="px-3 py-1 bg-emerald-500 rounded text-white">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Patients CRUD (localStorage)
+    let patients = JSON.parse(localStorage.getItem('ph_patients')||'[]');
+    let editingPatientId = null;
+
+    function savePatientsToStorage(){ localStorage.setItem('ph_patients', JSON.stringify(patients)); }
+    function generateId(){ return 'P-'+Math.floor(Math.random()*90000+10000); }
+
+    function renderPatients(){
+      const q = (document.getElementById('patientSearch').value||'').toLowerCase();
+      const tbody = document.getElementById('patientsTable'); tbody.innerHTML='';
+      patients.filter(p => p.name.toLowerCase().includes(q) || p.id.toLowerCase().includes(q))
+              .forEach((p) => {
+        const tr = document.createElement('tr'); tr.className='border-b border-white/10 hover:bg-white/5';
+        tr.innerHTML = `
+          <td class="py-2">${p.id}</td>
+          <td>${p.name}</td>
+          <td>${p.age}</td>
+          <td>${p.gender}</td>
+          <td>${p.contact}</td>
+          <td>
+            <button class="text-emerald-200 mr-3" onclick='editPatient("${p.id}")'>✏ Edit</button>
+            <button class="text-red-300" onclick='deletePatient("${p.id}")'>🗑 Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function openPatientForm(){
+      editingPatientId = null;
+      document.getElementById('patientModalTitle').innerText='Add Patient';
+      document.getElementById('p_name').value=''; document.getElementById('p_age').value=''; document.getElementById('p_gender').value=''; document.getElementById('p_contact').value='';
+      document.getElementById('patientModal').classList.remove('hidden'); document.getElementById('patientModal').classList.add('flex');
+    }
+    function closePatientForm(){ document.getElementById('patientModal').classList.add('hidden'); document.getElementById('patientModal').classList.remove('flex'); }
+
+    function savePatient(){
+      const name = document.getElementById('p_name').value.trim();
+      const age = document.getElementById('p_age').value;
+      const gender = document.getElementById('p_gender').value;
+      const contact = document.getElementById('p_contact').value.trim();
+      if(!name){ alert('Name required'); return; }
+
+      if(editingPatientId){
+        const idx = patients.findIndex(x=>x.id===editingPatientId);
+        patients[idx] = { ...patients[idx], name, age, gender, contact };
+      } else {
+        patients.push({ id: generateId(), name, age, gender, contact });
+      }
+      savePatientsToStorage(); renderPatients(); closePatientForm();
+    }
+
+    function editPatient(id){
+      const p = patients.find(x=>x.id===id); if(!p)return;
+      editingPatientId = id;
+      document.getElementById('patientModalTitle').innerText='Edit Patient';
+      document.getElementById('p_name').value = p.name;
+      document.getElementById('p_age').value = p.age;
+      document.getElementById('p_gender').value = p.gender;
+      document.getElementById('p_contact').value = p.contact;
+      document.getElementById('patientModal').classList.remove('hidden'); document.getElementById('patientModal').classList.add('flex');
+    }
+
+    function deletePatient(id){
+      if(confirm('Delete this patient?')){
+        patients = patients.filter(x=>x.id!==id);
+        savePatientsToStorage(); renderPatients();
+      }
+    }
+
+    // Initial demo data if empty
+    if(patients.length===0){
+      patients = [
+        { id:'P-10001', name:'Sadia Rahman', age:34, gender:'Female', contact:'017XXXXXXX' },
+        { id:'P-10002', name:'Mahmud Hasan', age:45, gender:'Male', contact:'018XXXXXXX' }
+      ];
+      savePatientsToStorage();
+    }
+    renderPatients();
+  </script>
 </body>
 </html>
