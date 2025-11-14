@@ -4,146 +4,187 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Manage Appointments</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/phosphor-icons"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    body { font-family: "Poppins", sans-serif; }
+    .glass {
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+  </style>
 </head>
 
-<body class="bg-gray-100">
+<body class="bg-gradient-to-br from-teal-600 to-blue-700 min-h-screen text-white">
 
 <!-- NAVBAR -->
-<nav class="bg-teal-700 text-white px-6 py-3 flex justify-between items-center">
-  <div class="text-xl font-semibold">Receptionist Panel</div>
+<nav class="glass fixed top-0 left-0 right-0 z-50 px-8 py-4 flex justify-between items-center shadow-lg">
+  <h1 class="text-2xl font-bold">Receptionist Panel</h1>
 
-  <div class="flex gap-6">
-    <a href="receptionist-dashboard.html">Dashboard</a>
-    <a href="manage-appointments.html" class="underline font-bold">Appointments</a>
-    <a href="patients.html">Patients</a>
-    <a href="doctors.html">Doctors</a>
-    <a href="billing.html">Billing</a>
-    <a href="notifications.html">Notifications</a>
-    <a href="profile.html">Profile</a>
+  <div class="flex gap-6 font-semibold">
+    <a href="receptionist-dashboard.html" class="hover:text-yellow-300 transition">Dashboard</a>
+    <a href="manage-appointments.html" class="text-yellow-300">Appointments</a>
+    <a href="patients.html" class="hover:text-yellow-300 transition">Patients</a>
+    <a href="doctors.html" class="hover:text-yellow-300 transition">Doctors</a>
+    <a href="billing.html" class="hover:text-yellow-300 transition">Billing</a>
+    <a href="notifications.html" class="hover:text-yellow-300 transition">Notifications</a>
+    <a href="profile.html" class="hover:text-yellow-300 transition">Profile</a>
   </div>
 </nav>
 
-<main class="p-8">
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold text-teal-700">Manage Appointments</h1>
-    <button onclick="openForm()" class="bg-teal-600 text-white px-4 py-2 rounded shadow hover:bg-teal-700">
-      + Add Appointment
-    </button>
+<!-- PAGE CONTENT -->
+<main class="pt-28 px-10 pb-10">
+
+  <h2 class="text-4xl font-bold mb-6">📅 Manage Appointments</h2>
+
+  <!-- Add New Appointment Button -->
+  <button onclick="openForm()"
+    class="mb-6 px-6 py-3 bg-yellow-400 text-black font-semibold rounded-xl hover:bg-yellow-500 transition">
+    + Add New Appointment
+  </button>
+
+  <!-- Search Bar -->
+  <input
+    id="searchInput"
+    onkeyup="searchAppointments()"
+    type="text"
+    placeholder="Search by patient name..."
+    class="glass w-full md:w-1/2 px-4 py-2 rounded-xl mb-6 text-black"
+  />
+
+  <!-- APPOINTMENTS TABLE -->
+  <div class="glass p-6 rounded-2xl shadow-xl overflow-x-auto">
+    <table class="w-full text-left">
+      <thead>
+        <tr class="border-b border-white/40">
+          <th class="pb-3">Patient</th>
+          <th class="pb-3">Doctor</th>
+          <th class="pb-3">Date</th>
+          <th class="pb-3">Time</th>
+          <th class="pb-3">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody id="appointmentsTable">
+        <tr class="border-b border-white/20">
+          <td>Rafi Ahmed</td>
+          <td>Dr. Zahir</td>
+          <td>2025-02-20</td>
+          <td>10:30 AM</td>
+          <td class="flex gap-3 mt-2">
+            <button onclick="editAppointment(this)" class="px-3 py-1 bg-green-600 rounded-lg hover:bg-green-700">Edit</button>
+            <button onclick="deleteAppointment(this)" class="px-3 py-1 bg-red-600 rounded-lg hover:bg-red-700">Delete</button>
+          </td>
+        </tr>
+
+        <tr class="border-b border-white/20">
+          <td>Nasrin Akter</td>
+          <td>Dr. Mehedi</td>
+          <td>2025-02-21</td>
+          <td>02:15 PM</td>
+          <td class="flex gap-3 mt-2">
+            <button onclick="editAppointment(this)" class="px-3 py-1 bg-green-600 rounded-lg hover:bg-green-700">Edit</button>
+            <button onclick="deleteAppointment(this)" class="px-3 py-1 bg-red-600 rounded-lg hover:bg-red-700">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
-
-  <table class="w-full bg-white shadow rounded">
-    <thead class="bg-teal-600 text-white">
-      <tr>
-        <th class="p-3">Patient</th>
-        <th class="p-3">Doctor</th>
-        <th class="p-3">Date</th>
-        <th class="p-3">Time</th>
-        <th class="p-3">Actions</th>
-      </tr>
-    </thead>
-
-    <tbody id="appointmentTable"></tbody>
-  </table>
 </main>
 
-<!-- FORM POPUP -->
-<div id="formPopup"
-     class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-  <div class="bg-white p-6 rounded shadow w-96">
-    <h2 class="text-xl font-bold mb-4" id="formTitle">Add Appointment</h2>
+<!-- ADD / EDIT APPOINTMENT POPUP FORM -->
+<div id="appointmentForm" class="fixed inset-0 bg-black/50 hidden items-center justify-center">
+  <div class="glass p-6 rounded-2xl w-96 shadow-xl">
 
-    <input id="patient" class="w-full border p-2 mb-3" placeholder="Patient Name">
-    <input id="doctor" class="w-full border p-2 mb-3" placeholder="Doctor Name">
-    <input id="date" type="date" class="w-full border p-2 mb-3">
-    <input id="time" type="time" class="w-full border p-2 mb-3">
+    <h2 class="text-2xl font-bold mb-4" id="formTitle">Add Appointment</h2>
+
+    <input id="patientName" type="text" placeholder="Patient Name" class="w-full mb-3 p-2 rounded-lg text-black" />
+    <input id="doctorName" type="text" placeholder="Doctor Name" class="w-full mb-3 p-2 rounded-lg text-black" />
+    <input id="date" type="date" class="w-full mb-3 p-2 rounded-lg text-black" />
+    <input id="time" type="time" class="w-full mb-3 p-2 rounded-lg text-black" />
 
     <div class="flex justify-end gap-3">
-      <button onclick="closeForm()" class="px-3 py-1 border rounded">Cancel</button>
-      <button onclick="saveAppointment()" class="px-3 py-1 bg-teal-600 text-white rounded">Save</button>
+      <button onclick="closeForm()" class="px-4 py-2 bg-gray-500 rounded-lg hover:bg-gray-600">Cancel</button>
+      <button onclick="saveAppointment()" class="px-4 py-2 bg-yellow-400 text-black rounded-lg hover:bg-yellow-500">
+        Save
+      </button>
     </div>
   </div>
 </div>
 
 <script>
-let editIndex = null;
-let appointments = [
-  { patient: "John Doe", doctor: "Dr. Smith", date: "2025-05-01", time: "10:00" },
-  { patient: "Sarah Lee", doctor: "Dr. Adams", date: "2025-05-02", time: "12:00" }
-];
+  let editRow = null;
 
-function renderTable() {
-  const table = document.getElementById("appointmentTable");
-  table.innerHTML = "";
-
-  appointments.forEach((appt, i) => {
-    table.innerHTML += `
-      <tr class="border-b">
-        <td class="p-3">${appt.patient}</td>
-        <td class="p-3">${appt.doctor}</td>
-        <td class="p-3">${appt.date}</td>
-        <td class="p-3">${appt.time}</td>
-        <td class="p-3 flex gap-2">
-          <button class="text-blue-600" onclick="editForm(${i})">Edit</button>
-          <button class="text-red-600" onclick="deleteAppointment(${i})">Delete</button>
-        </td>
-      </tr>
-    `;
-  });
-}
-
-function openForm() {
-  document.getElementById("formPopup").classList.remove("hidden");
-  document.getElementById("formTitle").innerText = "Add Appointment";
-  editIndex = null;
-
-  document.getElementById("patient").value = "";
-  document.getElementById("doctor").value = "";
-  document.getElementById("date").value = "";
-  document.getElementById("time").value = "";
-}
-
-function closeForm() {
-  document.getElementById("formPopup").classList.add("hidden");
-}
-
-function saveAppointment() {
-  const appt = {
-    patient: document.getElementById("patient").value,
-    doctor: document.getElementById("doctor").value,
-    date: document.getElementById("date").value,
-    time: document.getElementById("time").value
-  };
-
-  if (editIndex === null) appointments.push(appt);
-  else appointments[editIndex] = appt;
-
-  renderTable();
-  closeForm();
-}
-
-function editForm(i) {
-  const appt = appointments[i];
-  editIndex = i;
-
-  document.getElementById("formTitle").innerText = "Edit Appointment";
-  document.getElementById("patient").value = appt.patient;
-  document.getElementById("doctor").value = appt.doctor;
-  document.getElementById("date").value = appt.date;
-  document.getElementById("time").value = appt.time;
-
-  openForm();
-}
-
-function deleteAppointment(i) {
-  if (confirm("Delete this appointment?")) {
-    appointments.splice(i, 1);
-    renderTable();
+  function openForm() {
+    document.getElementById("appointmentForm").style.display = "flex";
+    document.getElementById("formTitle").innerText = "Add Appointment";
+    editRow = null;
   }
-}
 
-renderTable();
+  function closeForm() {
+    document.getElementById("appointmentForm").style.display = "none";
+  }
+
+  function saveAppointment() {
+    const patient = document.getElementById("patientName").value;
+    const doctor = document.getElementById("doctorName").value;
+    const date = document.getElementById("date").value;
+    const time = document.getElementById("time").value;
+
+    if (editRow) {
+      editRow.children[0].innerText = patient;
+      editRow.children[1].innerText = doctor;
+      editRow.children[2].innerText = date;
+      editRow.children[3].innerText = time;
+    } else {
+      const table = document.getElementById("appointmentsTable");
+      const row = document.createElement("tr");
+      row.className = "border-b border-white/20";
+
+      row.innerHTML = `
+        <td>${patient}</td>
+        <td>${doctor}</td>
+        <td>${date}</td>
+        <td>${time}</td>
+        <td class="flex gap-3 mt-2">
+          <button onclick="editAppointment(this)" class="px-3 py-1 bg-green-600 rounded-lg hover:bg-green-700">Edit</button>
+          <button onclick="deleteAppointment(this)" class="px-3 py-1 bg-red-600 rounded-lg hover:bg-red-700">Delete</button>
+        </td>
+      `;
+      table.appendChild(row);
+    }
+
+    closeForm();
+  }
+
+  function editAppointment(button) {
+    editRow = button.parentElement.parentElement;
+
+    document.getElementById("formTitle").innerText = "Edit Appointment";
+    document.getElementById("patientName").value = editRow.children[0].innerText;
+    document.getElementById("doctorName").value = editRow.children[1].innerText;
+    document.getElementById("date").value = editRow.children[2].innerText;
+    document.getElementById("time").value = editRow.children[3].innerText;
+
+    openForm();
+  }
+
+  function deleteAppointment(button) {
+    button.parentElement.parentElement.remove();
+  }
+
+  function searchAppointments() {
+    const input = document.getElementById("searchInput").value.toLowerCase();
+    const rows = document.querySelectorAll("#appointmentsTable tr");
+
+    rows.forEach(row => {
+      const patient = row.children[0].innerText.toLowerCase();
+      row.style.display = patient.includes(input) ? "" : "none";
+    });
+  }
 </script>
 
 </body>
