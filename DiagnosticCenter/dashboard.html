@@ -6,49 +6,41 @@
   <title>Diagnostic Center | Smart Healthcare</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/phosphor-icons"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    a, .card {
-      transition: all 0.4s ease;
+    a, .card, .status-badge {
+      transition: all 0.3s ease;
     }
     .card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-    }
-    .menu-enter {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.4s ease;
-    }
-    .menu-open {
-      max-height: 500px;
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 15px 25px rgba(0,0,0,0.2);
     }
     .status-badge {
       @apply px-3 py-1 rounded-full text-white text-sm font-semibold;
     }
+    tbody tr:hover {
+      background: rgba(59, 130, 246, 0.05);
+    }
   </style>
 </head>
-
-<body class="bg-gray-50 text-gray-800 min-h-screen font-sans">
+<body class="bg-gradient-to-b from-sky-50 to-white text-gray-800 min-h-screen font-sans">
 
   <!-- Navbar -->
-  <nav class="bg-gradient-to-r from-sky-600 to-sky-700 text-white shadow-lg sticky top-0 z-50">
+  <nav class="bg-gradient-to-r from-sky-600 to-cyan-500 text-white shadow-lg sticky top-0 z-50">
     <div class="container mx-auto px-6 py-4 flex justify-between items-center">
       <h1 class="text-2xl font-bold flex items-center gap-2">
         <i class="ph ph-heartbeat text-white"></i> Diagnostic Center
       </h1>
-
       <button id="menuBtn" class="sm:hidden text-2xl focus:outline-none">
         <i class="ph ph-list"></i>
       </button>
-
       <div class="hidden sm:flex items-center space-x-3">
         <a href="dashboard.html" class="px-4 py-2 rounded bg-white text-sky-700 flex items-center gap-2 font-medium shadow hover:bg-gray-100"><i class="ph ph-gauge"></i> Dashboard</a>
-        <a href="view-requests.html" class="px-4 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-flask"></i> Test Requests</a>
-        <a href="manage-lab.html" class="px-4 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-lab"></i> Lab Results</a>
-        <a href="patient-records.html" class="px-4 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-file-text"></i> Patient Records</a>
-        <a href="pricing.html" class="px-4 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-tag"></i> Pricing</a>
-        <a href="analytics.html" class="px-4 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-chart-bar"></i> Analytics</a>
+        <a href="view-requests.html" class="px-4 py-2 rounded hover:bg-cyan-400 flex items-center gap-2"><i class="ph ph-flask"></i> Test Requests</a>
+        <a href="manage-lab.html" class="px-4 py-2 rounded hover:bg-purple-500 flex items-center gap-2"><i class="ph ph-lab"></i> Lab Results</a>
+        <a href="patient-records.html" class="px-4 py-2 rounded hover:bg-green-500 flex items-center gap-2"><i class="ph ph-file-text"></i> Patient Records</a>
+        <a href="pricing.html" class="px-4 py-2 rounded hover:bg-yellow-400 flex items-center gap-2"><i class="ph ph-tag"></i> Pricing</a>
+        <a href="analytics.html" class="px-4 py-2 rounded hover:bg-pink-500 flex items-center gap-2"><i class="ph ph-chart-bar"></i> Analytics</a>
         <a href="logout.html" class="px-4 py-2 rounded hover:bg-red-500 flex items-center gap-2"><i class="ph ph-sign-out"></i> Logout</a>
       </div>
     </div>
@@ -56,108 +48,174 @@
     <!-- Mobile Menu -->
     <div id="mobileMenu" class="menu-enter sm:hidden bg-sky-600">
       <a href="dashboard.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-gauge"></i> Dashboard</a>
-      <a href="view-requests.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-flask"></i> Test Requests</a>
-      <a href="manage-lab.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-lab"></i> Lab Results</a>
-      <a href="patient-records.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-file-text"></i> Patient Records</a>
-      <a href="pricing.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-tag"></i> Pricing</a>
-      <a href="analytics.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-chart-bar"></i> Analytics</a>
+      <a href="view-requests.html" class="block px-4 py-2 hover:bg-cyan-400"><i class="ph ph-flask"></i> Test Requests</a>
+      <a href="manage-lab.html" class="block px-4 py-2 hover:bg-purple-500"><i class="ph ph-lab"></i> Lab Results</a>
+      <a href="patient-records.html" class="block px-4 py-2 hover:bg-green-500"><i class="ph ph-file-text"></i> Patient Records</a>
+      <a href="pricing.html" class="block px-4 py-2 hover:bg-yellow-400"><i class="ph ph-tag"></i> Pricing</a>
+      <a href="analytics.html" class="block px-4 py-2 hover:bg-pink-500"><i class="ph ph-chart-bar"></i> Analytics</a>
       <a href="logout.html" class="block px-4 py-2 hover:bg-red-500"><i class="ph ph-sign-out"></i> Logout</a>
     </div>
   </nav>
 
   <main class="container mx-auto px-6 py-10">
 
-    <!-- Title -->
+    <!-- Page Title -->
     <div class="text-center mb-12">
-      <h1 class="text-5xl font-bold text-sky-700 mb-2 flex justify-center items-center gap-3"><i class="ph ph-gauge"></i> Dashboard</h1>
-      <p class="text-gray-600 text-lg">Overview of lab operations and patient management</p>
+      <h1 class="text-5xl font-bold text-gradient-to-r from-cyan-500 to-sky-700 mb-2 flex justify-center items-center gap-3"><i class="ph ph-gauge"></i> Dashboard</h1>
+      <p class="text-gray-600 text-lg">Overview of lab operations and stakeholder activities</p>
     </div>
 
-    <!-- Metrics Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-      <div class="card bg-gradient-to-r from-sky-400 to-sky-500 p-6 rounded-2xl shadow-xl text-center text-white">
-        <i class="ph ph-flask text-5xl mb-3"></i>
-        <h3 class="text-3xl font-bold">15</h3>
+    <!-- Stakeholder Overview -->
+    <div class="text-center mb-12">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="card bg-gradient-to-r from-cyan-400 to-blue-500 p-4 rounded-2xl shadow-xl text-white">
+          <i class="ph ph-flask text-4xl mb-2"></i>
+          <h3 class="text-2xl font-bold">120</h3>
+          <p class="text-sm">Total Tests</p>
+        </div>
+        <div class="card bg-gradient-to-r from-green-400 to-lime-500 p-4 rounded-2xl shadow-xl text-white">
+          <i class="ph ph-check-square text-4xl mb-2"></i>
+          <h3 class="text-2xl font-bold">95</h3>
+          <p class="text-sm">Reports Completed</p>
+        </div>
+        <div class="card bg-gradient-to-r from-purple-400 to-pink-500 p-4 rounded-2xl shadow-xl text-white">
+          <i class="ph ph-file-text text-4xl mb-2"></i>
+          <h3 class="text-2xl font-bold">78</h3>
+          <p class="text-sm">Patients Served</p>
+        </div>
+        <div class="card bg-gradient-to-r from-yellow-400 to-orange-500 p-4 rounded-2xl shadow-xl text-white">
+          <i class="ph ph-currency-btc text-4xl mb-2"></i>
+          <h3 class="text-2xl font-bold">৳ 1,25,000</h3>
+          <p class="text-sm">Revenue</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compact Metrics Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+      <div class="card bg-gradient-to-r from-cyan-200 to-blue-300 p-4 rounded-2xl shadow-xl text-center text-white">
+        <i class="ph ph-flask text-4xl mb-2"></i>
+        <h3 class="text-2xl font-bold">15</h3>
         <p class="text-white/80 mt-1">Pending Tests</p>
       </div>
-      <div class="card bg-gradient-to-r from-green-400 to-green-500 p-6 rounded-2xl shadow-xl text-center text-white">
-        <i class="ph ph-check-square text-5xl mb-3"></i>
-        <h3 class="text-3xl font-bold">8</h3>
+      <div class="card bg-gradient-to-r from-green-200 to-lime-300 p-4 rounded-2xl shadow-xl text-center text-white">
+        <i class="ph ph-check-square text-4xl mb-2"></i>
+        <h3 class="text-2xl font-bold">8</h3>
         <p class="text-white/80 mt-1">Reports Uploaded</p>
       </div>
-      <div class="card bg-gradient-to-r from-purple-400 to-purple-500 p-6 rounded-2xl shadow-xl text-center text-white">
-        <i class="ph ph-file-text text-5xl mb-3"></i>
-        <h3 class="text-3xl font-bold">23</h3>
+      <div class="card bg-gradient-to-r from-purple-200 to-pink-300 p-4 rounded-2xl shadow-xl text-center text-white">
+        <i class="ph ph-file-text text-4xl mb-2"></i>
+        <h3 class="text-2xl font-bold">23</h3>
         <p class="text-white/80 mt-1">Patient Records</p>
       </div>
-      <div class="card bg-gradient-to-r from-yellow-400 to-yellow-500 p-6 rounded-2xl shadow-xl text-center text-white">
-        <i class="ph ph-chart-bar text-5xl mb-3"></i>
-        <h3 class="text-3xl font-bold">5</h3>
+      <div class="card bg-gradient-to-r from-yellow-200 to-orange-300 p-4 rounded-2xl shadow-xl text-center text-white">
+        <i class="ph ph-chart-bar text-4xl mb-2"></i>
+        <h3 class="text-2xl font-bold">5</h3>
         <p class="text-white/80 mt-1">Analytics Reports</p>
       </div>
     </div>
 
-    <!-- Recent Test Requests Table -->
-    <div class="bg-white p-8 rounded-2xl shadow-xl mb-12 overflow-x-auto">
-      <h2 class="text-3xl font-semibold text-sky-700 mb-5 flex items-center gap-2"><i class="ph ph-flask"></i> Recent Test Requests</h2>
-      <table class="w-full text-left border-collapse min-w-[600px]">
-        <thead class="bg-sky-100 text-sky-700 text-lg">
-          <tr>
-            <th class="px-6 py-3 rounded-tl-lg">Patient Name</th>
-            <th class="px-6 py-3">Test Type</th>
-            <th class="px-6 py-3">Requested Date</th>
-            <th class="px-6 py-3 rounded-tr-lg">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="border-b hover:bg-gray-50 transition">
-            <td class="px-6 py-3">Ayesha Khan</td>
-            <td class="px-6 py-3">Blood Test</td>
-            <td class="px-6 py-3">Nov 12, 2025</td>
-            <td class="px-6 py-3">
-              <span class="bg-yellow-500 px-3 py-1 rounded-full text-white text-sm font-semibold">Pending</span>
-            </td>
-          </tr>
-          <tr class="border-b hover:bg-gray-50 transition">
-            <td class="px-6 py-3">Rafi Ahmed</td>
-            <td class="px-6 py-3">X-Ray</td>
-            <td class="px-6 py-3">Nov 10, 2025</td>
-            <td class="px-6 py-3">
-              <span class="bg-green-500 px-3 py-1 rounded-full text-white text-sm font-semibold">Completed</span>
-            </td>
-          </tr>
-          <tr class="border-b hover:bg-gray-50 transition">
-            <td class="px-6 py-3">Sarah Tanvir</td>
-            <td class="px-6 py-3">MRI Scan</td>
-            <td class="px-6 py-3">Nov 11, 2025</td>
-            <td class="px-6 py-3">
-              <span class="bg-red-500 px-3 py-1 rounded-full text-white text-sm font-semibold">Delayed</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Charts Section (all small) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+      <div class="card bg-white p-4 rounded-2xl shadow-xl">
+        <h3 class="text-lg font-semibold mb-2 text-sky-700">Test Requests</h3>
+        <canvas id="testRequestsChart" height="150"></canvas>
+      </div>
+      <div class="card bg-white p-4 rounded-2xl shadow-xl">
+        <h3 class="text-lg font-semibold mb-2 text-green-700">Lab Results Status</h3>
+        <canvas id="labResultsChart" height="150"></canvas>
+      </div>
+      <div class="card bg-white p-4 rounded-2xl shadow-xl">
+        <h3 class="text-lg font-semibold mb-2 text-purple-700">Patient Records Growth</h3>
+        <canvas id="patientsChart" height="150"></canvas>
+      </div>
+      <div class="card bg-white p-4 rounded-2xl shadow-xl">
+        <h3 class="text-lg font-semibold mb-2 text-yellow-700">Revenue Trend</h3>
+        <canvas id="revenueChart" height="150"></canvas>
+      </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div class="card bg-white p-8 rounded-2xl shadow-xl text-center hover:shadow-2xl transition">
-        <i class="ph ph-file-text text-sky-600 text-5xl mb-3"></i>
-        <h2 class="text-2xl font-semibold mb-2">Manage Records</h2>
-        <p class="text-gray-600 mb-3">View and manage patient records efficiently.</p>
-        <a href="patient-records.html" class="text-sky-600 font-semibold hover:underline">Go →</a>
+    <!-- Tables Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+      
+      <!-- Test Requests Table -->
+      <div class="card bg-white p-4 rounded-2xl shadow-xl overflow-x-auto">
+        <h3 class="text-lg font-semibold mb-4 text-sky-700">Test Requests</h3>
+        <table class="min-w-full text-left text-gray-700">
+          <thead class="bg-sky-100 text-sky-700">
+            <tr>
+              <th class="px-4 py-2">Request ID</th>
+              <th class="px-4 py-2">Patient Name</th>
+              <th class="px-4 py-2">Test Type</th>
+              <th class="px-4 py-2">Status</th>
+              <th class="px-4 py-2">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b">
+              <td class="px-4 py-2">TR001</td>
+              <td class="px-4 py-2">John Doe</td>
+              <td class="px-4 py-2">Blood Test</td>
+              <td class="px-4 py-2"><span class="status-badge bg-green-500">Completed</span></td>
+              <td class="px-4 py-2">2025-11-10</td>
+            </tr>
+            <tr class="border-b">
+              <td class="px-4 py-2">TR002</td>
+              <td class="px-4 py-2">Jane Smith</td>
+              <td class="px-4 py-2">X-Ray</td>
+              <td class="px-4 py-2"><span class="status-badge bg-yellow-400">Pending</span></td>
+              <td class="px-4 py-2">2025-11-12</td>
+            </tr>
+            <tr class="border-b">
+              <td class="px-4 py-2">TR003</td>
+              <td class="px-4 py-2">Alice Brown</td>
+              <td class="px-4 py-2">MRI</td>
+              <td class="px-4 py-2"><span class="status-badge bg-red-500">Delayed</span></td>
+              <td class="px-4 py-2">2025-11-13</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <div class="card bg-white p-8 rounded-2xl shadow-xl text-center hover:shadow-2xl transition">
-        <i class="ph ph-chart-bar text-green-600 text-5xl mb-3"></i>
-        <h2 class="text-2xl font-semibold mb-2">View Analytics</h2>
-        <p class="text-gray-600 mb-3">Check lab statistics and reports for decision making.</p>
-        <a href="analytics.html" class="text-green-600 font-semibold hover:underline">Go →</a>
+
+      <!-- Patient Records Table -->
+      <div class="card bg-white p-4 rounded-2xl shadow-xl overflow-x-auto">
+        <h3 class="text-lg font-semibold mb-4 text-purple-700">Patient Records</h3>
+        <table class="min-w-full text-left text-gray-700">
+          <thead class="bg-purple-100 text-purple-700">
+            <tr>
+              <th class="px-4 py-2">Patient ID</th>
+              <th class="px-4 py-2">Name</th>
+              <th class="px-4 py-2">Age</th>
+              <th class="px-4 py-2">Gender</th>
+              <th class="px-4 py-2">Last Visit</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b">
+              <td class="px-4 py-2">P001</td>
+              <td class="px-4 py-2">John Doe</td>
+              <td class="px-4 py-2">32</td>
+              <td class="px-4 py-2">Male</td>
+              <td class="px-4 py-2">2025-11-10</td>
+            </tr>
+            <tr class="border-b">
+              <td class="px-4 py-2">P002</td>
+              <td class="px-4 py-2">Jane Smith</td>
+              <td class="px-4 py-2">28</td>
+              <td class="px-4 py-2">Female</td>
+              <td class="px-4 py-2">2025-11-12</td>
+            </tr>
+            <tr class="border-b">
+              <td class="px-4 py-2">P003</td>
+              <td class="px-4 py-2">Alice Brown</td>
+              <td class="px-4 py-2">45</td>
+              <td class="px-4 py-2">Female</td>
+              <td class="px-4 py-2">2025-11-13</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <div class="card bg-white p-8 rounded-2xl shadow-xl text-center hover:shadow-2xl transition">
-        <i class="ph ph-tag text-yellow-600 text-5xl mb-3"></i>
-        <h2 class="text-2xl font-semibold mb-2">Test Pricing</h2>
-        <p class="text-gray-600 mb-3">Review packages and pricing for different tests.</p>
-        <a href="pricing.html" class="text-yellow-600 font-semibold hover:underline">Go →</a>
-      </div>
+
     </div>
 
   </main>
@@ -166,13 +224,51 @@
     © 2025 Diagnostic Center. All Rights Reserved.
   </footer>
 
+  <!-- Scripts -->
   <script>
     const menuBtn = document.getElementById("menuBtn");
     const mobileMenu = document.getElementById("mobileMenu");
-
     menuBtn.addEventListener("click", () => {
       mobileMenu.classList.toggle("menu-open");
     });
+
+    // Chart.js examples
+    const testRequestsChart = new Chart(document.getElementById('testRequestsChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Blood Test', 'X-Ray', 'MRI', 'CT Scan'],
+        datasets: [{ label: 'Requests', data: [15, 8, 12, 5], backgroundColor: '#38bdf8' }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+
+    const labResultsChart = new Chart(document.getElementById('labResultsChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Completed', 'Pending', 'Delayed'],
+        datasets: [{ label: 'Lab Results', data: [95, 15, 5], backgroundColor: ['#22c55e','#facc15','#ef4444'] }]
+      },
+      options: { responsive: true }
+    });
+
+    const patientsChart = new Chart(document.getElementById('patientsChart'), {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+        datasets: [{ label: 'Patients', data: [10, 25, 40, 60, 78], borderColor: '#a78bfa', backgroundColor: 'rgba(167,139,250,0.2)', fill: true }]
+      },
+      options: { responsive: true }
+    });
+
+    const revenueChart = new Chart(document.getElementById('revenueChart'), {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+        datasets: [{ label: 'Revenue', data: [20000, 45000, 70000, 95000, 125000], borderColor: '#facc15', backgroundColor: 'rgba(250,204,21,0.2)', fill: true }]
+      },
+      options: { responsive: true }
+    });
   </script>
+
 </body>
 </html>

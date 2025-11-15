@@ -34,7 +34,6 @@
       <h1 class="text-2xl font-bold flex items-center gap-2">
         <i class="ph ph-heartbeat text-white"></i> Diagnostic Center
       </h1>
-
       <button id="menuBtn" class="sm:hidden text-2xl focus:outline-none">
         <i class="ph ph-list"></i>
       </button>
@@ -52,7 +51,6 @@
       </div>
     </div>
 
-    <!-- Mobile Menu -->
     <div id="mobileMenu" class="menu-enter sm:hidden bg-sky-600">
       <a href="dashboard.html" class="block px-4 py-2 hover:bg-sky-500">Dashboard</a>
       <a href="view-requests.html" class="block px-4 py-2 bg-white text-sky-700">Test Requests</a>
@@ -65,6 +63,7 @@
   </nav>
 
 
+
   <!-- Main Content -->
   <main class="container mx-auto px-6 py-10">
 
@@ -75,31 +74,41 @@
       <p class="text-gray-600 text-lg">Manage all patient test requests in real-time</p>
     </div>
 
-    <!-- Test Requests Table -->
+    <!-- Table -->
     <div class="bg-white p-8 rounded-2xl shadow-xl overflow-x-auto">
       <h2 class="text-3xl font-semibold text-sky-700 mb-5 flex items-center gap-2">
         <i class="ph ph-clipboard-text"></i> All Requests
       </h2>
 
-      <table class="w-full text-left border-collapse min-w-[750px]">
+      <table id="requestTable" class="w-full text-left border-collapse min-w-[850px]">
         <thead class="bg-sky-100 text-sky-700 text-lg">
           <tr>
             <th class="px-6 py-3 rounded-tl-lg">Patient Name</th>
             <th class="px-6 py-3">Test Type</th>
             <th class="px-6 py-3">Assigned Doctor</th>
             <th class="px-6 py-3">Date</th>
-            <th class="px-6 py-3 rounded-tr-lg">Status</th>
+            <th class="px-6 py-3">Status</th>
+            <th class="px-6 py-3 rounded-tr-lg text-center">Actions</th>
           </tr>
         </thead>
 
         <tbody>
+
           <tr class="border-b hover:bg-gray-50 transition">
             <td class="px-6 py-3">Ayesha Khan</td>
             <td class="px-6 py-3">Blood Test</td>
             <td class="px-6 py-3">Dr. Salman</td>
             <td class="px-6 py-3">Nov 12, 2025</td>
             <td class="px-6 py-3">
-              <span class="bg-yellow-500 text-white px-3 py-1 rounded-full font-semibold text-sm">Pending</span>
+              <span class="status bg-yellow-500 text-white px-3 py-1 rounded-full font-semibold text-sm">Pending</span>
+            </td>
+            <td class="px-6 py-3 flex gap-3 justify-center">
+              <button class="editBtn px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-1">
+                <i class="ph ph-pencil-simple"></i> Edit
+              </button>
+              <button class="deleteBtn px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center gap-1">
+                <i class="ph ph-trash"></i> Delete
+              </button>
             </td>
           </tr>
 
@@ -109,7 +118,15 @@
             <td class="px-6 py-3">Dr. Tamim</td>
             <td class="px-6 py-3">Nov 10, 2025</td>
             <td class="px-6 py-3">
-              <span class="bg-green-500 text-white px-3 py-1 rounded-full font-semibold text-sm">Completed</span>
+              <span class="status bg-green-500 text-white px-3 py-1 rounded-full font-semibold text-sm">Completed</span>
+            </td>
+            <td class="px-6 py-3 flex gap-3 justify-center">
+              <button class="editBtn px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-1">
+                <i class="ph ph-pencil-simple"></i> Edit
+              </button>
+              <button class="deleteBtn px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center gap-1">
+                <i class="ph ph-trash"></i> Delete
+              </button>
             </td>
           </tr>
 
@@ -119,17 +136,15 @@
             <td class="px-6 py-3">Dr. Zahin</td>
             <td class="px-6 py-3">Nov 11, 2025</td>
             <td class="px-6 py-3">
-              <span class="bg-red-500 text-white px-3 py-1 rounded-full font-semibold text-sm">Delayed</span>
+              <span class="status bg-red-500 text-white px-3 py-1 rounded-full font-semibold text-sm">Delayed</span>
             </td>
-          </tr>
-
-          <tr class="border-b hover:bg-gray-50 transition">
-            <td class="px-6 py-3">Imran Hossain</td>
-            <td class="px-6 py-3">Urine Test</td>
-            <td class="px-6 py-3">Dr. Tania</td>
-            <td class="px-6 py-3">Nov 13, 2025</td>
-            <td class="px-6 py-3">
-              <span class="bg-blue-500 text-white px-3 py-1 rounded-full font-semibold text-sm">Processing</span>
+            <td class="px-6 py-3 flex gap-3 justify-center">
+              <button class="editBtn px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-1">
+                <i class="ph ph-pencil-simple"></i> Edit
+              </button>
+              <button class="deleteBtn px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center gap-1">
+                <i class="ph ph-trash"></i> Delete
+              </button>
             </td>
           </tr>
 
@@ -138,6 +153,36 @@
     </div>
 
   </main>
+
+  <!-- Edit Popup Modal -->
+  <div id="editModal" class="fixed inset-0 bg-black bg-opacity-40 hidden flex items-center justify-center">
+    <div class="bg-white p-6 rounded-xl shadow-xl w-96">
+      <h2 class="text-2xl font-semibold mb-4 text-sky-600">Edit Request</h2>
+
+      <label class="block mb-2 font-semibold">Patient Name</label>
+      <input id="editName" type="text" class="w-full p-2 border rounded mb-4">
+
+      <label class="block mb-2 font-semibold">Test Type</label>
+      <input id="editTest" type="text" class="w-full p-2 border rounded mb-4">
+
+      <label class="block mb-2 font-semibold">Assigned Doctor</label>
+      <input id="editDoctor" type="text" class="w-full p-2 border rounded mb-4">
+
+      <label class="block mb-2 font-semibold">Status</label>
+      <select id="editStatus" class="w-full p-2 border rounded mb-4">
+        <option>Pending</option>
+        <option>Completed</option>
+        <option>Processing</option>
+        <option>Delayed</option>
+      </select>
+
+      <div class="flex justify-end gap-3 mt-4">
+        <button onclick="closeModal()" class="px-3 py-1 bg-gray-400 text-white rounded">Cancel</button>
+        <button id="saveBtn" class="px-4 py-1 bg-blue-600 text-white rounded">Save</button>
+      </div>
+    </div>
+  </div>
+
 
 
   <footer class="mt-16 text-center py-8 text-gray-500 border-t border-gray-200">
@@ -151,6 +196,57 @@
     menuBtn.addEventListener("click", () => {
       mobileMenu.classList.toggle("menu-open");
     });
+
+    let currentRow;
+
+    // DELETE BUTTON
+    document.querySelectorAll(".deleteBtn").forEach(btn => {
+      btn.addEventListener("click", function () {
+        if (confirm("Are you sure you want to delete this request?")) {
+          this.closest("tr").remove();
+        }
+      });
+    });
+
+    // EDIT BUTTON
+    document.querySelectorAll(".editBtn").forEach(btn => {
+      btn.addEventListener("click", function () {
+        currentRow = this.closest("tr");
+
+        document.getElementById("editName").value = currentRow.children[0].innerText;
+        document.getElementById("editTest").value = currentRow.children[1].innerText;
+        document.getElementById("editDoctor").value = currentRow.children[2].innerText;
+        document.getElementById("editStatus").value = currentRow.children[4].innerText.trim();
+
+        document.getElementById("editModal").classList.remove("hidden");
+      });
+    });
+
+    function closeModal() {
+      document.getElementById("editModal").classList.add("hidden");
+    }
+
+    // SAVE UPDATED VALUES
+    document.getElementById("saveBtn").addEventListener("click", function () {
+      currentRow.children[0].innerText = document.getElementById("editName").value;
+      currentRow.children[1].innerText = document.getElementById("editTest").value;
+      currentRow.children[2].innerText = document.getElementById("editDoctor").value;
+
+      let status = document.getElementById("editStatus").value;
+      let statusSpan = currentRow.querySelector(".status");
+
+      statusSpan.innerText = status;
+
+      statusSpan.className = "status px-3 py-1 rounded-full font-semibold text-sm text-white ";
+
+      if (status === "Pending") statusSpan.classList.add("bg-yellow-500");
+      if (status === "Completed") statusSpan.classList.add("bg-green-500");
+      if (status === "Processing") statusSpan.classList.add("bg-blue-500");
+      if (status === "Delayed") statusSpan.classList.add("bg-red-500");
+
+      closeModal();
+    });
   </script>
+
 </body>
 </html>
