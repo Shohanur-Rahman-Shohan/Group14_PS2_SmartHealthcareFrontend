@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home | SHMS - Smart Healthcare Management System</title>
+<meta name="description" content="Smart Healthcare Management System - Advanced hospital management platform with AI-powered diagnostics and comprehensive patient care services.">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .animate-fadeIn {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  .animate-slideUp {
+    animation: slideUp 0.7s ease-out forwards;
+  }
+  .animate-pulse-slow {
+    animation: pulse 3s ease-in-out infinite;
+  }
+  .float-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  .dropdownContent {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none;
+    position: absolute;
+    z-index: 50;
+    left: 0;
+  }
+  .dropdownContent.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .card-hover {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  .stat-number {
+    font-feature-settings: 'tnum';
+    font-variant-numeric: tabular-nums;
+  }
+  .gradient-border {
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899) border-box;
+    border: 2px solid transparent;
+  }
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #6366f1;
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Chart containers */
+  .chart-container {
+    position: relative;
+    height: 300px;
+  }
+
+  /* Hero Section - LARGER */
+  .hero {
+    position: relative;
+    width: 100%;
+    height: 80vh; /* Increased from 60vh to 80vh */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    color: #fff;
+    overflow: hidden;
+    margin: 30px 0;
+    border-radius: 20px;
+  }
+
+  .hero-slide {
+    position: absolute;
+    top:0; left:0;
+    width:100%;
+    height:100%;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    border-radius: 20px;
+  }
+
+  .hero-slide.active {
+    opacity: 1;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    top:0; left:0;
+    width:100%;
+    height:100%;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 20px;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 0 20px;
+  }
+
+  .dots {
+    position: absolute;
+    bottom: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 3;
+  }
+
+  .dot {
+    width: 12px;
+    height: 12px;
+    background: #ddd;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .dot.active {
+    background: #fff;
+  }
+
+  /* Search Bar Styling */
+  .search-bar {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 50px;
+    padding: 0.5rem 1rem;
+    width: 280px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .search-bar:focus-within {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .search-bar input {
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 100%;
+    color: #374151;
+  }
+
+  .search-bar input::placeholder {
+    color: #9CA3AF;
+  }
+
+  /* Custom Search Bar */
+  .custom-search-bar {
+    background-color: #4d7cac;
+    padding: 4px 7px;
+    border-radius: 6px;
+  }
+
+  .search-input {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    padding-right: 6px;
+    width: 120px;
+  }
+
+  /* Custom Sign-in Button */
+  .custom-btn-signin {
+    background-color: #5b728f;
+    padding: 8px 16px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-weight: 600;
+  }
+
+  .custom-btn-signin:hover {
+    background-color: #6a85a5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Loading spinner */
+  .loading-spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #6366f1;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    display: none;
+  }
+
+  /* Mobile menu */
+  #mobile-menu {
+    transition: all 0.3s ease;
+    max-height: 0;
+    overflow: hidden;
+  }
+
+  #mobile-menu.open {
+    max-height: 300px;
+  }
+
+  /* Back to top button */
+  #back-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 1000;
+  }
+
+  #back-to-top.show {
+    opacity: 1;
+  }
+
+  #back-to-top:hover {
+    transform: translateY(-3px);
+    background: #4338ca;
+  }
+</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen flex flex-col">
+
+<!-- Top Navbar -->
+<nav class="bg-gradient-to-r from-indigo-800 to-indigo-600 text-white px-7 py-5 flex justify-between items-center shadow-lg sticky top-0 z-50" aria-label="Main navigation">
+  <!-- Left Section -->
+  <div class="flex items-center space-x-4">
+    <h1 class="text-2xl font-bold tracking-wide flex items-center space-x-2">
+      <i class="ph ph-heartbeat text-3xl" aria-hidden="true"></i>
+      <span>SHMS</span>
+    </h1>
+    <div class="search-bar hidden md:flex items-center custom-search-bar">
+      <input type="text" placeholder="Search..." class="search-input" aria-label="Search">
+      <i class="ph ph-magnifying-glass text-gray-500" aria-hidden="true"></i>
+    </div>
+  </div>
+
+  <!-- Center Section -->
+  <div class="absolute left-1/2 transform -translate-x-1/2 text-center hidden md:flex items-center space-x-2">
+    <i class="ph ph-heartbeat text-2xl" aria-hidden="true"></i>
+    <span class="text-xl font-bold">Smart Healthcare Management System</span> 
+  </div>
+
+  <!-- Right Section -->
+  <div class="flex items-center space-x-4">
+    <a href="Login.html" class="custom-btn-signin">
+      <i class="ph ph-user" aria-hidden="true"></i>
+      <span>Sign in</span>
+    </a>
+    
+    <!-- Mobile menu button -->
+    <button class="md:hidden text-white p-2" id="mobile-menu-button" aria-label="Toggle mobile menu" aria-expanded="false">
+      <i class="ph ph-list text-2xl" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <!-- Mobile menu -->
+  <div class="md:hidden absolute top-full left-0 w-full bg-indigo-700 py-4" id="mobile-menu" aria-hidden="true">
+    <div class="px-6 space-y-4">
+      <div class="search-bar flex items-center custom-search-bar w-full">
+        <input type="text" placeholder="Search..." class="search-input flex-1" aria-label="Search">
+        <i class="ph ph-magnifying-glass text-gray-300" aria-hidden="true"></i>
+      </div>
+      <div class="flex flex-col space-y-3">
+        <a href="#about" class="text-white hover:bg-indigo-600 p-2 rounded">About</a>
+        <a href="#team" class="text-white hover:bg-indigo-600 p-2 rounded">Our Team</a>
+        <a href="#services" class="text-white hover:bg-indigo-600 p-2 rounded">Services</a>
+        <a href="#contact" class="text-white hover:bg-indigo-600 p-2 rounded">Contact</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<main class="px-5 md:px-8">
+  <!-- Hero Section - LARGER -->
+  <section class="hero">
+    <!-- Slides with data attributes for easy image replacement -->
+    <div class="hero-slide active" data-bg="A__Transition_01.png"></div>
+    <div class="hero-slide" data-bg="A__Transition_02.png"></div>
+    <div class="hero-slide" data-bg="A__Transition_03.png"></div>
+    <div class="hero-slide" data-bg="A__Transition_04.png"></div>
+    <div class="hero-slide" data-bg="A__Transition_05.png"></div>
+
+    <!-- Overlay -->
+    <div class="hero-overlay"></div>
+
+    <!-- Content -->
+    <div class="hero-content" style="color: #6fe1d1; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));">
+      <h2 class="text-4xl md:text-6xl font-bold mb-6" style="text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);">Smart Healthcare Management System</h2>
+      <p class="max-w-3xl mx-auto mb-10 text-xl md:text-2xl" style="text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);">
+        A unified platform that merges database power and AI intelligence to automate hospital operations and enhance patient care.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-6 justify-center">
+        <button onclick="window.location.href='Login.html'" class="px-10 py-4 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition shadow-lg text-lg" style="box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); transition: all 0.3s ease;">
+          Get Started
+        </button>
+        <button class="px-10 py-4 border-2 border-teal-400 text-teal-400 font-semibold rounded-lg hover:bg-teal-400 hover:text-gray-900 transition text-lg" style="color: #6fe1d1; border-color: #6fe1d1; box-shadow: 0 4px 15px rgba(111, 225, 209, 0.3); transition: all 0.3s ease;">
+          Learn More
+        </button>
+      </div>
+    </div>
+
+    <!-- Dots -->
+    <div class="dots">
+      <div class="dot active" onclick="currentSlide(0)"></div>
+      <div class="dot" onclick="currentSlide(1)"></div>
+      <div class="dot" onclick="currentSlide(2)"></div>
+      <div class="dot" onclick="currentSlide(3)"></div>
+      <div class="dot" onclick="currentSlide(4)"></div>
+    </div>
+  </section>
+
+<!-- Stats Section with Color Boxes - COMPACT -->
+  <section class="py-8">
+    <div class="container mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Years of Excellence -->
+        <div class="bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-xl p-4 text-center shadow-lg card-hover flex flex-col justify-center">
+          <div class="flex justify-center mb-2">
+            <i class="ph ph-trophy text-2xl" aria-hidden="true"></i>
+          </div>
+          <div class="text-3xl font-bold stat-number">20+</div>
+          <h3 class="text-sm font-semibold mt-1">Years of Excellence</h3>
+        </div>
+        
+        <!-- Patients Served -->
+        <div class="bg-gradient-to-br from-green-500 to-green-700 text-white rounded-xl p-4 text-center shadow-lg card-hover flex flex-col justify-center">
+          <div class="flex justify-center mb-2">
+            <i class="ph ph-users text-2xl" aria-hidden="true"></i>
+          </div>
+          <div class="text-3xl font-bold stat-number">50K+</div>
+          <h3 class="text-sm font-semibold mt-1">Patients Served</h3>
+        </div>
+        
+        <!-- Expert Doctors -->
+        <div class="bg-gradient-to-br from-purple-500 to-purple-700 text-white rounded-xl p-4 text-center shadow-lg card-hover flex flex-col justify-center">
+          <div class="flex justify-center mb-2">
+            <i class="ph ph-stethoscope text-2xl" aria-hidden="true"></i>
+          </div>
+          <div class="text-3xl font-bold stat-number">150+</div>
+          <h3 class="text-sm font-semibold mt-1">Expert Doctors</h3>
+        </div>
+        
+        <!-- Satisfaction Rate -->
+        <div class="bg-gradient-to-br from-red-500 to-red-700 text-white rounded-xl p-4 text-center shadow-lg card-hover flex flex-col justify-center">
+          <div class="flex justify-center mb-2">
+            <i class="ph ph-heart text-2xl" aria-hidden="true"></i>
+          </div>
+          <div class="text-3xl font-bold stat-number">98%</div>
+          <h3 class="text-sm font-semibold mt-1">Satisfaction Rate</h3>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hospital Overview -->
+  <section class="px-6 py-16" id="about">
+    <div class="container mx-auto bg-white rounded-2xl shadow-xl overflow-hidden animate-fadeIn">
+      <div class="md:flex md:items-center">
+        <div class="md:w-1/2 p-8">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="bg-indigo-100 p-2 rounded-lg">
+              <i class="ph ph-hospital text-indigo-700 text-2xl" aria-hidden="true"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-indigo-700">About Our Hospital</h3>
+          </div>
+          <div class="space-y-4 text-gray-700">
+            <p class="flex items-start space-x-2">
+              <i class="ph ph-check-circle text-green-500 text-xl mt-0.5" aria-hidden="true"></i>
+              <span>Our hospital has been a trusted healthcare provider for over 20 years, committed to offering the highest quality medical care.</span>
+            </p>
+            <p class="flex items-start space-x-2">
+              <i class="ph ph-check-circle text-green-500 text-xl mt-0.5" aria-hidden="true"></i>
+              <span>With advanced technology and a team of dedicated professionals, we ensure patient safety and excellent treatment outcomes.</span>
+            </p>
+            <p class="flex items-start space-x-2">
+              <i class="ph ph-check-circle text-green-500 text-xl mt-0.5" aria-hidden="true"></i>
+              <span>Our integrated Smart Healthcare Management System improves efficiency, transparency, and patient satisfaction across all services.</span>
+            </p>
+            <p class="flex items-start space-x-2">
+              <i class="ph ph-check-circle text-green-500 text-xl mt-0.5" aria-hidden="true"></i>
+              <span>State-of-the-art facilities including emergency care, ICU units, surgical centers, and specialized diagnostic departments.</span>
+            </p>
+            <p class="flex items-start space-x-2">
+              <i class="ph ph-check-circle text-green-500 text-xl mt-0.5" aria-hidden="true"></i>
+              <span>24/7 availability with experienced medical professionals ensuring round-the-clock patient support and emergency services.</span>
+            </p>
+          </div>
+          <div class="mt-6 grid grid-cols-3 gap-4">
+            <div class="text-center p-3 bg-indigo-50 rounded-lg">
+              <p class="text-2xl font-bold text-indigo-700 stat-number">20</p>
+              <p class="text-sm text-gray-600">Years Service</p>
+            </div>
+            <div class="text-center p-3 bg-green-50 rounded-lg">
+              <p class="text-2xl font-bold text-green-700 stat-number">50000</p>
+              <p class="text-sm text-gray-600">Patients Served</p>
+            </div>
+            <div class="text-center p-3 bg-purple-50 rounded-lg">
+              <p class="text-2xl font-bold text-purple-700 stat-number">98</p>
+              <p class="text-sm text-gray-600">Satisfaction %</p>
+            </div>
+          </div>
+        </div>
+        <div class="md:w-1/2 h-96 md:h-full">
+          <img src="A__Doctors.png" alt="Modern hospital interior with medical professionals" class="w-full h-full object-cover" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Our Expert Team -->
+  <section class="px-6 py-16 bg-white text-center" id="team">
+    <div class="container mx-auto">
+      <h2 class="text-3xl font-bold text-indigo-700 mb-6">Meet Our Expert Team</h2>
+      <p class="text-gray-600 max-w-2xl mx-auto mb-10">
+        Our dedicated professionals bring decades of experience, compassion, and expertise to ensure every patient receives the highest standard of care.
+      </p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 justify-center">
+        <div class="text-center">
+          <img src="A__Dr_Male_1.png" alt="Dr. Omar Faruq - Chief Cardiologist" class="rounded-full w-28 h-28 mx-auto mb-4 shadow-md">
+          <h3 class="text-lg font-semibold text-indigo-700">Dr. Omar Faruq</h3>
+          <p class="text-gray-500 text-sm mb-2">Chief Cardiologist</p>
+          <div class="flex justify-center space-x-3">
+            <i class="ph ph-facebook-logo text-indigo-600 text-lg cursor-pointer hover:text-indigo-800" aria-hidden="true"></i>
+            <i class="ph ph-linkedin-logo text-indigo-600 text-lg cursor-pointer hover:text-indigo-800" aria-hidden="true"></i>
+          </div>
+        </div>
+
+        <div class="text-center">
+          <img src="A__Dr_Male_2.png" alt="Dr. Rahat Chowdhury - Senior Neurologist" class="rounded-full w-28 h-28 mx-auto mb-4 shadow-md">
+          <h3 class="text-lg font-semibold text-indigo-700">Dr. Rahat Chowdhury</h3>
+          <p class="text-gray-500 text-sm mb-2">Senior Neurologist</p>
+          <div class="flex justify-center space-x-3">
+            <i class="ph ph-facebook-logo text-indigo-600 text-lg cursor-pointer hover:text-indigo-800" aria-hidden="true"></i>
+            <i class="ph ph-linkedin-logo text-indigo-600 text-lg cursor-pointer hover:text-indigo-800" aria-hidden="true"></i>
+          </div>
+        </div>
+
+        <div class="text-center">
+          <img src="A__Dr_Female_2.png" alt="Dr. Marium Rahman - General Surgeon" class="rounded-full w-28 h-28 mx-auto mb-4 shadow-md">
+          <h3 class="text-lg font-semibold text-indigo-700">Dr. Marium Rahman</h3>
+          <p class="text-gray-500 text-sm mb-2">General Surgeon</p>
+          <div class="flex justify-center space-x-3">
+            <i class="ph ph-facebook-logo text-indigo-600 text-lg cursor-pointer hover:text-indigo-800" aria-hidden="true"></i>
+            <i class="ph ph-linkedin-logo text-indigo-600 text-lg cursor-pointer hover:text-indigo-800" aria-hidden="true"></i>
+          </div>
+        </div>
+
+        <div class="text-center">
+          <img src="A__Dr_Female_1.png" alt="Dr. Ayesha Rahman - Pediatric Consultant" class="rounded-full w-28 h-28 mx-auto mb-4 shadow-md">
+          <h3 class="text-lg font-semibold text-indigo-700">Dr. Ayesha Rahman</h3>
+          <p class="text-gray-500 text-sm mb-2">Pediatric Consultant</p>
+          <div class="flex justify-center space-x-3">
+            <i class="ph ph-facebook-logo text-indigo-600 text-lg cursor-pointer hover:text-indigo-800" aria-hidden="true"></i>
+            <i class="ph ph-linkedin-logo text-indigo-600 text-lg cursor-pointer hover:text-indigo-800" aria-hidden="true"></i>
+          </div>
+        </div>
+
+        <div class="text-center">
+          <img src="A__Dr_Male_3.png" alt="Dr. Tareq Mahmud - Pulmonology" class="rounded-full w-28 h-28 mx-auto mb-4 shadow-md">
+          <h3 class="text-lg font-semibold text-indigo-700">Dr. Tareq Mahmud</h3>
+          <p class="text-gray-500 text-sm mb-2">Pulmonology</p>
+          <div class="flex justify-center space-x-3">
+            <i class="ph ph-facebook-logo text-indigo-600 text-lg cursor-pointer hover:text-indigo-800" aria-hidden="true"></i>
+            <i class="ph ph-linkedin-logo text-indigo-600 text-lg cursor-pointer hover:text-indigo-800" aria-hidden="true"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Announcements Section -->
+  <section class="px-6 py-16 bg-gradient-to-r from-indigo-50 to-blue-100">
+    <div class="container mx-auto">
+      <h2 class="text-3xl font-bold text-indigo-700 mb-8 text-center">News & Announcements</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-white rounded-2xl shadow-md p-6 card-hover">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">Technology</span>
+          </div>
+          <h4 class="text-xl font-semibold text-indigo-700 mb-2">New AI Diagnostic Module Launched</h4>
+          <p class="text-gray-600 text-sm mb-3">Our latest AI-based diagnostic module enhances prediction accuracy for chronic diseases by 92%, revolutionizing patient diagnosis and treatment planning.</p>
+          <a href="#" class="text-indigo-600 font-semibold hover:underline">Read more →</a>
+        </div>
+        <div class="bg-white rounded-2xl shadow-md p-6 card-hover">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">Health Campaign</span>
+          </div>
+          <h4 class="text-xl font-semibold text-indigo-700 mb-2">COVID-19 Booster Drive</h4>
+          <p class="text-gray-600 text-sm mb-3">Get your COVID-19 booster shot free of charge at our hospital from Nov 10 to Nov 30, 2025. Walk-in available, no appointment required.</p>
+          <a href="#" class="text-indigo-600 font-semibold hover:underline">Read more →</a>
+        </div>
+        <div class="bg-white rounded-2xl shadow-md p-6 card-hover">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="bg-purple-100 text-purple-700 text-xs font-semibold px-3 py-1 rounded-full">Service Launch</span>
+          </div>
+          <h4 class="text-xl font-semibold text-indigo-700 mb-2">24/7 Telemedicine Support</h4>
+          <p class="text-gray-600 text-sm mb-3">Patients can now consult with doctors virtually anytime via our new telemedicine portal. Accessible from home with secure video conferencing.</p>
+          <a href="#" class="text-indigo-600 font-semibold hover:underline">Read more →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="px-6 py-16 bg-white">
+    <div class="container mx-auto">
+      <h2 class="text-3xl font-bold text-indigo-700 mb-8 text-center">Why Choose Our Hospital?</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="text-center p-6 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-2xl card-hover">
+          <div class="mb-4 flex justify-center">
+            <i class="ph ph-stethoscope text-indigo-700 text-5xl" aria-hidden="true"></i>
+          </div>
+          <h3 class="text-lg font-semibold text-indigo-700 mb-2">Expert Medical Team</h3>
+          <p class="text-gray-600 text-sm">Board-certified doctors and specialists with decades of combined experience in various medical fields.</p>
+        </div>
+        
+        <div class="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl card-hover">
+          <div class="mb-4 flex justify-center">
+            <i class="ph ph-gear text-green-700 text-5xl" aria-hidden="true"></i>
+          </div>
+          <h3 class="text-lg font-semibold text-green-700 mb-2">Advanced Technology</h3>
+          <p class="text-gray-600 text-sm">State-of-the-art medical equipment and AI-powered diagnostic tools for accurate and fast treatment.</p>
+        </div>
+        
+        <div class="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl card-hover">
+          <div class="mb-4 flex justify-center">
+            <i class="ph ph-shield-check text-blue-700 text-5xl" aria-hidden="true"></i>
+          </div>
+          <h3 class="text-lg font-semibold text-blue-700 mb-2">Patient Safety</h3>
+          <p class="text-gray-600 text-sm">Comprehensive safety protocols, sterile facilities, and infection control measures to protect patient health.</p>
+        </div>
+        
+        <div class="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl card-hover">
+          <div class="mb-4 flex justify-center">
+            <i class="ph ph-heart text-purple-700 text-5xl" aria-hidden="true"></i>
+          </div>
+          <h3 class="text-lg font-semibold text-purple-700 mb-2">Compassionate Care</h3>
+          <p class="text-gray-600 text-sm">Dedicated support staff committed to patient comfort, dignity, and holistic wellness.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section class="px-6 py-16 bg-gray-50" id="services">
+    <div class="container mx-auto">
+      <h2 class="text-3xl font-bold text-indigo-700 mb-12 text-center">Our Services</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-indigo-700 hover:shadow-lg transition">
+          <div class="flex items-center gap-3 mb-3">
+            <i class="ph ph-first-aid text-indigo-700 text-3xl" aria-hidden="true"></i>
+            <h3 class="text-lg font-semibold text-indigo-700">Emergency Services</h3>
+          </div>
+          <p class="text-gray-600 text-sm">24/7 emergency care with rapid response team for critical conditions and accidents.</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-700 hover:shadow-lg transition">
+          <div class="flex items-center gap-3 mb-3">
+            <i class="ph ph-hospital text-green-700 text-3xl" aria-hidden="true"></i>
+            <h3 class="text-lg font-semibold text-green-700">Inpatient Care</h3>
+          </div>
+          <p class="text-gray-600 text-sm">Comfortable rooms with monitoring systems and round-the-clock nursing support.</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-700 hover:shadow-lg transition">
+          <div class="flex items-center gap-3 mb-3">
+            <i class="ph ph-clipboard-list text-blue-700 text-3xl" aria-hidden="true"></i>
+            <h3 class="text-lg font-semibold text-blue-700">Outpatient Clinic</h3>
+          </div>
+          <p class="text-gray-600 text-sm">Walk-in consultations with specialists for routine checkups and treatment.</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-700 hover:shadow-lg transition">
+          <div class="flex items-center gap-3 mb-3">
+            <i class="ph ph-scalpel text-purple-700 text-3xl" aria-hidden="true"></i>
+            <h3 class="text-lg font-semibold text-purple-700">Surgical Services</h3>
+          </div>
+          <p class="text-gray-600 text-sm">Advanced operating theaters with experienced surgeons for complex procedures.</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-pink-700 hover:shadow-lg transition">
+          <div class="flex items-center gap-3 mb-3">
+            <i class="ph ph-video-camera text-pink-700 text-3xl" aria-hidden="true"></i>
+            <h3 class="text-lg font-semibold text-pink-700">Telemedicine</h3>
+          </div>
+          <p class="text-gray-600 text-sm">Remote consultations with doctors via secure video conferencing from home.</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-yellow-700 hover:shadow-lg transition">
+          <div class="flex items-center gap-3 mb-3">
+            <i class="ph ph-heartbeat text-yellow-700 text-3xl" aria-hidden="true"></i>
+            <h3 class="text-lg font-semibold text-yellow-700">Rehabilitation</h3>
+          </div>
+          <p class="text-gray-600 text-sm">Physical therapy and recovery programs for post-operative and chronic patients.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact & Feedback -->
+  <section class="px-6 py-16 bg-white" id="contact">
+    <div class="container mx-auto">
+      <h2 class="text-3xl font-bold text-indigo-700 mb-6 text-center">Get in Touch</h2>
+      <p class="text-gray-600 text-center max-w-2xl mx-auto mb-10">
+        Have questions or feedback? Our support team is always ready to assist you with queries or suggestions to improve our services.
+      </p>
+
+      <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="bg-indigo-50 p-8 rounded-2xl shadow-md">
+          <h3 class="text-lg font-semibold text-indigo-700 mb-4">Contact Information</h3>
+          <p class="text-gray-600 mb-4 flex items-center space-x-2"><i class="ph ph-map-pin text-indigo-600 text-lg" aria-hidden="true"></i><span>123 Health Avenue, Dhaka, Bangladesh</span></p>
+          <p class="text-gray-600 mb-4 flex items-center space-x-2"><i class="ph ph-envelope text-indigo-600 text-lg" aria-hidden="true"></i><span>contact@shms.com</span></p>
+          <p class="text-gray-600 mb-4 flex items-center space-x-2"><i class="ph ph-phone text-indigo-600 text-lg" aria-hidden="true"></i><span>+880 1700 000 000</span></p>
+          <p class="text-gray-600 flex items-center space-x-2"><i class="ph ph-clock text-indigo-600 text-lg" aria-hidden="true"></i><span>Open: Mon–Sun (24/7 Emergency)</span></p>
+        </div>
+
+        <form class="bg-white p-8 rounded-2xl shadow-md space-y-4" id="contact-form">
+          <input type="text" placeholder="Your Name" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+          <input type="email" placeholder="Your Email" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+          <textarea placeholder="Your Message" rows="4" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required></textarea>
+          <div class="flex items-center">
+            <button type="submit" class="w-full py-3 bg-indigo-700 text-white rounded-md font-semibold hover:bg-indigo-800 transition flex items-center justify-center gap-2">
+              <span>Send Message</span>
+              <div class="loading-spinner" id="form-spinner"></div>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Back to top button -->
+<button id="back-to-top" aria-label="Back to top">
+  <i class="ph ph-arrow-up" aria-hidden="true"></i>
+</button>
+
+<!-- Footer -->
+<footer class="text-center py-6 bg-gradient-to-r from-indigo-700 to-indigo-600 text-white">
+  <div class="container mx-auto px-6">
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 mb-6">
+      <div class="flex items-center space-x-2">
+        <i class="ph ph-heartbeat text-2xl" aria-hidden="true"></i>
+        <span class="font-semibold">Smart Healthcare Management System</span>
+      </div>
+      <div class="text-sm">
+        © 2025 SHMS | All Rights Reserved
+      </div>
+      <div class="flex items-center space-x-4">
+        <a href="#" class="hover:text-indigo-200 transition">
+          <i class="ph ph-info text-xl" aria-hidden="true"></i>
+        </a>
+      </div>
+    </div>
+    
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+      <div class="max-w-md text-center md:text-left">
+        <p class="text-sm">
+          Empowering hospitals through intelligent automation and connected care — making healthcare efficient, reliable, and data-driven.
+        </p>
+      </div>
+
+      <div class="flex space-x-5 text-white">
+        <a href="#" class="hover:text-indigo-200 transition" aria-label="Facebook"><i class="ph ph-facebook-logo text-2xl" aria-hidden="true"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition" aria-label="Twitter"><i class="ph ph-twitter-logo text-2xl" aria-hidden="true"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition" aria-label="LinkedIn"><i class="ph ph-linkedin-logo text-2xl" aria-hidden="true"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition" aria-label="Email"><i class="ph ph-envelope text-2xl" aria-hidden="true"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition" aria-label="Phone"><i class="ph ph-phone text-2xl" aria-hidden="true"></i></a>
+      </div>
+    </div>
+
+    <div class="text-center text-sm text-indigo-200 mt-6 border-t border-indigo-700 pt-4">
+      © 2025 Smart Healthcare Management System | Designed for Intelligent Hospitals
+    </div>
+  </div>
+</footer>
+
+<!-- Structured Data for SEO -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Hospital",
+  "name": "Smart Healthcare Management System",
+  "description": "Advanced healthcare management platform with AI-powered diagnostics and comprehensive patient care services",
+  "url": "https://yourwebsite.com",
+  "telephone": "+880-1700-000-000",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "123 Health Avenue",
+    "addressLocality": "Dhaka",
+    "addressCountry": "Bangladesh"
+  },
+  "medicalSpecialty": [
+    "Cardiology",
+    "Neurology",
+    "Surgery",
+    "Pediatrics",
+    "Pulmonology"
+  ],
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Medical Services",
+    "itemListElement": [
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Emergency Care"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Inpatient Care"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Outpatient Clinic"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Surgical Services"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Telemedicine"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Rehabilitation"
+        }
+      }
+    ]
+  }
+}
+</script>
+
+<script>
+  // Hero Slider
+  let slideIndex = 0;
+  const slides = document.querySelectorAll(".hero-slide");
+  const dots = document.querySelectorAll(".dot");
+
+  function showSlide(index) {
+    slides.forEach((slide, i) => {
+      slide.style.opacity = i === index ? '1' : '0';
+      dots[i].style.background = i === index ? '#fff' : '#ddd';
+    });
+  }
+
+  function currentSlide(index) {
+    slideIndex = index;
+    showSlide(slideIndex);
+  }
+
+  setInterval(() => {
+    slideIndex = (slideIndex + 1) % slides.length;
+    showSlide(slideIndex);
+  }, 6000);
+
+  // Function to change hero slide images
+  function changeHeroImage(slideIndex, imageUrl) {
+    const slides = document.querySelectorAll('.hero-slide');
+    if (slides[slideIndex]) {
+      slides[slideIndex].style.backgroundImage = `url('${imageUrl}')`;
+    }
+  }
+
+  // Initialize slides with data-bg attributes
+  document.querySelectorAll('.hero-slide').forEach((slide, index) => {
+    const bg = slide.getAttribute('data-bg');
+    if (bg) {
+      slide.style.backgroundImage = `url('${bg}')`;
+    }
+  });
+
+  // Mobile menu functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    if (mobileMenuButton && mobileMenu) {
+      mobileMenuButton.addEventListener('click', function() {
+        const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+        mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
+        mobileMenu.setAttribute('aria-hidden', isExpanded);
+        mobileMenu.classList.toggle('open');
+        
+        // Change icon based on menu state
+        const icon = mobileMenuButton.querySelector('i');
+        if (icon) {
+          if (isExpanded) {
+            icon.className = 'ph ph-list text-2xl';
+          } else {
+            icon.className = 'ph ph-x text-2xl';
+          }
+        }
+      });
+    }
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', function(event) {
+      if (mobileMenu && !mobileMenu.contains(event.target) && 
+          mobileMenuButton && !mobileMenuButton.contains(event.target) &&
+          mobileMenu.classList.contains('open')) {
+        mobileMenuButton.setAttribute('aria-expanded', 'false');
+        mobileMenu.setAttribute('aria-hidden', 'true');
+        mobileMenu.classList.remove('open');
+        
+        // Reset icon
+        const icon = mobileMenuButton.querySelector('i');
+        if (icon) {
+          icon.className = 'ph ph-list text-2xl';
+        }
+      }
+    });
+
+    // Form submission handling
+    const contactForm = document.getElementById('contact-form');
+    const formSpinner = document.getElementById('form-spinner');
+    
+    if (contactForm) {
+      contactForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Show loading spinner
+        formSpinner.style.display = 'block';
+        
+        // Simulate form submission
+        setTimeout(function() {
+          formSpinner.style.display = 'none';
+          alert('Thank you for your message! We will get back to you soon.');
+          contactForm.reset();
+        }, 1500);
+      });
+    }
+
+    // Back to top button
+    const backToTopButton = document.getElementById('back-to-top');
+    
+    if (backToTopButton) {
+      window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+          backToTopButton.classList.add('show');
+        } else {
+          backToTopButton.classList.remove('show');
+        }
+      });
+      
+      backToTopButton.addEventListener('click', function() {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+    }
+
+    // Animate numbers on scroll
+    const animateValue = (element, start, end, duration) => {
+      let startTimestamp = null;
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const value = Math.floor(progress * (end - start) + start);
+        element.textContent = value.toLocaleString();
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        }
+      };
+      window.requestAnimationFrame(step);
+    };
+
+    // Observe stats for animation
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const statNumber = entry.target;
+          const targetValue = parseInt(statNumber.textContent.replace(/,/g, ''));
+          animateValue(statNumber, 0, targetValue, 1500);
+          observer.unobserve(statNumber);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('.stat-number').forEach(stat => {
+      observer.observe(stat);
+    });
+
+    // Add hover effect to dashboard cards
+    const dashboardCards = document.querySelectorAll('.card-hover');
+    dashboardCards.forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        this.style.transition = 'all 0.3s ease';
+      });
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        const target = document.querySelector(targetId);
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+          
+          // Close mobile menu if open
+          if (mobileMenu && mobileMenu.classList.contains('open')) {
+            mobileMenuButton.setAttribute('aria-expanded', 'false');
+            mobileMenu.setAttribute('aria-hidden', 'true');
+            mobileMenu.classList.remove('open');
+            
+            // Reset icon
+            const icon = mobileMenuButton.querySelector('i');
+            if (icon) {
+              icon.className = 'ph ph-list text-2xl';
+            }
+          }
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>

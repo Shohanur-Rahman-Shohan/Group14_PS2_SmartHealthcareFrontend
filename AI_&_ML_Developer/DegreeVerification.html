@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Degree Verification | SHMS AI-ML Developer</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  @keyframes chartAppear {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .animate-fadeIn { animation: fadeIn 0.6s ease-out forwards; }
+  .animate-slideUp { animation: slideUp 0.7s ease-out forwards; }
+  .animate-pulse-slow { animation: pulse 3s ease-in-out infinite; }
+  .chart-appear { animation: chartAppear 0.8s ease-out forwards; }
+
+  .dropdownContent {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none;
+    position: absolute;
+    z-index: 50;
+    left: 0;
+  }
+  .dropdownContent.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .card-hover {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  .stat-number {
+    font-feature-settings: 'tnum';
+    font-variant-numeric: tabular-nums;
+  }
+  .gradient-border {
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899) border-box;
+    border: 2px solid transparent;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #f1f1f1; }
+  ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: #4f46e5; }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Chart containers */
+  .chart-container { position: relative; height: 300px; }
+  
+  /* Progress bars */
+  .progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e5e7eb;
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease-in-out;
+  }
+  
+  /* Status indicators */
+  .status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+  
+  .status-verified { background-color: #10b981; }
+  .status-pending { background-color: #f59e0b; }
+  .status-failed { background-color: #ef4444; }
+  .status-processing { background-color: #3b82f6; }
+
+  /* Verification status colors */
+  .verification-valid { background-color: #10b981; color: white; }
+  .verification-invalid { background-color: #ef4444; color: white; }
+  .verification-pending { background-color: #f59e0b; color: white; }
+  .verification-suspicious { background-color: #8b5cf6; color: white; }
+
+  /* Form styles */
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  .form-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  
+  .form-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  }
+
+  /* Tabs */
+  .tab-container {
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .tab-button {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .tab-button.active {
+    color: #6366f1;
+    border-bottom-color: #6366f1;
+  }
+  
+  .tab-button:hover:not(.active) {
+    color: #374151;
+    border-bottom-color: #d1d5db;
+  }
+  
+  .tab-content {
+    display: none;
+  }
+  
+  .tab-content.active {
+    display: block;
+  }
+
+  /* Data table styles */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .data-table th {
+    background-color: #f9fafb;
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .data-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .data-table tr:hover {
+    background-color: #f9fafb;
+  }
+
+  /* Upload area */
+  .upload-area {
+    border: 2px dashed #d1d5db;
+    border-radius: 0.75rem;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s;
+    background-color: #f9fafb;
+  }
+  
+  .upload-area:hover {
+    border-color: #6366f1;
+    background-color: #f0f4ff;
+  }
+  
+  .upload-area.dragover {
+    border-color: #6366f1;
+    background-color: #e0e7ff;
+  }
+
+  /* Document preview */
+  .document-preview {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background-color: white;
+  }
+  
+  .document-preview img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen flex flex-col">
+
+<!-- Top Navbar -->
+<nav class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+  <h1 class="text-2xl font-bold tracking-wide flex items-center space-x-2">
+    <i class="ph ph-heartbeat text-3xl"></i>
+    <span>SHMS</span>
+  </h1>
+
+  <span class="text-xl font-bold flex items-center space-x-2">
+    <i class="ph ph-code"></i>
+    <span>AI-ML Developer</span>
+  </span>
+
+  <div class="relative flex items-center space-x-2">
+    
+    <!-- Notification Button -->
+    <a href="Notification.html" class="relative p-2 rounded-full hover:bg-indigo-600 focus:outline-none">
+      <i class="ph ph-bell text-xl"></i>
+      <!-- Notification badge -->
+      <span id="notificationBadge" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+        5
+      </span>
+    </a>
+
+    <!-- Three-dot menu -->
+    <div class="relative">
+      <button id="menuBtn" class="text-white text-2xl focus:outline-none hover:bg-indigo-600 rounded-full p-2 transition" aria-label="Menu">
+        <i class="ph ph-dots-three-vertical"></i>
+      </button>
+      <div id="menuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded-md shadow-lg z-50">
+        <a href="Profile.html" class="block px-4 py-2 hover:bg-indigo-100 rounded-t-md flex items-center space-x-2">
+          <i class="ph ph-user"></i>
+          <span>Profile</span>
+        </a>
+        <a href="Setting.html" class="block px-4 py-2 hover:bg-indigo-100 flex items-center space-x-2">
+          <i class="ph ph-gear"></i>
+          <span>Settings</span>
+        </a>
+        <a href="../Login.html" class="block px-4 py-2 hover:bg-indigo-100 text-red-600 rounded-b-md flex items-center space-x-2">
+          <i class="ph ph-sign-out"></i>
+          <span>Logout</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Feature Navbar -->
+<nav id="featureNavbar" class="bg-indigo-800 text-white shadow-md sticky top-0 z-40 transition-transform duration-300" style="top: 64px;">
+  <div class="container mx-auto flex flex-wrap justify-center md:justify-start items-center px-4 py-2 space-x-2">
+
+    <div class="relative">
+      <a href="Home.html" class="px-5 py-2 rounded-md hover:bg-indigo-700 block transition">Home</a>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">AI Model Management</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="TrainRetrainModel.html" class="block px-4 py-2 hover:bg-indigo-100">Train / Retrain Models</a>
+        <a href="ModelVersionControl.html" class="block px-4 py-2 hover:bg-indigo-100">Model Version Control</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Data & Pipeline</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="DataManagement.html" class="block px-4 py-2 hover:bg-indigo-100">Data Management</a>
+        <a href="PipelineHealth.html" class="block px-4 py-2 hover:bg-indigo-100">Pipeline Health & Quality</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Monitoring & Analytics</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="PredictionsDashboard.html" class="block px-4 py-2 hover:bg-indigo-100">Predictions Dashboard</a>
+        <a href="RealtimePerformance.html" class="block px-4 py-2 hover:bg-indigo-100">Real-Time Performance</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">System Administration</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="SystemMonitor.html" class="block px-4 py-2 hover:bg-indigo-100">System Monitor</a>
+        <a href="ApiManagement.html" class="block px-4 py-2 hover:bg-indigo-100">API Management</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md bg-indigo-600 font-semibold dropdownBtn transition">Verification Tools</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="cvVerification.html" class="block px-4 py-2 hover:bg-indigo-100">CV Verification</a>
+        <a href="DegreeVerification.html" class="block px-4 py-2 hover:bg-indigo-100">Degree Verification</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Reports</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="AiSystemReport.html" class="block px-4 py-2 hover:bg-indigo-100">AI System Report</a>
+        <a href="LogsAndReport.html" class="block px-4 py-2 hover:bg-indigo-100">Logs & Reports</a>
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+<!-- Current Time Display -->
+<div class="container mx-auto px-6 pt-4">
+  <div class="bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-md p-4 flex justify-between items-center transition-colors duration-300">
+    <div class="flex items-center space-x-4">
+      <div class="bg-blue-100 p-3 rounded-full">
+        <i class="ph ph-graduation-cap text-blue-700 text-2xl"></i>
+      </div>
+      <div>
+        <p class="text-sm text-white/80">Current Date & Time</p>
+        <p id="currentDateTime" class="text-lg font-semibold text-white"></p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2">
+      <span class="relative flex h-3 w-3">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+      </span>
+      <span class="text-sm font-medium text-white/90">Verification System Online</span>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<main class="flex-grow container mx-auto px-6 py-8">
+  <!-- Welcome Section -->
+  <div class="mb-10 animate-fadeIn">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">Degree Verification</h1>
+    <p class="text-gray-600">Verify academic credentials, validate degree certificates, and detect fraudulent documents using AI-powered verification tools.</p>
+  </div>
+
+  <!-- Verification Overview Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+    <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.1s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-blue-100 text-sm">Total Verifications</p>
+          <h3 class="text-2xl font-bold stat-number">1,847</h3>
+        </div>
+        <div class="bg-blue-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-file-text text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-blue-100">
+          <i class="ph ph-arrow-up mr-1"></i>
+          <span>24 new today</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.2s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-green-100 text-sm">Verified Degrees</p>
+          <h3 class="text-2xl font-bold stat-number">1,524</h3>
+        </div>
+        <div class="bg-green-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-check-circle text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-green-100">
+          <i class="ph ph-trend-up mr-1"></i>
+          <span>82.5% success rate</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.3s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-purple-100 text-sm">Pending Review</p>
+          <h3 class="text-2xl font-bold stat-number">42</h3>
+        </div>
+        <div class="bg-purple-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-clock text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-purple-100">
+          <i class="ph ph-warning mr-1"></i>
+          <span>8 require attention</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.4s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-orange-100 text-sm">Avg. Processing Time</p>
+          <h3 class="text-2xl font-bold stat-number">3.2 min</h3>
+        </div>
+        <div class="bg-orange-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-gauge text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-orange-100">
+          <i class="ph ph-arrow-down mr-1"></i>
+          <span>12% improvement</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs for Degree Verification -->
+  <div class="bg-white rounded-xl shadow-md mb-10 animate-fadeIn">
+    <div class="tab-container">
+      <div class="flex overflow-x-auto">
+        <button class="tab-button active" data-tab="verify-degree">Verify Degree</button>
+        <button class="tab-button" data-tab="verification-results">Verification Results</button>
+        <button class="tab-button" data-tab="institutions">Educational Institutions</button>
+        <button class="tab-button" data-tab="fraud-detection">Fraud Detection</button>
+        <button class="tab-button" data-tab="analytics">Analytics</button>
+      </div>
+    </div>
+
+    <!-- Verify Degree Tab -->
+    <div id="verify-degree" class="tab-content active p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Verify Academic Degree</h2>
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center space-x-2">
+          <i class="ph ph-history"></i>
+          <span>Verification History</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Document Upload -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Upload Degree Certificate</h3>
+          
+          <div class="upload-area" id="uploadArea">
+            <div class="flex flex-col items-center justify-center">
+              <div class="bg-indigo-100 p-4 rounded-full mb-4">
+                <i class="ph ph-cloud-arrow-up text-indigo-600 text-2xl"></i>
+              </div>
+              <p class="text-lg font-medium text-gray-700 mb-2">Upload Degree Certificate</p>
+              <p class="text-sm text-gray-500 mb-4">Drag & drop your file here or click to browse</p>
+              <p class="text-xs text-gray-400">Supported formats: JPG, PNG, PDF (Max 10MB)</p>
+              <input type="file" id="fileInput" class="hidden" accept=".jpg,.jpeg,.png,.pdf">
+              <button id="browseButton" class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md">
+                Browse Files
+              </button>
+            </div>
+          </div>
+
+          <div id="filePreview" class="mt-4 hidden">
+            <h4 class="text-md font-medium text-gray-700 mb-2">Document Preview</h4>
+            <div class="document-preview">
+              <img id="previewImage" src="" alt="Document preview">
+              <div class="p-4 border-t border-gray-200">
+                <div class="flex justify-between items-center">
+                  <div>
+                    <p class="font-medium text-gray-800" id="fileName">document.jpg</p>
+                    <p class="text-sm text-gray-500" id="fileSize">2.4 MB</p>
+                  </div>
+                  <button id="removeFile" class="text-red-600 hover:text-red-800">
+                    <i class="ph ph-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Verification Form -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Degree Information</h3>
+          
+          <form id="verificationForm">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="form-group">
+                <label class="form-label" for="fullName">Full Name</label>
+                <input type="text" class="form-input" id="fullName" placeholder="Enter full name as on certificate">
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="institution">Educational Institution</label>
+                <input type="text" class="form-input" id="institution" placeholder="Name of university/college">
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="degreeType">Degree Type</label>
+                <select class="form-input" id="degreeType">
+                  <option value="">Select degree type</option>
+                  <option value="bachelor">Bachelor's Degree</option>
+                  <option value="master">Master's Degree</option>
+                  <option value="doctorate">Doctorate/PhD</option>
+                  <option value="diploma">Diploma/Certificate</option>
+                  <option value="associate">Associate Degree</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="fieldOfStudy">Field of Study</label>
+                <input type="text" class="form-input" id="fieldOfStudy" placeholder="e.g., Computer Science">
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="graduationYear">Year of Graduation</label>
+                <input type="number" class="form-input" id="graduationYear" min="1950" max="2030" placeholder="YYYY">
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="country">Country</label>
+                <select class="form-input" id="country">
+                  <option value="">Select country</option>
+                  <option value="us">United States</option>
+                  <option value="uk">United Kingdom</option>
+                  <option value="canada">Canada</option>
+                  <option value="australia">Australia</option>
+                  <option value="germany">Germany</option>
+                  <option value="france">France</option>
+                  <option value="india">India</option>
+                  <option value="china">China</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="additionalInfo">Additional Information</label>
+              <textarea class="form-input" id="additionalInfo" rows="3" placeholder="Any additional details that might help with verification"></textarea>
+            </div>
+            
+            <div class="flex items-center mb-4">
+              <input type="checkbox" id="consentCheck" class="h-4 w-4 text-indigo-600 border-gray-300 rounded">
+              <label for="consentCheck" class="ml-2 text-sm text-gray-700">
+                I confirm that I have permission to verify this degree certificate
+              </label>
+            </div>
+            
+            <button type="button" id="startVerification" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-md flex items-center justify-center space-x-2">
+              <i class="ph ph-magnifying-glass"></i>
+              <span>Start Verification</span>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Quick Verification Options -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Verification Options</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <button class="flex flex-col items-center p-4 rounded-lg border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 transition-colors">
+            <div class="bg-blue-100 p-3 rounded-full mb-3">
+              <i class="ph ph-qr-code text-blue-600 text-xl"></i>
+            </div>
+            <span class="font-medium text-gray-800">Scan QR Code</span>
+            <p class="text-sm text-gray-600 mt-1 text-center">Use QR code on certificate for instant verification</p>
+          </button>
+          
+          <button class="flex flex-col items-center p-4 rounded-lg border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 transition-colors">
+            <div class="bg-green-100 p-3 rounded-full mb-3">
+              <i class="ph ph-database text-green-600 text-xl"></i>
+            </div>
+            <span class="font-medium text-gray-800">Database Lookup</span>
+            <p class="text-sm text-gray-600 mt-1 text-center">Check against accredited institutions database</p>
+          </button>
+          
+          <button class="flex flex-col items-center p-4 rounded-lg border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 transition-colors">
+            <div class="bg-purple-100 p-3 rounded-full mb-3">
+              <i class="ph ph-link text-purple-600 text-xl"></i>
+            </div>
+            <span class="font-medium text-gray-800">API Integration</span>
+            <p class="text-sm text-gray-600 mt-1 text-center">Connect directly to institution verification APIs</p>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Verification Results Tab -->
+    <div id="verification-results" class="tab-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Verification Results</h2>
+        <div class="flex space-x-2">
+          <button class="text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-md">All Results</button>
+          <button class="text-sm text-gray-500 px-3 py-1 rounded-md hover:bg-gray-100">Verified Only</button>
+          <button class="text-sm text-gray-500 px-3 py-1 rounded-md hover:bg-gray-100">Pending</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <!-- Recent Verifications -->
+        <div class="lg:col-span-2 bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Verifications</h3>
+          <div class="overflow-x-auto">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Verification ID</th>
+                  <th>Name</th>
+                  <th>Institution</th>
+                  <th>Degree</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="font-medium text-gray-900">VER-2024-0157</td>
+                  <td>Sarah Johnson</td>
+                  <td>Stanford University</td>
+                  <td>MSc Computer Science</td>
+                  <td>
+                    <span class="verification-valid text-xs px-2 py-1 rounded-full">Verified</span>
+                  </td>
+                  <td>2024-03-15</td>
+                  <td>
+                    <button class="text-indigo-600 hover:text-indigo-900">
+                      <i class="ph ph-eye"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="font-medium text-gray-900">VER-2024-0156</td>
+                  <td>Michael Chen</td>
+                  <td>MIT</td>
+                  <td>PhD Physics</td>
+                  <td>
+                    <span class="verification-valid text-xs px-2 py-1 rounded-full">Verified</span>
+                  </td>
+                  <td>2024-03-15</td>
+                  <td>
+                    <button class="text-indigo-600 hover:text-indigo-900">
+                      <i class="ph ph-eye"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="font-medium text-gray-900">VER-2024-0155</td>
+                  <td>Emma Wilson</td>
+                  <td>Harvard University</td>
+                  <td>MBA</td>
+                  <td>
+                    <span class="verification-pending text-xs px-2 py-1 rounded-full">Pending</span>
+                  </td>
+                  <td>2024-03-14</td>
+                  <td>
+                    <button class="text-indigo-600 hover:text-indigo-900">
+                      <i class="ph ph-eye"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="font-medium text-gray-900">VER-2024-0154</td>
+                  <td>James Rodriguez</td>
+                  <td>University of Oxford</td>
+                  <td>LLB Law</td>
+                  <td>
+                    <span class="verification-suspicious text-xs px-2 py-1 rounded-full">Suspicious</span>
+                  </td>
+                  <td>2024-03-14</td>
+                  <td>
+                    <button class="text-indigo-600 hover:text-indigo-900">
+                      <i class="ph ph-eye"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="font-medium text-gray-900">VER-2024-0153</td>
+                  <td>Lisa Thompson</td>
+                  <td>University of Toronto</td>
+                  <td>BSc Nursing</td>
+                  <td>
+                    <span class="verification-invalid text-xs px-2 py-1 rounded-full">Invalid</span>
+                  </td>
+                  <td>2024-03-13</td>
+                  <td>
+                    <button class="text-indigo-600 hover:text-indigo-900">
+                      <i class="ph ph-eye"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Verification Statistics -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Verification Statistics</h3>
+          <div class="space-y-6">
+            <div>
+              <h4 class="text-sm font-medium text-gray-700 mb-2">Verification Status</h4>
+              <div class="space-y-2">
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Verified</span>
+                  <span class="text-sm font-medium text-gray-800">82.5%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill bg-green-500" style="width: 82.5%"></div>
+                </div>
+                
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Pending</span>
+                  <span class="text-sm font-medium text-gray-800">10.2%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill bg-yellow-500" style="width: 10.2%"></div>
+                </div>
+                
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Invalid</span>
+                  <span class="text-sm font-medium text-gray-800">5.8%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill bg-red-500" style="width: 5.8%"></div>
+                </div>
+                
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Suspicious</span>
+                  <span class="text-sm font-medium text-gray-800">1.5%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill bg-purple-500" style="width: 1.5%"></div>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <h4 class="text-sm font-medium text-gray-700 mb-2">Processing Times</h4>
+              <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                  <div>
+                    <p class="text-sm text-gray-500">Average Time</p>
+                    <p class="text-2xl font-bold text-gray-800">3.2 min</p>
+                  </div>
+                  <div class="bg-blue-100 p-3 rounded-full">
+                    <i class="ph ph-clock text-blue-600 text-xl"></i>
+                  </div>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                  <div>
+                    <p class="text-sm text-gray-500">Fastest Verification</p>
+                    <p class="text-2xl font-bold text-gray-800">42 sec</p>
+                  </div>
+                  <div class="bg-green-100 p-3 rounded-full">
+                    <i class="ph ph-lightning text-green-600 text-xl"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Result Example -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Verification Details</h3>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2">
+            <h4 class="text-md font-medium text-gray-700 mb-3">Certificate Analysis</h4>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                <div class="flex items-center">
+                  <div class="bg-green-100 p-2 rounded-full mr-3">
+                    <i class="ph ph-check-circle text-green-600"></i>
+                  </div>
+                  <span class="font-medium text-gray-800">Document Authenticity</span>
+                </div>
+                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Verified</span>
+              </div>
+              
+              <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                <div class="flex items-center">
+                  <div class="bg-green-100 p-2 rounded-full mr-3">
+                    <i class="ph ph-check-circle text-green-600"></i>
+                  </div>
+                  <span class="font-medium text-gray-800">Institution Validation</span>
+                </div>
+                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Verified</span>
+              </div>
+              
+              <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                <div class="flex items-center">
+                  <div class="bg-green-100 p-2 rounded-full mr-3">
+                    <i class="ph ph-check-circle text-green-600"></i>
+                  </div>
+                  <span class="font-medium text-gray-800">Degree Program Verification</span>
+                </div>
+                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Verified</span>
+              </div>
+              
+              <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                <div class="flex items-center">
+                  <div class="bg-yellow-100 p-2 rounded-full mr-3">
+                    <i class="ph ph-warning text-yellow-600"></i>
+                  </div>
+                  <span class="font-medium text-gray-800">Graduation Date</span>
+                </div>
+                <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Manual Review Needed</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h4 class="text-md font-medium text-gray-700 mb-3">Verification Confidence</h4>
+            <div class="text-center mb-4">
+              <div class="inline-flex items-center justify-center w-24 h-24 bg-green-100 rounded-full mb-3">
+                <span class="text-2xl font-bold text-green-700">94%</span>
+              </div>
+              <p class="text-sm text-gray-600">High Confidence</p>
+            </div>
+            <div class="space-y-2">
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-600">Document Quality</span>
+                <span class="font-medium text-gray-800">Excellent</span>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-600">Data Extraction</span>
+                <span class="font-medium text-gray-800">98%</span>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-600">Institution Match</span>
+                <span class="font-medium text-gray-800">100%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Educational Institutions Tab -->
+    <div id="institutions" class="tab-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Educational Institutions</h2>
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center space-x-2">
+          <i class="ph ph-plus"></i>
+          <span>Add Institution</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Institutions Database -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Institutions Database</h3>
+          <div class="overflow-x-auto">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Institution</th>
+                  <th>Country</th>
+                  <th>Accreditation</th>
+                  <th>Verifications</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="font-medium text-gray-900">Stanford University</td>
+                  <td>United States</td>
+                  <td>WASC</td>
+                  <td>248</td>
+                  <td><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Verified</span></td>
+                </tr>
+                <tr>
+                  <td class="font-medium text-gray-900">University of Oxford</td>
+                  <td>United Kingdom</td>
+                  <td>QAA</td>
+                  <td>192</td>
+                  <td><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Verified</span></td>
+                </tr>
+                <tr>
+                  <td class="font-medium text-gray-900">University of Toronto</td>
+                  <td>Canada</td>
+                  <td>AUCC</td>
+                  <td>156</td>
+                  <td><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Verified</span></td>
+                </tr>
+                <tr>
+                  <td class="font-medium text-gray-900">University of Melbourne</td>
+                  <td>Australia</td>
+                  <td>TEQSA</td>
+                  <td>124</td>
+                  <td><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Verified</span></td>
+                </tr>
+                <tr>
+                  <td class="font-medium text-gray-900">Technical University of Munich</td>
+                  <td>Germany</td>
+                  <td>ACQUIN</td>
+                  <td>98</td>
+                  <td><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Verified</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Institution Details -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Institution Details</h3>
+          <div class="space-y-6">
+            <div class="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
+              <div class="bg-blue-100 p-3 rounded-full">
+                <i class="ph ph-building text-blue-600 text-xl"></i>
+              </div>
+              <div>
+                <p class="font-medium text-gray-800">Stanford University</p>
+                <p class="text-sm text-gray-500">Stanford, California, United States</p>
+              </div>
+            </div>
+            
+            <div>
+              <h4 class="text-md font-medium text-gray-700 mb-3">Verification Statistics</h4>
+              <div class="grid grid-cols-2 gap-4">
+                <div class="bg-gray-50 p-3 rounded-lg text-center">
+                  <p class="text-2xl font-bold text-gray-800">248</p>
+                  <p class="text-sm text-gray-600">Total Verifications</p>
+                </div>
+                <div class="bg-gray-50 p-3 rounded-lg text-center">
+                  <p class="text-2xl font-bold text-gray-800">98.4%</p>
+                  <p class="text-sm text-gray-600">Success Rate</p>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <h4 class="text-md font-medium text-gray-700 mb-2">Accreditation Details</h4>
+              <div class="space-y-2">
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-600">Accreditation Body</span>
+                  <span class="font-medium text-gray-800">WASC</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-600">Accreditation Status</span>
+                  <span class="font-medium text-green-600">Active</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-600">Last Verified</span>
+                  <span class="font-medium text-gray-800">2024-01-15</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Institution Map -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Global Institutions Map</h3>
+        <div class="bg-gray-100 h-64 rounded-lg flex items-center justify-center">
+          <div class="text-center">
+            <i class="ph ph-map-trifold text-gray-400 text-4xl mb-2"></i>
+            <p class="text-gray-500">Interactive map of verified educational institutions</p>
+            <button class="mt-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md">
+              View Full Map
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fraud Detection Tab -->
+    <div id="fraud-detection" class="tab-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Fraud Detection</h2>
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center space-x-2">
+          <i class="ph ph-export"></i>
+          <span>Export Report</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Fraud Patterns -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Common Fraud Patterns</h3>
+          <div class="space-y-4">
+            <div class="flex items-start space-x-4 p-4 border border-red-200 rounded-lg bg-red-50">
+              <div class="bg-red-100 p-2 rounded-full">
+                <i class="ph ph-warning text-red-600"></i>
+              </div>
+              <div>
+                <p class="font-medium text-red-800">Forged Signatures</p>
+                <p class="text-sm text-red-700">Detected 24 instances of signature forgery in the last 30 days</p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-4 p-4 border border-yellow-200 rounded-lg bg-yellow-50">
+              <div class="bg-yellow-100 p-2 rounded-full">
+                <i class="ph ph-warning text-yellow-600"></i>
+              </div>
+              <div>
+                <p class="font-medium text-yellow-800">Inconsistent Fonts</p>
+                <p class="text-sm text-yellow-700">Multiple font styles detected in supposedly official documents</p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-4 p-4 border border-purple-200 rounded-lg bg-purple-50">
+              <div class="bg-purple-100 p-2 rounded-full">
+                <i class="ph ph-warning text-purple-600"></i>
+              </div>
+              <div>
+                <p class="font-medium text-purple-800">Fake Institutions</p>
+                <p class="text-sm text-purple-700">12 diploma mill institutions identified this month</p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-4 p-4 border border-blue-200 rounded-lg bg-blue-50">
+              <div class="bg-blue-100 p-2 rounded-full">
+                <i class="ph ph-warning text-blue-600"></i>
+              </div>
+              <div>
+                <p class="font-medium text-blue-800">Altered Dates</p>
+                <p class="text-sm text-blue-700">Graduation dates inconsistent with institutional records</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fraud Detection Metrics -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Fraud Detection Metrics</h3>
+          <div class="space-y-6">
+            <div>
+              <h4 class="text-sm font-medium text-gray-700 mb-2">Detection Accuracy</h4>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm text-gray-600">Overall Accuracy</span>
+                <span class="text-sm text-gray-500">96.2%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill bg-green-500" style="width: 96.2%"></div>
+              </div>
+            </div>
+            
+            <div>
+              <h4 class="text-sm font-medium text-gray-700 mb-2">False Positives</h4>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm text-gray-600">Rate</span>
+                <span class="text-sm text-gray-500">2.1%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill bg-yellow-500" style="width: 2.1%"></div>
+              </div>
+            </div>
+            
+            <div>
+              <h4 class="text-sm font-medium text-gray-700 mb-2">Detection Speed</h4>
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600">Average Detection Time</span>
+                <span class="text-sm font-medium text-gray-800">8.7 sec</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Suspicious Activity -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Suspicious Activity</h3>
+        <div class="overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Case ID</th>
+                <th>Document Type</th>
+                <th>Institution</th>
+                <th>Fraud Type</th>
+                <th>Confidence</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-medium text-gray-900">FRAUD-2024-0042</td>
+                <td>Medical Degree</td>
+                <td>University of Caribbean</td>
+                <td>Diploma Mill</td>
+                <td>98%</td>
+                <td>2024-03-15</td>
+                <td><span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">Confirmed</span></td>
+              </tr>
+              <tr>
+                <td class="font-medium text-gray-900">FRAUD-2024-0041</td>
+                <td>Engineering Degree</td>
+                <td>Stanford University</td>
+                <td>Forged Signature</td>
+                <td>92%</td>
+                <td>2024-03-14</td>
+                <td><span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">Confirmed</span></td>
+              </tr>
+              <tr>
+                <td class="font-medium text-gray-900">FRAUD-2024-0040</td>
+                <td>Business Degree</td>
+                <td>Harvard University</td>
+                <td>Altered Dates</td>
+                <td>87%</td>
+                <td>2024-03-13</td>
+                <td><span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Under Review</span></td>
+              </tr>
+              <tr>
+                <td class="font-medium text-gray-900">FRAUD-2024-0039</td>
+                <td>Law Degree</td>
+                <td>University of Oxford</td>
+                <td>Inconsistent Formatting</td>
+                <td>78%</td>
+                <td>2024-03-12</td>
+                <td><span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Under Review</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics Tab -->
+    <div id="analytics" class="tab-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Verification Analytics</h2>
+        <div class="flex space-x-2">
+          <button class="text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-md">Last 30 Days</button>
+          <button class="text-sm text-gray-500 px-3 py-1 rounded-md hover:bg-gray-100">Last 90 Days</button>
+          <button class="text-sm text-gray-500 px-3 py-1 rounded-md hover:bg-gray-100">Year to Date</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Verification Trends -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Verification Trends</h3>
+          <div class="chart-container">
+            <canvas id="verificationTrendsChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Degree Type Distribution -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Degree Type Distribution</h3>
+          <div class="chart-container">
+            <canvas id="degreeDistributionChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Geographic Distribution -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Geographic Distribution</h3>
+        <div class="chart-container">
+          <canvas id="geographicDistributionChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="bg-white rounded-xl shadow-md p-6 animate-fadeIn">
+    <h2 class="text-xl font-bold text-gray-800 mb-6">Quick Actions</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <button class="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 transition-colors">
+        <div class="flex items-center">
+          <div class="bg-indigo-100 p-2 rounded-lg mr-3">
+            <i class="ph ph-upload-simple text-indigo-600"></i>
+          </div>
+          <span class="font-medium text-gray-800">Batch Upload</span>
+        </div>
+        <i class="ph ph-arrow-right text-gray-400"></i>
+      </button>
+      
+      <button class="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 transition-colors">
+        <div class="flex items-center">
+          <div class="bg-green-100 p-2 rounded-lg mr-3">
+            <i class="ph ph-check-circle text-green-600"></i>
+          </div>
+          <span class="font-medium text-gray-800">Verify Institution</span>
+        </div>
+        <i class="ph ph-arrow-right text-gray-400"></i>
+      </button>
+      
+      <button class="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 transition-colors">
+        <div class="flex items-center">
+          <div class="bg-blue-100 p-2 rounded-lg mr-3">
+            <i class="ph ph-chart-line text-blue-600"></i>
+          </div>
+          <span class="font-medium text-gray-800">Analytics Report</span>
+        </div>
+        <i class="ph ph-arrow-right text-gray-400"></i>
+      </button>
+      
+      <button class="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 transition-colors">
+        <div class="flex items-center">
+          <div class="bg-purple-100 p-2 rounded-lg mr-3">
+            <i class="ph ph-shield-check text-purple-600"></i>
+          </div>
+          <span class="font-medium text-gray-800">Fraud Report</span>
+        </div>
+        <i class="ph ph-arrow-right text-gray-400"></i>
+      </button>
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="text-center py-6 bg-gradient-to-r from-indigo-700 to-indigo-600 text-white">
+  <div class="container mx-auto px-6">
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 mb-6">
+      <div class="flex items-center space-x-2">
+        <i class="ph ph-heartbeat text-2xl"></i>
+        <span class="font-semibold">Smart Healthcare Management System</span>
+      </div>
+      <div class="text-sm">
+        © 2025 SHMS | AI-ML Developer Dashboard
+      </div>
+      <div class="flex items-center space-x-4">
+        <a href="#" class="hover:text-indigo-200 transition">
+          <i class="ph ph-info text-xl"></i>
+        </a>
+      </div>
+    </div>
+    
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+      <div class="max-w-md text-center md:text-left">
+        <p class="text-sm">
+          Advanced AI-ML infrastructure for predictive healthcare analytics and intelligent patient care solutions.
+        </p>
+      </div>
+
+      <div class="flex space-x-5 text-white">
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-facebook-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-twitter-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-linkedin-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-envelope text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-phone text-2xl"></i></a>
+      </div>
+    </div>
+
+    <div class="text-center text-sm text-indigo-200 mt-6 border-t border-indigo-700 pt-4">
+      © 2025 Smart Healthcare Management System | AI-ML Developer Interface
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Update current date and time
+  function updateDateTime() {
+    const now = new Date();
+    const options = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    };
+    document.getElementById('currentDateTime').textContent = now.toLocaleDateString('en-US', options);
+  }
+  updateDateTime();
+  setInterval(updateDateTime, 1000);
+
+  // Top menu toggle
+  const menuBtn = document.getElementById('menuBtn');
+  const menuDropdown = document.getElementById('menuDropdown');
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuDropdown.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+      menuDropdown.classList.add('hidden');
+    }
+  });
+
+  // Dropdown functionality
+  const dropdownButtons = document.querySelectorAll('.dropdownBtn');
+  let activeDropdown = null;
+
+  dropdownButtons.forEach(btn => {
+    const dropdown = btn.nextElementSibling;
+    if (!dropdown) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeDropdown && activeDropdown !== dropdown) {
+        activeDropdown.classList.remove('show');
+      }
+      if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        activeDropdown = null;
+      } else {
+        dropdown.classList.add('show');
+        activeDropdown = dropdown;
+      }
+    });
+
+    btn.addEventListener('mouseenter', () => dropdown.classList.add('show'));
+    btn.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!dropdown.matches(':hover')) {
+          dropdown.classList.remove('show');
+        }
+      }, 100);
+    });
+    
+    if (dropdown) {
+      dropdown.addEventListener('mouseleave', () => {
+        dropdown.classList.remove('show');
+        if (activeDropdown === dropdown) activeDropdown = null;
+      });
+    }
+  });
+
+  document.body.addEventListener('click', () => {
+    if (activeDropdown) {
+      activeDropdown.classList.remove('show');
+      activeDropdown = null;
+    }
+  });
+
+  // Hide/show navbar on scroll
+  let lastScroll = 0;
+  const featureNavbar = document.getElementById('featureNavbar');
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+    if (currentScroll > lastScroll && currentScroll > 100) {
+      featureNavbar.style.transform = 'translateY(-100%)';
+    } else {
+      featureNavbar.style.transform = 'translateY(0)';
+    }
+    lastScroll = currentScroll;
+  });
+
+  // Tab functionality
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      // Remove active class from all buttons and contents
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      tabContents.forEach(content => content.classList.remove('active'));
+      
+      // Add active class to clicked button
+      button.classList.add('active');
+      
+      // Show corresponding content
+      const tabId = button.getAttribute('data-tab');
+      document.getElementById(tabId).classList.add('active');
+    });
+  });
+
+  // Animate numbers on scroll
+  const animateValue = (element, start, end, duration) => {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const value = Math.floor(progress * (end - start) + start);
+      element.textContent = value.toLocaleString();
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+    window.requestAnimationFrame(step);
+  };
+
+  // Observe stats for animation
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const statNumber = entry.target;
+        const targetValue = parseInt(statNumber.textContent.replace(/,/g, ''));
+        animateValue(statNumber, 0, targetValue, 1500);
+        observer.unobserve(statNumber);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('.stat-number').forEach(stat => {
+    observer.observe(stat);
+  });
+
+  // File upload functionality
+  const uploadArea = document.getElementById('uploadArea');
+  const fileInput = document.getElementById('fileInput');
+  const browseButton = document.getElementById('browseButton');
+  const filePreview = document.getElementById('filePreview');
+  const previewImage = document.getElementById('previewImage');
+  const fileName = document.getElementById('fileName');
+  const fileSize = document.getElementById('fileSize');
+  const removeFile = document.getElementById('removeFile');
+
+  browseButton.addEventListener('click', () => {
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', handleFileSelect);
+  
+  uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('dragover');
+  });
+  
+  uploadArea.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('dragover');
+  });
+  
+  uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('dragover');
+    
+    if (e.dataTransfer.files.length) {
+      fileInput.files = e.dataTransfer.files;
+      handleFileSelect();
+    }
+  });
+
+  function handleFileSelect() {
+    if (fileInput.files && fileInput.files[0]) {
+      const file = fileInput.files[0];
+      
+      // Check file type
+      const validTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+      if (!validTypes.includes(file.type)) {
+        alert('Please select a valid file type (JPG, PNG, or PDF)');
+        return;
+      }
+      
+      // Check file size (10MB max)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File size must be less than 10MB');
+        return;
+      }
+      
+      // Update file info
+      fileName.textContent = file.name;
+      fileSize.textContent = formatFileSize(file.size);
+      
+      // Show preview for images
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          previewImage.src = e.target.result;
+          filePreview.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // For PDFs, show a placeholder
+        previewImage.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDIwMCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjUwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik04MCAxMjVIMTIwVjE2NUg4MFYxMjVaIiBmaWxsPSIjOUM5QzlDIi8+CjxwYXRoIGQ9Ik02MCA2MEgxNDBWOTBINjBWNjBaIiBmaWxsPSIjOUM5QzlDIi8+CjxwYXRoIGQ9Ik02MCAxMDBIMTQwVjEzMEg2MFYxMDBaIiBmaWxsPSIjOUM5QzlDIi8+CjxwYXRoIGQ9Ik02MCAxNDBIMTQwVjE3MEg2MFYxNDBaIiBmaWxsPSIjOUM5QzlDIi8+CjxwYXRoIGQ9Ik02MCAxODBIMTQwVjIxMEg2MFYxODBaIiBmaWxsPSIjOUM5QzlDIi8+Cjwvc3ZnPgo=';
+        filePreview.classList.remove('hidden');
+      }
+    }
+  }
+
+  removeFile.addEventListener('click', () => {
+    fileInput.value = '';
+    filePreview.classList.add('hidden');
+  });
+
+  function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  // Start verification button
+  document.getElementById('startVerification').addEventListener('click', () => {
+    const consentCheck = document.getElementById('consentCheck');
+    if (!consentCheck.checked) {
+      alert('Please confirm that you have permission to verify this degree certificate');
+      return;
+    }
+    
+    if (!fileInput.files.length) {
+      alert('Please upload a degree certificate to verify');
+      return;
+    }
+    
+    // Simulate verification process
+    const button = document.getElementById('startVerification');
+    const originalText = button.innerHTML;
+    
+    button.innerHTML = '<i class="ph ph-circle-notch animate-spin"></i><span>Verifying...</span>';
+    button.disabled = true;
+    
+    // Simulate API call delay
+    setTimeout(() => {
+      button.innerHTML = '<i class="ph ph-check-circle"></i><span>Verification Complete</span>';
+      button.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+      button.classList.add('bg-green-600');
+      
+      // Switch to results tab after a delay
+      setTimeout(() => {
+        document.querySelector('[data-tab="verification-results"]').click();
+        button.innerHTML = originalText;
+        button.disabled = false;
+        button.classList.remove('bg-green-600');
+        button.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+      }, 1500);
+    }, 3000);
+  });
+
+  // Chart.js configurations
+  const chartColors = {
+    primary: '#6366F1',
+    secondary: '#8B5CF6',
+    success: '#10B981',
+    warning: '#F59E0B',
+    danger: '#EF4444',
+    info: '#3B82F6'
+  };
+
+  // Initialize Charts
+  document.addEventListener('DOMContentLoaded', function() {
+    // Verification Trends Chart
+    const trendsCtx = document.getElementById('verificationTrendsChart').getContext('2d');
+    const verificationTrendsChart = new Chart(trendsCtx, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        datasets: [{
+          label: 'Total Verifications',
+          data: [125, 138, 142, 156, 168, 175, 182, 194, 205, 198, 184, 175],
+          borderColor: 'rgb(99, 102, 241)',
+          backgroundColor: 'rgba(99, 102, 241, 0.1)',
+          tension: 0.3,
+          fill: true
+        }, {
+          label: 'Verified Degrees',
+          data: [98, 112, 118, 128, 142, 148, 152, 162, 172, 165, 152, 145],
+          borderColor: 'rgb(16, 185, 129)',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          tension: 0.3,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+
+    // Degree Distribution Chart
+    const degreeCtx = document.getElementById('degreeDistributionChart').getContext('2d');
+    const degreeDistributionChart = new Chart(degreeCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Bachelor', 'Master', 'Doctorate', 'Diploma', 'Associate'],
+        datasets: [{
+          data: [45, 28, 12, 8, 7],
+          backgroundColor: [
+            'rgba(99, 102, 241, 0.7)',
+            'rgba(139, 92, 246, 0.7)',
+            'rgba(236, 72, 153, 0.7)',
+            'rgba(16, 185, 129, 0.7)',
+            'rgba(245, 158, 11, 0.7)'
+          ],
+          borderColor: [
+            'rgb(99, 102, 241)',
+            'rgb(139, 92, 246)',
+            'rgb(236, 72, 153)',
+            'rgb(16, 185, 129)',
+            'rgb(245, 158, 11)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+          }
+        }
+      }
+    });
+
+    // Geographic Distribution Chart
+    const geoCtx = document.getElementById('geographicDistributionChart').getContext('2d');
+    const geographicDistributionChart = new Chart(geoCtx, {
+      type: 'bar',
+      data: {
+        labels: ['United States', 'United Kingdom', 'Canada', 'Australia', 'Germany', 'India', 'France', 'Other'],
+        datasets: [{
+          label: 'Number of Verifications',
+          data: [542, 385, 278, 192, 156, 142, 128, 245],
+          backgroundColor: 'rgba(99, 102, 241, 0.7)',
+          borderColor: 'rgb(99, 102, 241)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  });
+
+  // Add hover effect to dashboard cards
+  const dashboardCards = document.querySelectorAll('.card-hover');
+  dashboardCards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transition = 'all 0.3s ease';
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-ML Developer Settings | SHMS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  .animate-slideUp {
+    animation: slideUp 0.7s ease-out forwards;
+  }
+  .animate-pulse-slow {
+    animation: pulse 3s ease-in-out infinite;
+  }
+  .dropdownContent {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none;
+    position: absolute;
+    z-index: 50;
+    left: 0;
+  }
+  .dropdownContent.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .card-hover {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.2);
+  }
+  .gradient-border {
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899) border-box;
+    border: 2px solid transparent;
+  }
+  
+  /* Modal styles */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #6366f1;
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+  }
+  
+  /* Toggle switch */
+  .toggle-checkbox:checked {
+    right: 0;
+    border-color: #6366f1;
+  }
+  .toggle-checkbox:checked + .toggle-label {
+    background-color: #6366f1;
+  }
+  
+  /* Settings sidebar */
+  .settings-sidebar {
+    position: sticky;
+    top: 120px;
+    height: calc(100vh - 140px);
+    overflow-y: auto;
+  }
+  
+  /* Active nav item */
+  .nav-item {
+    transition: all 0.3s ease;
+  }
+  .nav-item.active {
+    background-color: #e0e7ff;
+    color: #4f46e5;
+    border-right: 3px solid #4f46e5;
+  }
+  .nav-item:hover {
+    background-color: #e0e7ff;
+    color: #4f46e5;
+    transform: translateX(5px);
+  }
+  
+  /* Toast notification */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    background-color: #10b981;
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .toast.error {
+    background-color: #ef4444;
+  }
+  .toast.warning {
+    background-color: #f59e0b;
+  }
+  .toast.info {
+    background-color: #3b82f6;
+  }
+  
+  /* Enhanced Dark Theme */
+  .dark-theme {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+    color: #f8fafc !important;
+  }
+  .dark-theme .bg-white {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+  }
+  .dark-theme .text-gray-700,
+  .dark-theme .text-gray-800 {
+    color: #e2e8f0 !important;
+  }
+  .dark-theme .text-gray-600 {
+    color: #94a3b8 !important;
+  }
+  .dark-theme .border-gray-300 {
+    border-color: #475569 !important;
+  }
+  .dark-theme .bg-gray-50 {
+    background-color: #1e293b !important;
+  }
+  .dark-theme .bg-indigo-50 {
+    background-color: #1e1b4b !important;
+  }
+  .dark-theme .bg-green-50 {
+    background-color: #022c22 !important;
+  }
+  .dark-theme .bg-purple-50 {
+    background-color: #2e1065 !important;
+  }
+  .dark-theme .bg-blue-50 {
+    background-color: #172554 !important;
+  }
+  .dark-theme .bg-yellow-50 {
+    background-color: #422006 !important;
+  }
+  .dark-theme .bg-red-50 {
+    background-color: #450a0a !important;
+  }
+  .dark-theme .bg-gradient-to-r {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+  }
+  .dark-theme .shadow-lg {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4) !important;
+  }
+  .dark-theme input,
+  .dark-theme select,
+  .dark-theme textarea {
+    background-color: #1e293b !important;
+    border-color: #475569 !important;
+    color: #f8fafc !important;
+  }
+  .dark-theme input:focus,
+  .dark-theme select:focus,
+  .dark-theme textarea:focus {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+  }
+  .dark-theme .nav-item.active {
+    background-color: #312e81 !important;
+    color: #c7d2fe !important;
+    border-right: 3px solid #818cf8 !important;
+  }
+  .dark-theme .nav-item:hover {
+    background-color: #312e81 !important;
+    color: #c7d2fe !important;
+  }
+  .dark-theme .bg-indigo-100 {
+    background-color: #312e81 !important;
+  }
+  .dark-theme .text-indigo-600 {
+    color: #a5b4fc !important;
+  }
+  .dark-theme .bg-green-100 {
+    background-color: #065f46 !important;
+  }
+  .dark-theme .text-green-600 {
+    color: #34d399 !important;
+  }
+  .dark-theme .bg-purple-100 {
+    background-color: #5b21b6 !important;
+  }
+  .dark-theme .text-purple-600 {
+    color: #c4b5fd !important;
+  }
+  .dark-theme .bg-blue-100 {
+    background-color: #1e40af !important;
+  }
+  .dark-theme .text-blue-600 {
+    color: #93c5fd !important;
+  }
+  .dark-theme .bg-yellow-100 {
+    background-color: #92400e !important;
+  }
+  .dark-theme .text-yellow-600 {
+    color: #fcd34d !important;
+  }
+  .dark-theme .bg-red-100 {
+    background-color: #991b1b !important;
+  }
+  .dark-theme .text-red-600 {
+    color: #fca5a5 !important;
+  }
+  .dark-theme .border-indigo-500 {
+    border-color: #818cf8 !important;
+  }
+  .dark-theme .border-gray-300 {
+    border-color: #475569 !important;
+  }
+  .dark-theme .hover\:bg-indigo-50:hover {
+    background-color: #312e81 !important;
+  }
+  .dark-theme .hover\:bg-gray-50:hover {
+    background-color: #334155 !important;
+  }
+  .dark-theme .hover\:bg-red-50:hover {
+    background-color: #7f1d1d !important;
+  }
+  .dark-theme .text-indigo-700 {
+    color: #c7d2fe !important;
+  }
+  .dark-theme .text-green-700 {
+    color: #6ee7b7 !important;
+  }
+  .dark-theme .text-purple-700 {
+    color: #ddd6fe !important;
+  }
+  .dark-theme .border-t {
+    border-color: #334155 !important;
+  }
+  .dark-theme .border-b {
+    border-color: #334155 !important;
+  }
+  .dark-theme .bg-indigo-600 {
+    background-color: #4f46e5 !important;
+  }
+  .dark-theme .hover\:bg-indigo-700:hover {
+    background-color: #4338ca !important;
+  }
+  .dark-theme .bg-green-600 {
+    background-color: #059669 !important;
+  }
+  .dark-theme .hover\:bg-green-700:hover {
+    background-color: #047857 !important;
+  }
+  .dark-theme .border-red-300 {
+    border-color: #fca5a5 !important;
+  }
+  .dark-theme .text-red-700 {
+    color: #fecaca !important;
+  }
+  .dark-theme .bg-gray-200 {
+    background-color: #475569 !important;
+  }
+  .dark-theme .peer-checked\:bg-indigo-600 {
+    background-color: #4f46e5 !important;
+  }
+</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen flex flex-col">
+
+<!-- Toast Notification -->
+<div id="toast" class="toast">
+  <div class="flex items-center">
+    <i class="ph ph-check-circle mr-2"></i>
+    <span id="toastMessage">Settings saved successfully!</span>
+  </div>
+</div>
+
+<!-- Top Navbar -->
+<nav class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+  <h1 class="text-2xl font-bold tracking-wide flex items-center space-x-2">
+    <i class="ph ph-heartbeat text-3xl"></i>
+    <span>SHMS</span>
+  </h1>
+
+  <span class="text-xl font-bold flex items-center space-x-2">
+    <i class="ph ph-code"></i>
+    <span>AI-ML Developer</span>
+  </span>
+
+  <div class="relative flex items-center space-x-2">
+    
+    <!-- Notification Button -->
+    <a href="Notification.html" class="relative p-2 rounded-full hover:bg-indigo-600 focus:outline-none">
+      <i class="ph ph-bell text-xl"></i>
+      <!-- Notification badge -->
+      <span id="notificationBadge" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+        5
+      </span>
+    </a>
+
+    <!-- Three-dot menu -->
+    <div class="relative">
+      <button id="menuBtn" class="text-white text-2xl focus:outline-none hover:bg-indigo-600 rounded-full p-2 transition" aria-label="Menu">
+        <i class="ph ph-dots-three-vertical"></i>
+      </button>
+      <div id="menuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded-md shadow-lg z-50">
+        <a href="Profile.html" class="block px-4 py-2 hover:bg-indigo-100 rounded-t-md flex items-center space-x-2">
+          <i class="ph ph-user"></i>
+          <span>Profile</span>
+        </a>
+        <a href="Setting.html" class="block px-4 py-2 hover:bg-indigo-100 flex items-center space-x-2">
+          <i class="ph ph-gear"></i>
+          <span>Settings</span>
+        </a>
+        <a href="../Login.html" class="block px-4 py-2 hover:bg-indigo-100 text-red-600 rounded-b-md flex items-center space-x-2">
+          <i class="ph ph-sign-out"></i>
+          <span>Logout</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Feature Navbar -->
+<nav id="featureNavbar" class="bg-indigo-800 text-white shadow-md sticky top-0 z-40 transition-transform duration-300" style="top: 64px;">
+  <div class="container mx-auto flex flex-wrap justify-center md:justify-start items-center px-4 py-2 space-x-2">
+
+    <div class="relative">
+      <a href="Home.html" class="px-5 py-2 rounded-md hover:bg-indigo-700 block transition">Home</a>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">AI Model Management</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="TrainRetrainModel.html" class="block px-4 py-2 hover:bg-indigo-100">Train / Retrain Models</a>
+        <a href="ModelVersionControl.html" class="block px-4 py-2 hover:bg-indigo-100">Model Version Control</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Data & Pipeline</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="DataManagement.html" class="block px-4 py-2 hover:bg-indigo-100">Data Management</a>
+        <a href="PipelineHealth.html" class="block px-4 py-2 hover:bg-indigo-100">Pipeline Health & Quality</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Monitoring & Analytics</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="PredictionsDashboard.html" class="block px-4 py-2 hover:bg-indigo-100">Predictions Dashboard</a>
+        <a href="RealtimePerformance.html" class="block px-4 py-2 hover:bg-indigo-100">Real-Time Performance</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">System Administration</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="SystemMonitor.html" class="block px-4 py-2 hover:bg-indigo-100">System Monitor</a>
+        <a href="ApiManagement.html" class="block px-4 py-2 hover:bg-indigo-100">API Management</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Verification Tools</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="cvVerification.html" class="block px-4 py-2 hover:bg-indigo-100">CV Verification</a>
+        <a href="DegreeVerification.html" class="block px-4 py-2 hover:bg-indigo-100">Degree Verification</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Reports</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="AiSystemReport.html" class="block px-4 py-2 hover:bg-indigo-100">AI System Report</a>
+        <a href="LogsAndReport.html" class="block px-4 py-2 hover:bg-indigo-100">Logs & Reports</a>
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+<!-- Current Time Display -->
+<div class="container mx-auto px-6 pt-4">
+  <div class="bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-md p-4 flex justify-between items-center transition-colors duration-300">
+    <div class="flex items-center space-x-4">
+      <div class="bg-blue-100 p-3 rounded-full">
+        <i class="ph ph-gear text-blue-700 text-2xl"></i>
+      </div>
+      <div>
+        <p class="text-sm text-white/80">AI-ML Developer Settings & Configuration</p>
+        <p class="text-lg font-semibold text-white">Configure your development environment and model preferences</p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2">
+      <span class="relative flex h-3 w-3">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+      </span>
+      <span class="text-sm font-medium text-white/90">GPU Available</span>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Header -->
+<section class="px-6 py-8">
+  <div class="container mx-auto">
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden animate-fadeIn">
+      <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
+        <div class="flex flex-col md:flex-row items-center justify-between">
+          <div class="flex items-center">
+            <div class="bg-white p-3 rounded-full mr-4">
+              <i class="ph ph-gear text-indigo-600 text-2xl"></i>
+            </div>
+            <div>
+              <h1 class="text-3xl font-bold mb-2">AI-ML Developer Settings</h1>
+              <p class="text-indigo-100 text-lg">Configure your development environment, model training, and deployment options</p>
+            </div>
+          </div>
+          <div class="mt-4 md:mt-0">
+            <button id="saveAllSettings" class="bg-white text-indigo-600 hover:bg-indigo-50 font-semibold py-2 px-4 rounded-lg transition flex items-center space-x-2">
+              <i class="ph ph-floppy-disk"></i>
+              <span>Save All Settings</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+        <div class="bg-indigo-50 p-4 rounded-lg">
+          <p class="text-2xl font-bold text-indigo-700">18</p>
+          <p class="text-gray-600 text-sm">Active Models</p>
+        </div>
+        <div class="bg-green-50 p-4 rounded-lg">
+          <p class="text-2xl font-bold text-green-700">12</p>
+          <p class="text-gray-600 text-sm">Training Jobs</p>
+        </div>
+        <div class="bg-purple-50 p-4 rounded-lg">
+          <p class="text-2xl font-bold text-purple-700">94.2%</p>
+          <p class="text-gray-600 text-sm">Avg. Model Accuracy</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Settings Content -->
+<main class="px-6 py-4">
+  <div class="container mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <!-- Settings Sidebar -->
+    <div class="lg:col-span-1">
+      <div class="bg-white rounded-2xl shadow-lg settings-sidebar animate-fadeIn">
+        <div class="p-4 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-indigo-700">Developer Settings</h3>
+        </div>
+        <nav class="p-4 space-y-1">
+          <a href="#account" class="nav-item block px-4 py-2 rounded-lg text-gray-700 transition flex items-center space-x-3 active">
+            <i class="ph ph-user-circle text-lg"></i>
+            <span>Developer Profile</span>
+          </a>
+          <a href="#environment" class="nav-item block px-4 py-2 rounded-lg text-gray-700 transition flex items-center space-x-3">
+            <i class="ph ph-terminal text-lg"></i>
+            <span>Development Environment</span>
+          </a>
+          <a href="#model-training" class="nav-item block px-4 py-2 rounded-lg text-gray-700 transition flex items-center space-x-3">
+            <i class="ph ph-brain text-lg"></i>
+            <span>Model Training</span>
+          </a>
+          <a href="#deployment" class="nav-item block px-4 py-2 rounded-lg text-gray-700 transition flex items-center space-x-3">
+            <i class="ph ph-rocket-launch text-lg"></i>
+            <span>Model Deployment</span>
+          </a>
+          <a href="#notifications" class="nav-item block px-4 py-2 rounded-lg text-gray-700 transition flex items-center space-x-3">
+            <i class="ph ph-bell text-lg"></i>
+            <span>Notifications</span>
+          </a>
+          <a href="#data" class="nav-item block px-4 py-2 rounded-lg text-gray-700 transition flex items-center space-x-3">
+            <i class="ph ph-database text-lg"></i>
+            <span>Data Management</span>
+          </a>
+          <a href="#integrations" class="nav-item block px-4 py-2 rounded-lg text-gray-700 transition flex items-center space-x-3">
+            <i class="ph ph-plug text-lg"></i>
+            <span>Integrations</span>
+          </a>
+          <a href="#advanced" class="nav-item block px-4 py-2 rounded-lg text-gray-700 transition flex items-center space-x-3">
+            <i class="ph ph-wrench text-lg"></i>
+            <span>Advanced</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+    
+    <!-- Settings Panels -->
+    <div class="lg:col-span-3 space-y-6">
+      <!-- Developer Profile Panel -->
+      <div id="account" class="bg-white p-6 rounded-2xl shadow-lg card-hover gradient-border animate-fadeIn" style="animation-delay: 0.1s;">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-semibold text-indigo-700 flex items-center space-x-2">
+            <i class="ph ph-user-circle"></i>
+            <span>Developer Profile</span>
+          </h3>
+          <span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">Active</span>
+        </div>
+        
+        <div class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-gray-700 text-sm font-medium mb-2">Full Name</label>
+              <input type="text" id="accountName" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" value="Alex Chen">
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm font-medium mb-2">Email Address</label>
+              <input type="email" id="accountEmail" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" value="alex.chen@shms-ai.org">
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm font-medium mb-2">Specialization</label>
+              <select id="accountSpecialization" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option>Computer Vision</option>
+                <option>Natural Language Processing</option>
+                <option>Predictive Analytics</option>
+                <option>Reinforcement Learning</option>
+                <option selected>Healthcare AI</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm font-medium mb-2">Access Level</label>
+              <select id="accountAccess" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option>Junior Developer</option>
+                <option>Senior Developer</option>
+                <option selected>Lead AI Engineer</option>
+                <option>AI Research Scientist</option>
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-gray-700 text-sm font-medium mb-2">Bio</label>
+            <textarea id="accountBio" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" rows="3">Lead AI-ML Developer specializing in healthcare predictive models with 8 years of experience in medical AI systems and deep learning architectures.</textarea>
+          </div>
+          
+          <div class="flex justify-end">
+            <button id="updateAccount" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium">
+              Update Profile
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Development Environment Panel -->
+      <div id="environment" class="bg-white p-6 rounded-2xl shadow-lg card-hover gradient-border animate-fadeIn" style="animation-delay: 0.2s;">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-semibold text-indigo-700 flex items-center space-x-2">
+            <i class="ph ph-terminal"></i>
+            <span>Development Environment</span>
+          </h3>
+          <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">Custom</span>
+        </div>
+        
+        <div class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+              <h4 class="font-medium text-gray-800">Compute Resources</h4>
+              
+              <div>
+                <label class="block text-gray-700 text-sm font-medium mb-2">GPU Allocation</label>
+                <select id="gpuAllocation" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option>1 GPU (Standard)</option>
+                  <option selected>2 GPUs (Enhanced)</option>
+                  <option>4 GPUs (High Performance)</option>
+                  <option>8 GPUs (Research Grade)</option>
+                </select>
+              </div>
+              
+              <div>
+                <label class="block text-gray-700 text-sm font-medium mb-2">Memory Allocation</label>
+                <select id="memoryAllocation" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option>16 GB RAM</option>
+                  <option selected>32 GB RAM</option>
+                  <option>64 GB RAM</option>
+                  <option>128 GB RAM</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="space-y-4">
+              <h4 class="font-medium text-gray-800">Development Tools</h4>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">Jupyter Notebooks</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="jupyterNotebooks" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">VS Code Server</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="vscodeServer" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">TensorBoard</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="tensorboard" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+          
+          <div class="border-t border-gray-200 pt-4">
+            <h4 class="font-medium text-gray-800 mb-3">Framework Preferences</h4>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <label class="inline-flex items-center">
+                <input type="checkbox" name="frameworks" id="frameworkTensorflow" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500" checked>
+                <span class="ml-2 text-gray-700">TensorFlow</span>
+              </label>
+              <label class="inline-flex items-center">
+                <input type="checkbox" name="frameworks" id="frameworkPytorch" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500" checked>
+                <span class="ml-2 text-gray-700">PyTorch</span>
+              </label>
+              <label class="inline-flex items-center">
+                <input type="checkbox" name="frameworks" id="frameworkScikit" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500" checked>
+                <span class="ml-2 text-gray-700">Scikit-learn</span>
+              </label>
+              <label class="inline-flex items-center">
+                <input type="checkbox" name="frameworks" id="frameworkXgboost" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500">
+                <span class="ml-2 text-gray-700">XGBoost</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Model Training Panel -->
+      <div id="model-training" class="bg-white p-6 rounded-2xl shadow-lg card-hover gradient-border animate-fadeIn" style="animation-delay: 0.3s;">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-semibold text-indigo-700 flex items-center space-x-2">
+            <i class="ph ph-brain"></i>
+            <span>Model Training Configuration</span>
+          </h3>
+          <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded-full">Optimized</span>
+        </div>
+        
+        <div class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+              <h4 class="font-medium text-gray-800">Training Parameters</h4>
+              
+              <div>
+                <label class="block text-gray-700 text-sm font-medium mb-2">Default Epochs</label>
+                <input type="number" id="defaultEpochs" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" value="100" min="1" max="1000">
+              </div>
+              
+              <div>
+                <label class="block text-gray-700 text-sm font-medium mb-2">Batch Size</label>
+                <select id="batchSize" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option>16</option>
+                  <option selected>32</option>
+                  <option>64</option>
+                  <option>128</option>
+                </select>
+              </div>
+              
+              <div>
+                <label class="block text-gray-700 text-sm font-medium mb-2">Learning Rate</label>
+                <input type="text" id="learningRate" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" value="0.001">
+              </div>
+            </div>
+            
+            <div class="space-y-4">
+              <h4 class="font-medium text-gray-800">Training Features</h4>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">Early Stopping</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="earlyStopping" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">Auto Hyperparameter Tuning</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="hyperparameterTuning" class="sr-only peer">
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">Cross-Validation</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="crossValidation" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+          
+          <div class="border-t border-gray-200 pt-4">
+            <h4 class="font-medium text-gray-800 mb-3">Experiment Tracking</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-gray-700 text-sm font-medium mb-2">Experiment Manager</label>
+                <select id="experimentManager" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option>MLflow</option>
+                  <option selected>Weights & Biases</option>
+                  <option>TensorBoard</option>
+                  <option>Comet ML</option>
+                </select>
+              </div>
+              
+              <div>
+                <label class="block text-gray-700 text-sm font-medium mb-2">Auto-logging</label>
+                <select id="autoLogging" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option>Minimal</option>
+                  <option selected>Standard</option>
+                  <option>Detailed</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Model Deployment Panel -->
+      <div id="deployment" class="bg-white p-6 rounded-2xl shadow-lg card-hover gradient-border animate-fadeIn" style="animation-delay: 0.4s;">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-semibold text-indigo-700 flex items-center space-x-2">
+            <i class="ph ph-rocket-launch"></i>
+            <span>Model Deployment Settings</span>
+          </h3>
+          <span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">Active</span>
+        </div>
+        
+        <div class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+              <h4 class="font-medium text-gray-800">Deployment Options</h4>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">Auto-deploy Best Model</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="autoDeploy" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">A/B Testing</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="abTesting" class="sr-only peer">
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">Canary Deployment</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="canaryDeployment" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+            </div>
+            
+            <div class="space-y-4">
+              <h4 class="font-medium text-gray-800">Serving Configuration</h4>
+              
+              <div>
+                <label class="block text-gray-700 text-sm font-medium mb-2">Serving Framework</label>
+                <select id="servingFramework" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option>TensorFlow Serving</option>
+                  <option selected>TorchServe</option>
+                  <option>KServe</option>
+                  <option>Custom REST API</option>
+                </select>
+              </div>
+              
+              <div>
+                <label class="block text-gray-700 text-sm font-medium mb-2">API Timeout (seconds)</label>
+                <input type="number" id="apiTimeout" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" value="30" min="5" max="300">
+              </div>
+            </div>
+          </div>
+          
+          <div class="border-t border-gray-200 pt-4">
+            <h4 class="font-medium text-gray-800 mb-3">Performance Monitoring</h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">Model Drift Detection</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="driftDetection" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">Performance Metrics</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="performanceMetrics" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">Auto-retraining</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="autoRetraining" class="sr-only peer">
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Notifications Panel -->
+      <div id="notifications" class="bg-white p-6 rounded-2xl shadow-lg card-hover gradient-border animate-fadeIn" style="animation-delay: 0.5s;">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-semibold text-indigo-700 flex items-center space-x-2">
+            <i class="ph ph-bell"></i>
+            <span>Developer Notifications</span>
+          </h3>
+          <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">Custom</span>
+        </div>
+        
+        <div class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+              <h4 class="font-medium text-gray-800">Training Notifications</h4>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">Training Complete</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="notifyTrainingComplete" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">Model Performance Alerts</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="notifyPerformanceAlerts" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">Resource Usage Warnings</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="notifyResourceUsage" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+            </div>
+            
+            <div class="space-y-4">
+              <h4 class="font-medium text-gray-800">System Notifications</h4>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">Deployment Status</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="notifyDeploymentStatus" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">Data Pipeline Updates</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="notifyDataPipeline" class="sr-only peer">
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">Security Alerts</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="notifySecurityAlerts" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Data Management Panel -->
+      <div id="data" class="bg-white p-6 rounded-2xl shadow-lg card-hover gradient-border animate-fadeIn" style="animation-delay: 0.6s;">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-semibold text-indigo-700 flex items-center space-x-2">
+            <i class="ph ph-database"></i>
+            <span>Data Management</span>
+          </h3>
+          <span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">Active</span>
+        </div>
+        
+        <div class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+              <h4 class="font-medium text-gray-800">Data Access</h4>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">Anonymized Patient Data</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="accessAnonymizedData" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">Synthetic Data Generation</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="syntheticData" class="sr-only peer">
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">External Datasets</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="externalDatasets" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+            </div>
+            
+            <div class="space-y-4">
+              <h4 class="font-medium text-gray-800">Data Processing</h4>
+              
+              <div>
+                <label class="block text-gray-700 text-sm font-medium mb-2">Data Validation</label>
+                <select id="dataValidation" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option>Basic</option>
+                  <option selected>Standard</option>
+                  <option>Strict</option>
+                </select>
+              </div>
+              
+              <div>
+                <label class="block text-gray-700 text-sm font-medium mb-2">Auto Preprocessing</label>
+                <select id="autoPreprocessing" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option>Manual</option>
+                  <option selected>Auto-detect</option>
+                  <option>Custom Pipeline</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <div class="border-t border-gray-200 pt-4">
+            <h4 class="font-medium text-gray-800 mb-3">Data Versioning</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">Auto-version Datasets</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="autoVersionDatasets" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-700">Data Lineage Tracking</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="dataLineage" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Integrations Panel -->
+      <div id="integrations" class="bg-white p-6 rounded-2xl shadow-lg card-hover gradient-border animate-fadeIn" style="animation-delay: 0.7s;">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-semibold text-indigo-700 flex items-center space-x-2">
+            <i class="ph ph-plug"></i>
+            <span>AI-ML Integrations</span>
+          </h3>
+          <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">8 Active</span>
+        </div>
+        
+        <div class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+              <h4 class="font-medium text-gray-800">ML Platforms</h4>
+              
+              <div class="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
+                <div class="flex items-center space-x-3">
+                  <div class="bg-blue-100 p-2 rounded-lg">
+                    <i class="ph ph-cloud-arrow-down text-blue-600"></i>
+                  </div>
+                  <div>
+                    <h5 class="font-medium">Weights & Biases</h5>
+                    <p class="text-gray-600 text-sm">Experiment Tracking</p>
+                  </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="wandb" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+              
+              <div class="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
+                <div class="flex items-center space-x-3">
+                  <div class="bg-green-100 p-2 rounded-lg">
+                    <i class="ph ph-git-fork text-green-600"></i>
+                  </div>
+                  <div>
+                    <h5 class="font-medium">MLflow</h5>
+                    <p class="text-gray-600 text-sm">Model Management</p>
+                  </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="mlflow" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+              
+              <div class="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
+                <div class="flex items-center space-x-3">
+                  <div class="bg-purple-100 p-2 rounded-lg">
+                    <i class="ph ph-shield-check text-purple-600"></i>
+                  </div>
+                  <div>
+                    <h5 class="font-medium">DVC</h5>
+                    <p class="text-gray-600 text-sm">Data Version Control</p>
+                  </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="dvc" class="sr-only peer">
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+            </div>
+            
+            <div class="space-y-4">
+              <h4 class="font-medium text-gray-800">Cloud Services</h4>
+              
+              <div class="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
+                <div class="flex items-center space-x-3">
+                  <div class="bg-red-100 p-2 rounded-lg">
+                    <i class="ph ph-google-logo text-red-600"></i>
+                  </div>
+                  <div>
+                    <h5 class="font-medium">Google Cloud AI</h5>
+                    <p class="text-gray-600 text-sm">Vertex AI Platform</p>
+                  </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="gcpAi" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+              
+              <div class="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
+                <div class="flex items-center space-x-3">
+                  <div class="bg-blue-100 p-2 rounded-lg">
+                    <i class="ph ph-cloud text-blue-600"></i>
+                  </div>
+                  <div>
+                    <h5 class="font-medium">AWS SageMaker</h5>
+                    <p class="text-gray-600 text-sm">ML Platform</p>
+                  </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="awsSagemaker" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+              
+              <div class="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
+                <div class="flex items-center space-x-3">
+                  <div class="bg-green-100 p-2 rounded-lg">
+                    <i class="ph ph-microsoft-logo text-green-600"></i>
+                  </div>
+                  <div>
+                    <h5 class="font-medium">Azure ML</h5>
+                    <p class="text-gray-600 text-sm">Machine Learning</p>
+                  </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="azureMl" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Advanced Panel -->
+      <div id="advanced" class="bg-white p-6 rounded-2xl shadow-lg card-hover gradient-border animate-fadeIn" style="animation-delay: 0.8s;">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-semibold text-indigo-700 flex items-center space-x-2">
+            <i class="ph ph-wrench"></i>
+            <span>Advanced Developer Settings</span>
+          </h3>
+          <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 rounded-full">Use with caution</span>
+        </div>
+        
+        <div class="space-y-6">
+          <div>
+            <h4 class="font-medium text-gray-800 mb-3">Developer Options</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-700">Debug Mode</span>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="debugMode" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                  </label>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-700">Verbose Logging</span>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="verboseLogging" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                  </label>
+                </div>
+              </div>
+              
+              <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-700">Experimental Features</span>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="experimentalFeatures" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                  </label>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-700">Beta ML Algorithms</span>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="betaAlgorithms" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translateX-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="border-t border-gray-200 pt-4">
+            <h4 class="font-medium text-gray-800 mb-3">System Maintenance</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button id="clearModelCache" class="p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-left">
+                <h5 class="font-medium text-gray-800">Clear Model Cache</h5>
+                <p class="text-gray-600 text-sm mt-1">Remove cached model files</p>
+              </button>
+              
+              <button id="refreshDataConnections" class="p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-left">
+                <h5 class="font-medium text-gray-800">Refresh Data Connections</h5>
+                <p class="text-gray-600 text-sm mt-1">Reconnect to data sources</p>
+              </button>
+              
+              <button id="runSystemDiagnostics" class="p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-left">
+                <h5 class="font-medium text-gray-800">System Diagnostics</h5>
+                <p class="text-gray-600 text-sm mt-1">Run comprehensive system check</p>
+              </button>
+              
+              <button id="resetDeveloperSettings" class="p-4 border border-red-300 rounded-lg hover:bg-red-50 transition text-left">
+                <h5 class="font-medium text-red-700">Reset Developer Settings</h5>
+                <p class="text-red-600 text-sm mt-1">Restore all settings to default</p>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="text-center py-6 bg-gradient-to-r from-indigo-700 to-indigo-600 text-white mt-8">
+  <div class="container mx-auto px-6">
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 mb-6">
+      <div class="flex items-center space-x-2">
+        <i class="ph ph-heartbeat text-2xl"></i>
+        <span class="font-semibold">Smart Healthcare Management System</span>
+      </div>
+      <div class="text-sm">
+        © 2025 SHMS AI Labs | All Rights Reserved
+      </div>
+      <div class="flex items-center space-x-4">
+        <a href="#" class="hover:text-indigo-200 transition">
+          <i class="ph ph-info text-xl"></i>
+        </a>
+      </div>
+    </div>
+    
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+      <div class="max-w-md text-center md:text-left">
+        <p class="text-sm">
+          Empowering healthcare through intelligent AI models and machine learning — making diagnostics accurate, predictive, and data-driven.
+        </p>
+      </div>
+
+      <div class="flex space-x-5 text-white">
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-facebook-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-twitter-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-linkedin-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-envelope text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-phone text-2xl"></i></a>
+      </div>
+    </div>
+
+    <div class="text-center text-sm text-indigo-200 mt-6 border-t border-indigo-700 pt-4">
+      © 2025 Smart Healthcare Management System | AI-ML Development Division
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Toast notification function
+  function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toastMessage');
+    const toastIcon = toast.querySelector('i');
+    
+    toastMessage.textContent = message;
+    
+    // Remove all type classes
+    toast.classList.remove('error', 'warning', 'info');
+    
+    // Add the appropriate type class
+    if (type !== 'success') {
+      toast.classList.add(type);
+    }
+    
+    // Update icon based on type
+    if (type === 'error') {
+      toastIcon.className = 'ph ph-warning-circle mr-2';
+    } else if (type === 'warning') {
+      toastIcon.className = 'ph ph-warning mr-2';
+    } else if (type === 'info') {
+      toastIcon.className = 'ph ph-info mr-2';
+    } else {
+      toastIcon.className = 'ph ph-check-circle mr-2';
+    }
+    
+    toast.classList.add('show');
+    
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 3000);
+  }
+
+  // Top menu toggle
+  const menuBtn = document.getElementById('menuBtn');
+  const menuDropdown = document.getElementById('menuDropdown');
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuDropdown.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+      menuDropdown.classList.add('hidden');
+    }
+  });
+
+  // Dropdown functionality
+  const dropdownButtons = document.querySelectorAll('.dropdownBtn');
+  let activeDropdown = null;
+
+  dropdownButtons.forEach(btn => {
+    const dropdown = btn.nextElementSibling;
+    if (!dropdown) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeDropdown && activeDropdown !== dropdown) {
+        activeDropdown.classList.remove('show');
+      }
+      if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        activeDropdown = null;
+      } else {
+        dropdown.classList.add('show');
+        activeDropdown = dropdown;
+      }
+    });
+
+    btn.addEventListener('mouseenter', () => dropdown.classList.add('show'));
+    btn.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!dropdown.matches(':hover')) {
+          dropdown.classList.remove('show');
+        }
+      }, 100);
+    });
+    
+    if (dropdown) {
+      dropdown.addEventListener('mouseleave', () => {
+        dropdown.classList.remove('show');
+        if (activeDropdown === dropdown) activeDropdown = null;
+      });
+    }
+  });
+
+  document.body.addEventListener('click', () => {
+    if (activeDropdown) {
+      activeDropdown.classList.remove('show');
+      activeDropdown = null;
+    }
+  });
+
+  // Hide/show navbar on scroll
+  let lastScroll = 0;
+  const featureNavbar = document.getElementById('featureNavbar');
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+    if (currentScroll > lastScroll && currentScroll > 100) {
+      featureNavbar.style.transform = 'translateY(-100%)';
+    } else {
+      featureNavbar.style.transform = 'translateY(0)';
+    }
+    lastScroll = currentScroll;
+  });
+
+  // Settings sidebar navigation
+  const navItems = document.querySelectorAll('.nav-item');
+  let activeNavItem = document.querySelector('.nav-item.active');
+  
+  navItems.forEach(item => {
+    // Click functionality
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      // Remove active class from all items
+      navItems.forEach(i => i.classList.remove('active'));
+      
+      // Add active class to clicked item
+      this.classList.add('active');
+      activeNavItem = this;
+      
+      // Scroll to the corresponding section
+      const targetId = this.getAttribute('href').substring(1);
+      const targetElement = document.getElementById(targetId);
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+    
+    // Enhanced hover functionality
+    item.addEventListener('mouseenter', function() {
+      // Add a temporary highlight effect
+      this.style.transform = 'translateX(5px)';
+    });
+    
+    item.addEventListener('mouseleave', function() {
+      // Remove the transform effect
+      this.style.transform = 'translateX(0)';
+    });
+  });
+
+  // Auto-update active nav item based on scroll position
+  window.addEventListener('scroll', () => {
+    const sections = document.querySelectorAll('div[id]');
+    let currentSection = '';
+    
+    sections.forEach(section => {
+      const sectionTop = section.offsetTop - 150;
+      const sectionHeight = section.clientHeight;
+      if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+        currentSection = section.getAttribute('id');
+      }
+    });
+    
+    navItems.forEach(item => {
+      item.classList.remove('active');
+      if (item.getAttribute('href') === `#${currentSection}`) {
+        item.classList.add('active');
+        activeNavItem = item;
+      }
+    });
+  });
+
+  // Save all settings button
+  document.getElementById('saveAllSettings').addEventListener('click', () => {
+    // Show saving indicator
+    const button = document.getElementById('saveAllSettings');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="ph ph-circle-notch animate-spin"></i><span>Saving...</span>';
+    button.disabled = true;
+    
+    // Simulate saving process
+    setTimeout(() => {
+      button.innerHTML = '<i class="ph ph-check"></i><span>Saved Successfully!</span>';
+      button.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+      button.classList.add('bg-green-600', 'hover:bg-green-700');
+      
+      // Show toast notification
+      showToast('All developer settings saved successfully!', 'success');
+      
+      // Reset button after a delay
+      setTimeout(() => {
+        button.innerHTML = originalText;
+        button.classList.remove('bg-green-600', 'hover:bg-green-700');
+        button.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+        button.disabled = false;
+      }, 2000);
+    }, 1500);
+  });
+
+  // Update buttons for each section
+  document.getElementById('updateAccount').addEventListener('click', function() {
+    const button = this;
+    const originalText = button.innerHTML;
+    
+    button.innerHTML = '<i class="ph ph-circle-notch animate-spin"></i><span>Updating...</span>';
+    button.disabled = true;
+    
+    setTimeout(() => {
+      button.innerHTML = '<i class="ph ph-check"></i><span>Updated!</span>';
+      button.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+      button.classList.add('bg-green-600', 'hover:bg-green-700');
+      
+      showToast('Developer profile updated successfully!', 'success');
+      
+      setTimeout(() => {
+        button.innerHTML = originalText;
+        button.classList.remove('bg-green-600', 'hover:bg-green-700');
+        button.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+        button.disabled = false;
+      }, 2000);
+    }, 1500);
+  });
+
+  // Clear Model Cache
+  document.getElementById('clearModelCache').addEventListener('click', function() {
+    const button = this;
+    const originalText = button.innerHTML;
+    
+    button.innerHTML = '<i class="ph ph-circle-notch animate-spin"></i><span>Clearing...</span>';
+    button.disabled = true;
+    
+    setTimeout(() => {
+      button.innerHTML = '<i class="ph ph-check"></i><span>Cache Cleared!</span>';
+      
+      showToast('Model cache cleared successfully!', 'success');
+      
+      setTimeout(() => {
+        button.innerHTML = originalText;
+        button.disabled = false;
+      }, 2000);
+    }, 2000);
+  });
+
+  // Refresh Data Connections
+  document.getElementById('refreshDataConnections').addEventListener('click', function() {
+    const button = this;
+    const originalText = button.innerHTML;
+    
+    button.innerHTML = '<i class="ph ph-circle-notch animate-spin"></i><span>Refreshing...</span>';
+    button.disabled = true;
+    
+    setTimeout(() => {
+      button.innerHTML = '<i class="ph ph-check"></i><span>Connections Refreshed!</span>';
+      
+      showToast('Data connections refreshed successfully!', 'success');
+      
+      setTimeout(() => {
+        button.innerHTML = originalText;
+        button.disabled = false;
+      }, 2000);
+    }, 2500);
+  });
+
+  // Run System Diagnostics
+  document.getElementById('runSystemDiagnostics').addEventListener('click', function() {
+    const button = this;
+    const originalText = button.innerHTML;
+    
+    button.innerHTML = '<i class="ph ph-circle-notch animate-spin"></i><span>Running...</span>';
+    button.disabled = true;
+    
+    setTimeout(() => {
+      button.innerHTML = '<i class="ph ph-check"></i><span>Diagnostics Complete!</span>';
+      
+      showToast('System diagnostics completed successfully!', 'success');
+      
+      setTimeout(() => {
+        button.innerHTML = originalText;
+        button.disabled = false;
+      }, 2000);
+    }, 4000);
+  });
+
+  // Reset Developer Settings Button
+  document.getElementById('resetDeveloperSettings').addEventListener('click', function() {
+    const resetConfirmed = confirm('Are you sure you want to reset all developer settings to default? This action cannot be undone.');
+    
+    if (resetConfirmed) {
+      const button = this;
+      const originalText = button.innerHTML;
+      
+      button.innerHTML = '<i class="ph ph-circle-notch animate-spin"></i><span>Resetting...</span>';
+      button.disabled = true;
+      
+      // Reset settings to default values
+      // This would be more comprehensive in a real application
+      
+      setTimeout(() => {
+        button.innerHTML = '<i class="ph ph-check"></i><span>Settings Reset!</span>';
+        
+        showToast('All developer settings have been reset to default values!', 'success');
+        
+        setTimeout(() => {
+          button.innerHTML = originalText;
+          button.disabled = false;
+        }, 2000);
+      }, 3000);
+    } else {
+      showToast('Settings reset cancelled', 'info');
+    }
+  });
+
+  // Toggle switches functionality
+  const toggleSwitches = document.querySelectorAll('input[type="checkbox"]');
+  toggleSwitches.forEach(switchElement => {
+    switchElement.addEventListener('change', function() {
+      const settingName = this.id.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+      const status = this.checked ? 'enabled' : 'disabled';
+      
+      showToast(`${settingName} ${status}`, 'info');
+    });
+  });
+
+  // Select dropdowns functionality
+  const selectElements = document.querySelectorAll('select');
+  selectElements.forEach(selectElement => {
+    selectElement.addEventListener('change', function() {
+      const settingName = this.id.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+      const value = this.options[this.selectedIndex].text;
+      
+      showToast(`${settingName} updated to: ${value}`, 'info');
+    });
+  });
+
+  // Input fields functionality
+  const inputElements = document.querySelectorAll('input[type="number"], input[type="text"]');
+  inputElements.forEach(inputElement => {
+    inputElement.addEventListener('change', function() {
+      const settingName = this.id.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+      const value = this.value;
+      
+      showToast(`${settingName} updated to: ${value}`, 'info');
+    });
+  });
+
+  // Radio buttons functionality
+  const radioButtons = document.querySelectorAll('input[type="radio"]');
+  radioButtons.forEach(radio => {
+    radio.addEventListener('change', function() {
+      if (this.checked) {
+        const settingName = this.name.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+        const value = this.nextElementSibling.textContent;
+        
+        showToast(`${settingName} set to: ${value}`, 'info');
+      }
+    });
+  });
+
+  // Checkbox groups functionality
+  const frameworkCheckboxes = document.querySelectorAll('input[name="frameworks"]');
+  frameworkCheckboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+      const frameworkName = this.nextElementSibling.textContent;
+      const status = this.checked ? 'enabled' : 'disabled';
+      
+      showToast(`${frameworkName} framework ${status}`, 'info');
+    });
+  });
+</script>
+</body>
+</html>

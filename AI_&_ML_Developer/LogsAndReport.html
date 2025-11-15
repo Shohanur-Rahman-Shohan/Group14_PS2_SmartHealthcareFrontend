@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logs & Reports | SHMS Reports</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  .animate-fadeIn { animation: fadeIn 0.6s ease-out forwards; }
+  .animate-slideUp { animation: slideUp 0.7s ease-out forwards; }
+  .animate-pulse-slow { animation: pulse 3s ease-in-out infinite; }
+
+  .dropdownContent {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none;
+    position: absolute;
+    z-index: 50;
+    left: 0;
+  }
+  .dropdownContent.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .card-hover {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  .stat-number {
+    font-feature-settings: 'tnum';
+    font-variant-numeric: tabular-nums;
+  }
+  .gradient-border {
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899) border-box;
+    border: 2px solid transparent;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #f1f1f1; }
+  ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: #4f46e5; }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Chart containers */
+  .chart-container { position: relative; height: 300px; }
+  
+  /* Progress bars */
+  .progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e5e7eb;
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease-in-out;
+  }
+  
+  /* Status indicators */
+  .status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+  
+  .status-active { background-color: #10b981; }
+  .status-processing { background-color: #f59e0b; }
+  .status-error { background-color: #ef4444; }
+  .status-idle { background-color: #6b7280; }
+
+  /* Log levels */
+  .log-info { background-color: #3b82f6; color: white; }
+  .log-warning { background-color: #f59e0b; color: white; }
+  .log-error { background-color: #ef4444; color: white; }
+  .log-critical { background-color: #7c2d12; color: white; }
+  .log-debug { background-color: #6b7280; color: white; }
+
+  /* Form styles */
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  .form-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  
+  .form-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  }
+
+  /* Tabs */
+  .tab-container {
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .tab-button {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .tab-button.active {
+    color: #6366f1;
+    border-bottom-color: #6366f1;
+  }
+  
+  .tab-button:hover:not(.active) {
+    color: #374151;
+    border-bottom-color: #d1d5db;
+  }
+  
+  .tab-content {
+    display: none;
+  }
+  
+  .tab-content.active {
+    display: block;
+  }
+
+  /* Data table styles */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .data-table th {
+    background-color: #f9fafb;
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .data-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .data-table tr:hover {
+    background-color: #f9fafb;
+  }
+
+  /* Log entry styling */
+  .log-entry {
+    font-family: monospace;
+    font-size: 0.875rem;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .log-entry-info { background-color: #dbeafe; }
+  .log-entry-warning { background-color: #fef3c7; }
+  .log-entry-error { background-color: #fee2e2; }
+  .log-entry-critical { background-color: #fecaca; }
+  .log-entry-debug { background-color: #f3f4f6; }
+
+  /* Report card styles */
+  .report-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    transition: all 0.3s;
+  }
+  
+  .report-card:hover {
+    border-color: #6366f1;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen flex flex-col">
+
+<!-- Top Navbar -->
+<nav class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+  <h1 class="text-2xl font-bold tracking-wide flex items-center space-x-2">
+    <i class="ph ph-heartbeat text-3xl"></i>
+    <span>SHMS</span>
+  </h1>
+
+  <span class="text-xl font-bold flex items-center space-x-2">
+    <i class="ph ph-code"></i>
+    <span>AI-ML Developer</span>
+  </span>
+
+  <div class="relative flex items-center space-x-2">
+    
+    <!-- Notification Button -->
+    <a href="Notification.html" class="relative p-2 rounded-full hover:bg-indigo-600 focus:outline-none">
+      <i class="ph ph-bell text-xl"></i>
+      <!-- Notification badge -->
+      <span id="notificationBadge" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+        5
+      </span>
+    </a>
+
+    <!-- Three-dot menu -->
+    <div class="relative">
+      <button id="menuBtn" class="text-white text-2xl focus:outline-none hover:bg-indigo-600 rounded-full p-2 transition" aria-label="Menu">
+        <i class="ph ph-dots-three-vertical"></i>
+      </button>
+      <div id="menuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded-md shadow-lg z-50">
+        <a href="Profile.html" class="block px-4 py-2 hover:bg-indigo-100 rounded-t-md flex items-center space-x-2">
+          <i class="ph ph-user"></i>
+          <span>Profile</span>
+        </a>
+        <a href="Setting.html" class="block px-4 py-2 hover:bg-indigo-100 flex items-center space-x-2">
+          <i class="ph ph-gear"></i>
+          <span>Settings</span>
+        </a>
+        <a href="../Login.html" class="block px-4 py-2 hover:bg-indigo-100 text-red-600 rounded-b-md flex items-center space-x-2">
+          <i class="ph ph-sign-out"></i>
+          <span>Logout</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Feature Navbar -->
+<nav id="featureNavbar" class="bg-indigo-800 text-white shadow-md sticky top-0 z-40 transition-transform duration-300" style="top: 64px;">
+  <div class="container mx-auto flex flex-wrap justify-center md:justify-start items-center px-4 py-2 space-x-2">
+
+    <div class="relative">
+      <a href="Home.html" class="px-5 py-2 rounded-md hover:bg-indigo-700 block transition">Home</a>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">AI Model Management</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="TrainRetrainModel.html" class="block px-4 py-2 hover:bg-indigo-100">Train / Retrain Models</a>
+        <a href="ModelVersionControl.html" class="block px-4 py-2 hover:bg-indigo-100">Model Version Control</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Data & Pipeline</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="DataManagement.html" class="block px-4 py-2 hover:bg-indigo-100">Data Management</a>
+        <a href="PipelineHealth.html" class="block px-4 py-2 hover:bg-indigo-100">Pipeline Health & Quality</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Monitoring & Analytics</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="PredictionsDashboard.html" class="block px-4 py-2 hover:bg-indigo-100">Predictions Dashboard</a>
+        <a href="RealtimePerformance.html" class="block px-4 py-2 hover:bg-indigo-100">Real-Time Performance</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">System Administration</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="SystemMonitor.html" class="block px-4 py-2 hover:bg-indigo-100">System Monitor</a>
+        <a href="ApiManagement.html" class="block px-4 py-2 hover:bg-indigo-100">API Management</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Verification Tools</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="cvVerification.html" class="block px-4 py-2 hover:bg-indigo-100">CV Verification</a>
+        <a href="DegreeVerification.html" class="block px-4 py-2 hover:bg-indigo-100">Degree Verification</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md bg-indigo-600 font-semibold dropdownBtn transition">Reports</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="AiSystemReport.html" class="block px-4 py-2 hover:bg-indigo-100">AI System Report</a>
+        <a href="LogsAndReport.html" class="block px-4 py-2 hover:bg-indigo-100">Logs & Reports</a>
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+<!-- Current Time Display -->
+<div class="container mx-auto px-6 pt-4">
+  <div class="bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-md p-4 flex justify-between items-center transition-colors duration-300">
+    <div class="flex items-center space-x-4">
+      <div class="bg-blue-100 p-3 rounded-full">
+        <i class="ph ph-file-text text-blue-700 text-2xl"></i>
+      </div>
+      <div>
+        <p class="text-sm text-white/80">Current Date & Time</p>
+        <p id="currentDateTime" class="text-lg font-semibold text-white"></p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2">
+      <span class="relative flex h-3 w-3">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+      </span>
+      <span class="text-sm font-medium text-white/90">Logging System Active</span>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<main class="flex-grow container mx-auto px-6 py-8">
+  <!-- Welcome Section -->
+  <div class="mb-10 animate-fadeIn">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">Logs & Reports</h1>
+    <p class="text-gray-600">Comprehensive system logging, audit trails, and automated report generation.</p>
+  </div>
+
+  <!-- Logs & Reports Overview Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+    <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.1s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-blue-100 text-sm">Log Entries Today</p>
+          <h3 class="text-2xl font-bold stat-number">12,458</h3>
+        </div>
+        <div class="bg-blue-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-file-text text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-blue-100">
+          <i class="ph ph-arrow-up mr-1"></i>
+          <span>8% increase from yesterday</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.2s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-green-100 text-sm">Error Rate</p>
+          <h3 class="text-2xl font-bold stat-number">0.42%</h3>
+        </div>
+        <div class="bg-green-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-warning-circle text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-green-100">
+          <i class="ph ph-arrow-down mr-1"></i>
+          <span>0.15% decrease from last week</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.3s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-purple-100 text-sm">Active Reports</p>
+          <h3 class="text-2xl font-bold stat-number">24</h3>
+        </div>
+        <div class="bg-purple-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-chart-line text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-purple-100">
+          <i class="ph ph-arrow-up mr-1"></i>
+          <span>3 new reports this week</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.4s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-orange-100 text-sm">Storage Used</p>
+          <h3 class="text-2xl font-bold stat-number">42%</h3>
+        </div>
+        <div class="bg-orange-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-hard-drives text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-orange-100">
+          <i class="ph ph-info mr-1"></i>
+          <span>1.2TB of 2.8TB used</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs for Logs & Reports -->
+  <div class="bg-white rounded-xl shadow-md mb-10 animate-fadeIn">
+    <div class="tab-container">
+      <div class="flex overflow-x-auto">
+        <button class="tab-button active" data-tab="system-logs">System Logs</button>
+        <button class="tab-button" data-tab="audit-logs">Audit Logs</button>
+        <button class="tab-button" data-tab="error-reports">Error Reports</button>
+        <button class="tab-button" data-tab="performance-reports">Performance Reports</button>
+        <button class="tab-button" data-tab="custom-reports">Custom Reports</button>
+      </div>
+    </div>
+
+    <!-- System Logs Tab -->
+    <div id="system-logs" class="tab-content active p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">System Logs</h2>
+        <div class="flex space-x-3">
+          <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 py-2 px-4 rounded-md flex items-center space-x-2">
+            <i class="ph ph-funnel"></i>
+            <span>Filter</span>
+          </button>
+          <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 py-2 px-4 rounded-md flex items-center space-x-2">
+            <i class="ph ph-magnifying-glass"></i>
+            <span>Search</span>
+          </button>
+          <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center space-x-2">
+            <i class="ph ph-export"></i>
+            <span>Export</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Log Level Filter -->
+      <div class="flex flex-wrap gap-2 mb-6">
+        <button class="text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-md">All</button>
+        <button class="text-sm text-gray-500 px-3 py-1 rounded-md hover:bg-gray-100">Info</button>
+        <button class="text-sm text-gray-500 px-3 py-1 rounded-md hover:bg-gray-100">Warning</button>
+        <button class="text-sm text-gray-500 px-3 py-1 rounded-md hover:bg-gray-100">Error</button>
+        <button class="text-sm text-gray-500 px-3 py-1 rounded-md hover:bg-gray-100">Critical</button>
+        <button class="text-sm text-gray-500 px-3 py-1 rounded-md hover:bg-gray-100">Debug</button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Level</th>
+              <th>Module</th>
+              <th>Message</th>
+              <th>User</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="font-medium text-gray-900">2024-03-15 14:32:15</td>
+              <td><span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">INFO</span></td>
+              <td>API Gateway</td>
+              <td class="max-w-md truncate">Successfully processed prediction request for patient P-7842</td>
+              <td>system</td>
+              <td>
+                <div class="flex space-x-2">
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-eye"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium text-gray-900">2024-03-15 14:31:42</td>
+              <td><span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">WARN</span></td>
+              <td>Model Server</td>
+              <td class="max-w-md truncate">High memory usage detected in diabetes prediction model</td>
+              <td>system</td>
+              <td>
+                <div class="flex space-x-2">
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-eye"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium text-gray-900">2024-03-15 14:30:18</td>
+              <td><span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">ERROR</span></td>
+              <td>Database</td>
+              <td class="max-w-md truncate">Connection timeout when querying patient records</td>
+              <td>system</td>
+              <td>
+                <div class="flex space-x-2">
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-eye"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium text-gray-900">2024-03-15 14:29:55</td>
+              <td><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">INFO</span></td>
+              <td>Authentication</td>
+              <td class="max-w-md truncate">User admin successfully logged in from IP 192.168.1.45</td>
+              <td>admin</td>
+              <td>
+                <div class="flex space-x-2">
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-eye"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium text-gray-900">2024-03-15 14:28:33</td>
+              <td><span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">CRITICAL</span></td>
+              <td>Heart Disease Model</td>
+              <td class="max-w-md truncate">Model inference failed due to corrupted input data</td>
+              <td>system</td>
+              <td>
+                <div class="flex space-x-2">
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-eye"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="flex justify-between items-center mt-6">
+        <div class="text-sm text-gray-700">
+          Showing 1 to 5 of 12,458 log entries
+        </div>
+        <div class="flex space-x-2">
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+            Previous
+          </button>
+          <button class="px-3 py-1 bg-indigo-600 text-white rounded-md">
+            1
+          </button>
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+            2
+          </button>
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+            3
+          </button>
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audit Logs Tab -->
+    <div id="audit-logs" class="tab-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Audit Logs</h2>
+        <div class="flex space-x-3">
+          <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 py-2 px-4 rounded-md flex items-center space-x-2">
+            <i class="ph ph-funnel"></i>
+            <span>Filter</span>
+          </button>
+          <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 py-2 px-4 rounded-md flex items-center space-x-2">
+            <i class="ph ph-magnifying-glass"></i>
+            <span>Search</span>
+          </button>
+          <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center space-x-2">
+            <i class="ph ph-export"></i>
+            <span>Export</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>User</th>
+              <th>Action</th>
+              <th>Resource</th>
+              <th>Details</th>
+              <th>IP Address</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="font-medium text-gray-900">2024-03-15 14:32:15</td>
+              <td>admin</td>
+              <td>LOGIN</td>
+              <td>Authentication System</td>
+              <td class="max-w-md truncate">User logged in successfully</td>
+              <td>192.168.1.45</td>
+              <td><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">SUCCESS</span></td>
+            </tr>
+            <tr>
+              <td class="font-medium text-gray-900">2024-03-15 14:30:42</td>
+              <td>ml_engineer</td>
+              <td>UPDATE</td>
+              <td>Diabetes Model</td>
+              <td class="max-w-md truncate">Model parameters updated</td>
+              <td>10.0.0.23</td>
+              <td><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">SUCCESS</span></td>
+            </tr>
+            <tr>
+              <td class="font-medium text-gray-900">2024-03-15 14:29:18</td>
+              <td>data_scientist</td>
+              <td>DELETE</td>
+              <td>Patient Dataset</td>
+              <td class="max-w-md truncate">Dataset P-2024-Q1 deleted</td>
+              <td>10.0.0.42</td>
+              <td><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">SUCCESS</span></td>
+            </tr>
+            <tr>
+              <td class="font-medium text-gray-900">2024-03-15 14:27:55</td>
+              <td>analyst</td>
+              <td>ACCESS</td>
+              <td>Prediction Results</td>
+              <td class="max-w-md truncate">Accessed high-risk prediction reports</td>
+              <td>192.168.1.67</td>
+              <td><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">SUCCESS</span></td>
+            </tr>
+            <tr>
+              <td class="font-medium text-gray-900">2024-03-15 14:26:33</td>
+              <td>external_user</td>
+              <td>LOGIN</td>
+              <td>Authentication System</td>
+              <td class="max-w-md truncate">Failed login attempt - invalid credentials</td>
+              <td>203.0.113.12</td>
+              <td><span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">FAILED</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="flex justify-between items-center mt-6">
+        <div class="text-sm text-gray-700">
+          Showing 1 to 5 of 3,247 audit entries
+        </div>
+        <div class="flex space-x-2">
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+            Previous
+          </button>
+          <button class="px-3 py-1 bg-indigo-600 text-white rounded-md">
+            1
+          </button>
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+            2
+          </button>
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+            3
+          </button>
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Reports Tab -->
+    <div id="error-reports" class="tab-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Error Reports</h2>
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center space-x-2">
+          <i class="ph ph-export"></i>
+          <span>Generate Report</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Error Trends -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Error Trends</h3>
+          <div class="chart-container">
+            <canvas id="errorTrendsChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Error Distribution -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Error Distribution</h3>
+          <div class="chart-container">
+            <canvas id="errorDistributionChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Error Sources -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Top Error Sources</h3>
+        <div class="space-y-4">
+          <div>
+            <div class="flex justify-between mb-1">
+              <span class="text-sm font-medium text-gray-700">Database Connection</span>
+              <span class="text-sm font-medium text-gray-700">42%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-red-500" style="width: 42%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between mb-1">
+              <span class="text-sm font-medium text-gray-700">Model Inference</span>
+              <span class="text-sm font-medium text-gray-700">28%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-yellow-500" style="width: 28%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between mb-1">
+              <span class="text-sm font-medium text-gray-700">API Gateway</span>
+              <span class="text-sm font-medium text-gray-700">18%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-blue-500" style="width: 18%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between mb-1">
+              <span class="text-sm font-medium text-gray-700">Authentication</span>
+              <span class="text-sm font-medium text-gray-700">12%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-purple-500" style="width: 12%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Performance Reports Tab -->
+    <div id="performance-reports" class="tab-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Performance Reports</h2>
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center space-x-2">
+          <i class="ph ph-export"></i>
+          <span>Generate Report</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- System Performance -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">System Performance</h3>
+          <div class="chart-container">
+            <canvas id="systemPerformanceChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Response Time Analysis -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Response Time Analysis</h3>
+          <div class="chart-container">
+            <canvas id="responseTimeChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Performance Metrics -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Performance Metrics</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="text-center p-4 border border-gray-200 rounded-lg">
+            <div class="text-2xl font-bold text-green-600">99.97%</div>
+            <div class="text-sm text-gray-600">Uptime</div>
+          </div>
+          <div class="text-center p-4 border border-gray-200 rounded-lg">
+            <div class="text-2xl font-bold text-blue-600">142 ms</div>
+            <div class="text-sm text-gray-600">Avg. Response Time</div>
+          </div>
+          <div class="text-center p-4 border border-gray-200 rounded-lg">
+            <div class="text-2xl font-bold text-purple-600">2,458</div>
+            <div class="text-sm text-gray-600">Requests/Min</div>
+          </div>
+          <div class="text-center p-4 border border-gray-200 rounded-lg">
+            <div class="text-2xl font-bold text-orange-600">0.42%</div>
+            <div class="text-sm text-gray-600">Error Rate</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Reports Tab -->
+    <div id="custom-reports" class="tab-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Custom Reports</h2>
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center space-x-2">
+          <i class="ph ph-plus"></i>
+          <span>Create Report</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Report Templates -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Report Templates</h3>
+          <div class="space-y-4">
+            <div class="report-card">
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="font-medium text-gray-800">Daily System Health</h4>
+                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Active</span>
+              </div>
+              <p class="text-sm text-gray-600 mb-3">Comprehensive daily overview of system performance and health metrics.</p>
+              <div class="flex justify-between text-xs text-gray-500">
+                <span>Last run: Today, 06:00</span>
+                <span>PDF, Excel</span>
+              </div>
+            </div>
+
+            <div class="report-card">
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="font-medium text-gray-800">Weekly Error Analysis</h4>
+                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Active</span>
+              </div>
+              <p class="text-sm text-gray-600 mb-3">Detailed analysis of system errors and trends over the past week.</p>
+              <div class="flex justify-between text-xs text-gray-500">
+                <span>Last run: Monday, 08:00</span>
+                <span>PDF, Excel</span>
+              </div>
+            </div>
+
+            <div class="report-card">
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="font-medium text-gray-800">Monthly Performance</h4>
+                <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Draft</span>
+              </div>
+              <p class="text-sm text-gray-600 mb-3">Comprehensive monthly performance report for stakeholders.</p>
+              <div class="flex justify-between text-xs text-gray-500">
+                <span>Last run: Never</span>
+                <span>PDF</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Create New Report -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Create New Report</h3>
+          <form>
+            <div class="form-group">
+              <label class="form-label" for="reportName">Report Name</label>
+              <input type="text" id="reportName" class="form-input" placeholder="Enter report name">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="reportDescription">Description</label>
+              <textarea id="reportDescription" class="form-input" rows="3" placeholder="Enter report description"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Report Type</label>
+              <div class="grid grid-cols-2 gap-4">
+                <div class="flex items-center">
+                  <input type="radio" id="daily" name="reportType" class="text-indigo-600">
+                  <label for="daily" class="ml-2 text-sm text-gray-700">Daily</label>
+                </div>
+                <div class="flex items-center">
+                  <input type="radio" id="weekly" name="reportType" class="text-indigo-600">
+                  <label for="weekly" class="ml-2 text-sm text-gray-700">Weekly</label>
+                </div>
+                <div class="flex items-center">
+                  <input type="radio" id="monthly" name="reportType" class="text-indigo-600">
+                  <label for="monthly" class="ml-2 text-sm text-gray-700">Monthly</label>
+                </div>
+                <div class="flex items-center">
+                  <input type="radio" id="custom" name="reportType" class="text-indigo-600">
+                  <label for="custom" class="ml-2 text-sm text-gray-700">Custom</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Output Format</label>
+              <div class="flex space-x-4">
+                <div class="flex items-center">
+                  <input type="checkbox" id="formatPdf" class="rounded text-indigo-600">
+                  <label for="formatPdf" class="ml-2 text-sm text-gray-700">PDF</label>
+                </div>
+                <div class="flex items-center">
+                  <input type="checkbox" id="formatExcel" class="rounded text-indigo-600">
+                  <label for="formatExcel" class="ml-2 text-sm text-gray-700">Excel</label>
+                </div>
+                <div class="flex items-center">
+                  <input type="checkbox" id="formatCsv" class="rounded text-indigo-600">
+                  <label for="formatCsv" class="ml-2 text-sm text-gray-700">CSV</label>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md">
+              Create Report Template
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Scheduled Reports -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Scheduled Reports</h3>
+        <div class="overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Report Name</th>
+                <th>Schedule</th>
+                <th>Last Run</th>
+                <th>Next Run</th>
+                <th>Recipients</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-medium text-gray-900">Daily System Health</td>
+                <td>Daily at 06:00</td>
+                <td>2024-03-15 06:00</td>
+                <td>2024-03-16 06:00</td>
+                <td>5 recipients</td>
+                <td><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Active</span></td>
+                <td>
+                  <div class="flex space-x-2">
+                    <button class="text-indigo-600 hover:text-indigo-900">
+                      <i class="ph ph-pencil"></i>
+                    </button>
+                    <button class="text-red-600 hover:text-red-900">
+                      <i class="ph ph-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="font-medium text-gray-900">Weekly Error Analysis</td>
+                <td>Weekly on Monday</td>
+                <td>2024-03-11 08:00</td>
+                <td>2024-03-18 08:00</td>
+                <td>8 recipients</td>
+                <td><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Active</span></td>
+                <td>
+                  <div class="flex space-x-2">
+                    <button class="text-indigo-600 hover:text-indigo-900">
+                      <i class="ph ph-pencil"></i>
+                    </button>
+                    <button class="text-red-600 hover:text-red-900">
+                      <i class="ph ph-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="font-medium text-gray-900">Monthly Performance</td>
+                <td>Monthly on 1st</td>
+                <td>2024-03-01 09:00</td>
+                <td>2024-04-01 09:00</td>
+                <td>12 recipients</td>
+                <td><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Active</span></td>
+                <td>
+                  <div class="flex space-x-2">
+                    <button class="text-indigo-600 hover:text-indigo-900">
+                      <i class="ph ph-pencil"></i>
+                    </button>
+                    <button class="text-red-600 hover:text-red-900">
+                      <i class="ph ph-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Critical Events -->
+  <div class="bg-white rounded-xl shadow-md p-6 animate-fadeIn">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl font-bold text-gray-800">Recent Critical Events</h2>
+      <button class="text-sm bg-indigo-600 text-white px-4 py-2 rounded-md flex items-center">
+        <i class="ph ph-bell-ringing mr-1"></i>
+        <span>Alert Settings</span>
+      </button>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="border border-red-200 rounded-lg p-4 bg-red-50">
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex items-center">
+            <div class="bg-red-100 p-2 rounded-full mr-3">
+              <i class="ph ph-warning text-red-600"></i>
+            </div>
+            <h3 class="font-semibold text-red-800">Database Connection</h3>
+          </div>
+          <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">Critical</span>
+        </div>
+        <p class="text-sm text-red-700 mb-2">Primary database connection failed. System switched to backup.</p>
+        <p class="text-xs text-red-600">Detected: 2 hours ago</p>
+      </div>
+      
+      <div class="border border-yellow-200 rounded-lg p-4 bg-yellow-50">
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex items-center">
+            <div class="bg-yellow-100 p-2 rounded-full mr-3">
+              <i class="ph ph-warning text-yellow-600"></i>
+            </div>
+            <h3 class="font-semibold text-yellow-800">High Memory Usage</h3>
+          </div>
+          <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Warning</span>
+        </div>
+        <p class="text-sm text-yellow-700 mb-2">Diabetes model using 85% of allocated memory.</p>
+        <p class="text-xs text-yellow-600">Detected: 5 hours ago</p>
+      </div>
+      
+      <div class="border border-blue-200 rounded-lg p-4 bg-blue-50">
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex items-center">
+            <div class="bg-blue-100 p-2 rounded-full mr-3">
+              <i class="ph ph-info text-blue-600"></i>
+            </div>
+            <h3 class="font-semibold text-blue-800">Failed Login Attempts</h3>
+          </div>
+          <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Info</span>
+        </div>
+        <p class="text-sm text-blue-700 mb-2">15 failed login attempts from IP 203.0.113.12.</p>
+        <p class="text-xs text-blue-600">Detected: 1 day ago</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="text-center py-6 bg-gradient-to-r from-indigo-700 to-indigo-600 text-white">
+  <div class="container mx-auto px-6">
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 mb-6">
+      <div class="flex items-center space-x-2">
+        <i class="ph ph-heartbeat text-2xl"></i>
+        <span class="font-semibold">Smart Healthcare Management System</span>
+      </div>
+      <div class="text-sm">
+        © 2025 SHMS | Reports Dashboard
+      </div>
+      <div class="flex items-center space-x-4">
+        <a href="#" class="hover:text-indigo-200 transition">
+          <i class="ph ph-info text-xl"></i>
+        </a>
+      </div>
+    </div>
+    
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+      <div class="max-w-md text-center md:text-left">
+        <p class="text-sm">
+          Comprehensive logging, monitoring, and reporting for SHMS healthcare AI infrastructure.
+        </p>
+      </div>
+
+      <div class="flex space-x-5 text-white">
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-facebook-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-twitter-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-linkedin-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-envelope text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-phone text-2xl"></i></a>
+      </div>
+    </div>
+
+    <div class="text-center text-sm text-indigo-200 mt-6 border-t border-indigo-700 pt-4">
+      © 2025 Smart Healthcare Management System | Reports Interface
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Update current date and time
+  function updateDateTime() {
+    const now = new Date();
+    const options = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    };
+    document.getElementById('currentDateTime').textContent = now.toLocaleDateString('en-US', options);
+  }
+  updateDateTime();
+  setInterval(updateDateTime, 1000);
+
+  // Top menu toggle
+  const menuBtn = document.getElementById('menuBtn');
+  const menuDropdown = document.getElementById('menuDropdown');
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuDropdown.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+      menuDropdown.classList.add('hidden');
+    }
+  });
+
+  // Dropdown functionality
+  const dropdownButtons = document.querySelectorAll('.dropdownBtn');
+  let activeDropdown = null;
+
+  dropdownButtons.forEach(btn => {
+    const dropdown = btn.nextElementSibling;
+    if (!dropdown) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeDropdown && activeDropdown !== dropdown) {
+        activeDropdown.classList.remove('show');
+      }
+      if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        activeDropdown = null;
+      } else {
+        dropdown.classList.add('show');
+        activeDropdown = dropdown;
+      }
+    });
+
+    btn.addEventListener('mouseenter', () => dropdown.classList.add('show'));
+    btn.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!dropdown.matches(':hover')) {
+          dropdown.classList.remove('show');
+        }
+      }, 100);
+    });
+    
+    if (dropdown) {
+      dropdown.addEventListener('mouseleave', () => {
+        dropdown.classList.remove('show');
+        if (activeDropdown === dropdown) activeDropdown = null;
+      });
+    }
+  });
+
+  document.body.addEventListener('click', () => {
+    if (activeDropdown) {
+      activeDropdown.classList.remove('show');
+      activeDropdown = null;
+    }
+  });
+
+  // Hide/show navbar on scroll
+  let lastScroll = 0;
+  const featureNavbar = document.getElementById('featureNavbar');
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+    if (currentScroll > lastScroll && currentScroll > 100) {
+      featureNavbar.style.transform = 'translateY(-100%)';
+    } else {
+      featureNavbar.style.transform = 'translateY(0)';
+    }
+    lastScroll = currentScroll;
+  });
+
+  // Tab functionality
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      // Remove active class from all buttons and contents
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      tabContents.forEach(content => content.classList.remove('active'));
+      
+      // Add active class to clicked button
+      button.classList.add('active');
+      
+      // Show corresponding content
+      const tabId = button.getAttribute('data-tab');
+      document.getElementById(tabId).classList.add('active');
+    });
+  });
+
+  // Animate numbers on scroll
+  const animateValue = (element, start, end, duration) => {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const value = Math.floor(progress * (end - start) + start);
+      element.textContent = value.toLocaleString();
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+    window.requestAnimationFrame(step);
+  };
+
+  // Observe stats for animation
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const statNumber = entry.target;
+        const targetValue = parseInt(statNumber.textContent.replace(/,/g, ''));
+        animateValue(statNumber, 0, targetValue, 1500);
+        observer.unobserve(statNumber);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('.stat-number').forEach(stat => {
+    observer.observe(stat);
+  });
+
+  // Chart.js configurations
+  const chartColors = {
+    primary: '#6366F1',
+    secondary: '#8B5CF6',
+    success: '#10B981',
+    warning: '#F59E0B',
+    danger: '#EF4444',
+    info: '#3B82F6'
+  };
+
+  // Initialize Charts
+  document.addEventListener('DOMContentLoaded', function() {
+    // Error Trends Chart
+    const errorTrendsCtx = document.getElementById('errorTrendsChart').getContext('2d');
+    const errorTrendsChart = new Chart(errorTrendsCtx, {
+      type: 'line',
+      data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{
+          label: 'Total Errors',
+          data: [65, 59, 80, 81, 56, 55, 52],
+          borderColor: 'rgb(239, 68, 68)',
+          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          tension: 0.3,
+          fill: true
+        }, {
+          label: 'Critical Errors',
+          data: [12, 15, 8, 10, 5, 3, 7],
+          borderColor: 'rgb(124, 45, 18)',
+          backgroundColor: 'rgba(124, 45, 18, 0.1)',
+          tension: 0.3,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+
+    // Error Distribution Chart
+    const errorDistributionCtx = document.getElementById('errorDistributionChart').getContext('2d');
+    const errorDistributionChart = new Chart(errorDistributionCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Database', 'Model Inference', 'API Gateway', 'Authentication', 'Other'],
+        datasets: [{
+          data: [42, 28, 18, 8, 4],
+          backgroundColor: [
+            'rgba(239, 68, 68, 0.7)',
+            'rgba(245, 158, 11, 0.7)',
+            'rgba(59, 130, 246, 0.7)',
+            'rgba(139, 92, 246, 0.7)',
+            'rgba(107, 114, 128, 0.7)'
+          ],
+          borderColor: [
+            'rgb(239, 68, 68)',
+            'rgb(245, 158, 11)',
+            'rgb(59, 130, 246)',
+            'rgb(139, 92, 246)',
+            'rgb(107, 114, 128)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+          }
+        }
+      }
+    });
+
+    // System Performance Chart
+    const systemPerformanceCtx = document.getElementById('systemPerformanceChart').getContext('2d');
+    const systemPerformanceChart = new Chart(systemPerformanceCtx, {
+      type: 'line',
+      data: {
+        labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+        datasets: [{
+          label: 'CPU Usage',
+          data: [45, 52, 38, 24, 33, 28],
+          borderColor: 'rgb(99, 102, 241)',
+          backgroundColor: 'rgba(99, 102, 241, 0.1)',
+          tension: 0.3,
+          fill: true
+        }, {
+          label: 'Memory Usage',
+          data: [65, 59, 80, 81, 56, 55],
+          borderColor: 'rgb(16, 185, 129)',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          tension: 0.3,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            ticks: {
+              callback: function(value) {
+                return value + '%';
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Response Time Chart
+    const responseTimeCtx = document.getElementById('responseTimeChart').getContext('2d');
+    const responseTimeChart = new Chart(responseTimeCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Heart Disease', 'Diabetes', 'Cancer', 'Patient Data', 'Model Status'],
+        datasets: [{
+          label: 'Response Time (ms)',
+          data: [128, 142, 245, 98, 312],
+          backgroundColor: [
+            'rgba(99, 102, 241, 0.7)',
+            'rgba(139, 92, 246, 0.7)',
+            'rgba(236, 72, 153, 0.7)',
+            'rgba(16, 185, 129, 0.7)',
+            'rgba(245, 158, 11, 0.7)'
+          ],
+          borderColor: [
+            'rgb(99, 102, 241)',
+            'rgb(139, 92, 246)',
+            'rgb(236, 72, 153)',
+            'rgb(16, 185, 129)',
+            'rgb(245, 158, 11)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  });
+
+  // Add hover effect to dashboard cards
+  const dashboardCards = document.querySelectorAll('.card-hover');
+  dashboardCards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transition = 'all 0.3s ease';
+    });
+  });
+
+  // Simulate log updates
+  function simulateLogUpdates() {
+    const logsTable = document.querySelector('#system-logs .data-table tbody');
+    if (!logsTable) return;
+    
+    const levels = ['INFO', 'WARN', 'ERROR', 'CRITICAL'];
+    const modules = ['API Gateway', 'Model Server', 'Database', 'Authentication', 'Scheduler'];
+    const messages = [
+      'Successfully processed prediction request',
+      'High memory usage detected',
+      'Connection timeout when querying records',
+      'User authentication successful',
+      'Scheduled task completed',
+      'Model inference started',
+      'Data validation failed',
+      'Cache cleared successfully'
+    ];
+    
+    const level = levels[Math.floor(Math.random() * levels.length)];
+    const module = modules[Math.floor(Math.random() * modules.length)];
+    const message = messages[Math.floor(Math.random() * messages.length)];
+    
+    const now = new Date();
+    const timestamp = now.toISOString().replace('T', ' ').substring(0, 19);
+    
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+      <td class="font-medium text-gray-900">${timestamp}</td>
+      <td><span class="bg-${level === 'INFO' ? 'blue' : level === 'WARN' ? 'yellow' : level === 'ERROR' ? 'red' : 'red'}-100 text-${level === 'INFO' ? 'blue' : level === 'WARN' ? 'yellow' : level === 'ERROR' ? 'red' : 'red'}-800 text-xs px-2 py-1 rounded-full">${level}</span></td>
+      <td>${module}</td>
+      <td class="max-w-md truncate">${message}</td>
+      <td>system</td>
+      <td>
+        <div class="flex space-x-2">
+          <button class="text-indigo-600 hover:text-indigo-900">
+            <i class="ph ph-eye"></i>
+          </button>
+        </div>
+      </td>
+    `;
+    
+    logsTable.insertBefore(newRow, logsTable.firstChild);
+    
+    // Remove oldest log if we have more than 5
+    if (logsTable.children.length > 5) {
+      logsTable.removeChild(logsTable.lastChild);
+    }
+  }
+  
+  // Update logs every 10 seconds
+  setInterval(simulateLogUpdates, 10000);
+</script>
+</body>
+</html>

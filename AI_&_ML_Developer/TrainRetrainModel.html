@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Train/Retrain Models | SHMS AI-ML Developer</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  @keyframes chartAppear {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .animate-fadeIn { animation: fadeIn 0.6s ease-out forwards; }
+  .animate-slideUp { animation: slideUp 0.7s ease-out forwards; }
+  .animate-pulse-slow { animation: pulse 3s ease-in-out infinite; }
+  .chart-appear { animation: chartAppear 0.8s ease-out forwards; }
+
+  .dropdownContent {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none;
+    position: absolute;
+    z-index: 50;
+    left: 0;
+  }
+  .dropdownContent.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .card-hover {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  .stat-number {
+    font-feature-settings: 'tnum';
+    font-variant-numeric: tabular-nums;
+  }
+  .gradient-border {
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899) border-box;
+    border: 2px solid transparent;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #f1f1f1; }
+  ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: #4f46e5; }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Chart containers */
+  .chart-container { position: relative; height: 300px; }
+  
+  /* Progress bars */
+  .progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e5e7eb;
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease-in-out;
+  }
+  
+  /* Model status indicators */
+  .status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+  
+  .status-active { background-color: #10b981; }
+  .status-training { background-color: #f59e0b; }
+  .status-error { background-color: #ef4444; }
+  .status-idle { background-color: #6b7280; }
+
+  /* Training configuration form */
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  .form-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  
+  .form-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  }
+  
+  /* Toggle switch */
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+  }
+  
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+  }
+  
+  .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  
+  input:checked + .toggle-slider {
+    background-color: #10b981;
+  }
+  
+  input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+  }
+</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen flex flex-col">
+
+
+<!-- Top Navbar -->
+<nav class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+  <h1 class="text-2xl font-bold tracking-wide flex items-center space-x-2">
+    <i class="ph ph-heartbeat text-3xl"></i>
+    <span>SHMS</span>
+  </h1>
+
+  <span class="text-xl font-bold flex items-center space-x-2">
+    <i class="ph ph-code"></i>
+    <span>AI-ML Developer</span>
+  </span>
+
+  <div class="relative flex items-center space-x-2">
+    
+    <!-- Notification Button -->
+    <a href="Notification.html" class="relative p-2 rounded-full hover:bg-indigo-600 focus:outline-none">
+      <i class="ph ph-bell text-xl"></i>
+      <!-- Notification badge -->
+      <span id="notificationBadge" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+        5
+      </span>
+    </a>
+
+    <!-- Three-dot menu -->
+    <div class="relative">
+      <button id="menuBtn" class="text-white text-2xl focus:outline-none hover:bg-indigo-600 rounded-full p-2 transition" aria-label="Menu">
+        <i class="ph ph-dots-three-vertical"></i>
+      </button>
+      <div id="menuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded-md shadow-lg z-50">
+        <a href="Profile.html" class="block px-4 py-2 hover:bg-indigo-100 rounded-t-md flex items-center space-x-2">
+          <i class="ph ph-user"></i>
+          <span>Profile</span>
+        </a>
+        <a href="Setting.html" class="block px-4 py-2 hover:bg-indigo-100 flex items-center space-x-2">
+          <i class="ph ph-gear"></i>
+          <span>Settings</span>
+        </a>
+        <a href="../Login.html" class="block px-4 py-2 hover:bg-indigo-100 text-red-600 rounded-b-md flex items-center space-x-2">
+          <i class="ph ph-sign-out"></i>
+          <span>Logout</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Feature Navbar -->
+<nav id="featureNavbar" class="bg-indigo-800 text-white shadow-md sticky top-0 z-40 transition-transform duration-300" style="top: 64px;">
+  <div class="container mx-auto flex flex-wrap justify-center md:justify-start items-center px-4 py-2 space-x-2">
+
+    <div class="relative">
+      <a href="Home.html" class="px-5 py-2 rounded-md hover:bg-indigo-700 block transition">Home</a>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md bg-indigo-600 font-semibold dropdownBtn transition">AI Model Management</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="TrainRetrainModel.html" class="block px-4 py-2 hover:bg-indigo-100">Train / Retrain Models</a>
+        <a href="ModelVersionControl.html" class="block px-4 py-2 hover:bg-indigo-100">Model Version Control</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Data & Pipeline</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="DataManagement.html" class="block px-4 py-2 hover:bg-indigo-100">Data Management</a>
+        <a href="PipelineHealth.html" class="block px-4 py-2 hover:bg-indigo-100">Pipeline Health & Quality</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Monitoring & Analytics</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="PredictionsDashboard.html" class="block px-4 py-2 hover:bg-indigo-100">Predictions Dashboard</a>
+        <a href="RealtimePerformance.html" class="block px-4 py-2 hover:bg-indigo-100">Real-Time Performance</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">System Administration</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="SystemMonitor.html" class="block px-4 py-2 hover:bg-indigo-100">System Monitor</a>
+        <a href="ApiManagement.html" class="block px-4 py-2 hover:bg-indigo-100">API Management</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Verification Tools</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="cvVerification.html" class="block px-4 py-2 hover:bg-indigo-100">CV Verification</a>
+        <a href="DegreeVerification.html" class="block px-4 py-2 hover:bg-indigo-100">Degree Verification</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Reports</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="AiSystemReport.html" class="block px-4 py-2 hover:bg-indigo-100">AI System Report</a>
+        <a href="LogsAndReport.html" class="block px-4 py-2 hover:bg-indigo-100">Logs & Reports</a>
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+<!-- Current Time Display -->
+<div class="container mx-auto px-6 pt-4">
+  <div class="bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-md p-4 flex justify-between items-center transition-colors duration-300">
+    <div class="flex items-center space-x-4">
+      <div class="bg-blue-100 p-3 rounded-full">
+        <i class="ph ph-calendar-check text-blue-700 text-2xl"></i>
+      </div>
+      <div>
+        <p class="text-sm text-white/80">Current Date & Time</p>
+        <p id="currentDateTime" class="text-lg font-semibold text-white"></p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2">
+      <span class="relative flex h-3 w-3">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+      </span>
+      <span class="text-sm font-medium text-white/90">System Online</span>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<main class="flex-grow container mx-auto px-6 py-8">
+  <!-- Welcome Section -->
+  <div class="mb-10 animate-fadeIn">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">Model Training & Retraining</h1>
+    <p class="text-gray-600">Configure, train, and monitor your AI models with comprehensive tools and real-time metrics.</p>
+  </div>
+
+  <!-- Training Configuration Section -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+    <!-- Configuration Form -->
+    <div class="lg:col-span-2 bg-white rounded-xl shadow-md p-6 animate-fadeIn">
+      <h2 class="text-xl font-bold text-gray-800 mb-6">Training Configuration</h2>
+      
+      <form id="trainingForm">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Model Selection -->
+          <div class="form-group">
+            <label class="form-label" for="modelType">Model Type</label>
+            <select class="form-input" id="modelType" required>
+              <option value="">Select a model</option>
+              <option value="heart_disease">Heart Disease Prediction</option>
+              <option value="diabetes">Diabetes Risk Assessment</option>
+              <option value="cancer">Cancer Detection</option>
+              <option value="respiratory">Respiratory Analysis</option>
+              <option value="neurological">Neurological Disorder Detection</option>
+            </select>
+          </div>
+          
+          <!-- Dataset Selection -->
+          <div class="form-group">
+            <label class="form-label" for="dataset">Training Dataset</label>
+            <select class="form-input" id="dataset" required>
+              <option value="">Select a dataset</option>
+              <option value="patients_2024">Patient Records 2024</option>
+              <option value="medical_history">Medical History Database</option>
+              <option value="lab_results">Lab Results Dataset</option>
+              <option value="imaging_data">Medical Imaging Dataset</option>
+            </select>
+          </div>
+          
+          <!-- Training Algorithm -->
+          <div class="form-group">
+            <label class="form-label" for="algorithm">Training Algorithm</label>
+            <select class="form-input" id="algorithm" required>
+              <option value="">Select an algorithm</option>
+              <option value="neural_network">Neural Network</option>
+              <option value="random_forest">Random Forest</option>
+              <option value="svm">Support Vector Machine</option>
+              <option value="gradient_boosting">Gradient Boosting</option>
+              <option value="logistic_regression">Logistic Regression</option>
+            </select>
+          </div>
+          
+          <!-- Training Epochs -->
+          <div class="form-group">
+            <label class="form-label" for="epochs">Training Epochs</label>
+            <input type="number" class="form-input" id="epochs" min="1" max="1000" value="100" required>
+          </div>
+          
+          <!-- Learning Rate -->
+          <div class="form-group">
+            <label class="form-label" for="learningRate">Learning Rate</label>
+            <input type="number" class="form-input" id="learningRate" min="0.0001" max="1" step="0.0001" value="0.001" required>
+          </div>
+          
+          <!-- Batch Size -->
+          <div class="form-group">
+            <label class="form-label" for="batchSize">Batch Size</label>
+            <input type="number" class="form-input" id="batchSize" min="8" max="512" value="32" required>
+          </div>
+        </div>
+        
+        <!-- Advanced Options -->
+        <div class="mt-6 border-t pt-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Advanced Options</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Validation Split -->
+            <div class="form-group">
+              <label class="form-label" for="validationSplit">Validation Split (%)</label>
+              <input type="number" class="form-input" id="validationSplit" min="5" max="40" value="20" required>
+            </div>
+            
+            <!-- Early Stopping -->
+            <div class="form-group">
+              <label class="form-label" for="earlyStopping">Early Stopping Patience</label>
+              <input type="number" class="form-input" id="earlyStopping" min="1" max="20" value="10" required>
+            </div>
+          </div>
+          
+          <!-- Toggle Options -->
+          <div class="mt-4 space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-gray-700">Enable Data Augmentation</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="dataAugmentation" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            
+            <div class="flex items-center justify-between">
+              <span class="text-gray-700">Transfer Learning</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="transferLearning">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            
+            <div class="flex items-center justify-between">
+              <span class="text-gray-700">Cross-Validation</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="crossValidation" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="mt-8 flex space-x-4">
+          <button type="button" id="startTraining" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-6 rounded-lg transition flex items-center space-x-2">
+            <i class="ph ph-play-circle"></i>
+            <span>Start Training</span>
+          </button>
+          
+          <button type="button" id="scheduleTraining" class="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded-lg transition flex items-center space-x-2">
+            <i class="ph ph-calendar"></i>
+            <span>Schedule Training</span>
+          </button>
+          
+          <button type="reset" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-lg transition flex items-center space-x-2">
+            <i class="ph ph-arrow-counter-clockwise"></i>
+            <span>Reset</span>
+          </button>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Training Resources & Status -->
+    <div class="bg-white rounded-xl shadow-md p-6 animate-fadeIn">
+      <h2 class="text-xl font-bold text-gray-800 mb-6">Training Resources</h2>
+      
+      <div class="space-y-6">
+        <!-- Resource Allocation -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-700 mb-4">Resource Allocation</h3>
+          
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700">CPU Allocation</span>
+                <span class="text-sm text-gray-500">65%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill bg-blue-500" style="width: 65%"></div>
+              </div>
+            </div>
+            
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700">GPU Allocation</span>
+                <span class="text-sm text-gray-500">82%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill bg-purple-500" style="width: 82%"></div>
+              </div>
+            </div>
+            
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700">Memory Usage</span>
+                <span class="text-sm text-gray-500">45%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill bg-green-500" style="width: 45%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Estimated Training Time -->
+        <div class="bg-indigo-50 p-4 rounded-lg">
+          <h3 class="text-lg font-semibold text-gray-700 mb-2">Estimated Training Time</h3>
+          <p class="text-2xl font-bold text-indigo-700">2h 15m</p>
+          <p class="text-sm text-gray-600 mt-1">Based on current configuration and resources</p>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-700 mb-4">Quick Actions</h3>
+          
+          <div class="space-y-3">
+            <button class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 transition-colors flex items-center space-x-3">
+              <div class="bg-blue-100 p-2 rounded-lg">
+                <i class="ph ph-upload-simple text-blue-600"></i>
+              </div>
+              <span class="font-medium text-gray-800">Upload Custom Dataset</span>
+            </button>
+            
+            <button class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 transition-colors flex items-center space-x-3">
+              <div class="bg-green-100 p-2 rounded-lg">
+                <i class="ph ph-file-text text-green-600"></i>
+              </div>
+              <span class="font-medium text-gray-800">View Training Templates</span>
+            </button>
+            
+            <button class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 transition-colors flex items-center space-x-3">
+              <div class="bg-purple-100 p-2 rounded-lg">
+                <i class="ph ph-gear text-purple-600"></i>
+              </div>
+              <span class="font-medium text-gray-800">Optimization Settings</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Training Jobs -->
+  <div class="bg-white rounded-xl shadow-md p-6 mb-10 animate-fadeIn">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl font-bold text-gray-800">Active Training Jobs</h2>
+      <button class="text-sm bg-indigo-600 text-white px-4 py-2 rounded-md flex items-center">
+        <i class="ph ph-plus mr-1"></i>
+        <span>New Training Job</span>
+      </button>
+    </div>
+    
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left text-gray-500">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+          <tr>
+            <th class="px-4 py-3">Job ID</th>
+            <th class="px-4 py-3">Model</th>
+            <th class="px-4 py-3">Status</th>
+            <th class="px-4 py-3">Progress</th>
+            <th class="px-4 py-3">Started</th>
+            <th class="px-4 py-3">ETA</th>
+            <th class="px-4 py-3">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="bg-white border-b hover:bg-gray-50">
+            <td class="px-4 py-3 font-medium text-gray-900">TRN-2024-0012</td>
+            <td class="px-4 py-3">Heart Disease Prediction v3.2</td>
+            <td class="px-4 py-3">
+              <span class="flex items-center">
+                <span class="status-indicator status-training"></span>
+                <span>Training</span>
+              </span>
+            </td>
+            <td class="px-4 py-3">
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 65%"></div>
+              </div>
+            </td>
+            <td class="px-4 py-3">2 hours ago</td>
+            <td class="px-4 py-3">1h 15m</td>
+            <td class="px-4 py-3">
+              <button class="text-indigo-600 hover:text-indigo-900 mr-3">
+                <i class="ph ph-eye"></i>
+              </button>
+              <button class="text-red-600 hover:text-red-900">
+                <i class="ph ph-stop"></i>
+              </button>
+            </td>
+          </tr>
+          <tr class="bg-white border-b hover:bg-gray-50">
+            <td class="px-4 py-3 font-medium text-gray-900">TRN-2024-0011</td>
+            <td class="px-4 py-3">Diabetes Risk Assessment v2.1</td>
+            <td class="px-4 py-3">
+              <span class="flex items-center">
+                <span class="status-indicator status-training"></span>
+                <span>Training</span>
+              </span>
+            </td>
+            <td class="px-4 py-3">
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 32%"></div>
+              </div>
+            </td>
+            <td class="px-4 py-3">4 hours ago</td>
+            <td class="px-4 py-3">5h 40m</td>
+            <td class="px-4 py-3">
+              <button class="text-indigo-600 hover:text-indigo-900 mr-3">
+                <i class="ph ph-eye"></i>
+              </button>
+              <button class="text-red-600 hover:text-red-900">
+                <i class="ph ph-stop"></i>
+              </button>
+            </td>
+          </tr>
+          <tr class="bg-white border-b hover:bg-gray-50">
+            <td class="px-4 py-3 font-medium text-gray-900">TRN-2024-0010</td>
+            <td class="px-4 py-3">Cancer Detection v1.6</td>
+            <td class="px-4 py-3">
+              <span class="flex items-center">
+                <span class="status-indicator status-training"></span>
+                <span>Training</span>
+              </span>
+            </td>
+            <td class="px-4 py-3">
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 12%"></div>
+              </div>
+            </td>
+            <td class="px-4 py-3">6 hours ago</td>
+            <td class="px-4 py-3">8h 20m</td>
+            <td class="px-4 py-3">
+              <button class="text-indigo-600 hover:text-indigo-900 mr-3">
+                <i class="ph ph-eye"></i>
+              </button>
+              <button class="text-red-600 hover:text-red-900">
+                <i class="ph ph-stop"></i>
+              </button>
+            </td>
+          </tr>
+          <tr class="bg-white hover:bg-gray-50">
+            <td class="px-4 py-3 font-medium text-gray-900">TRN-2024-0009</td>
+            <td class="px-4 py-3">Respiratory Analysis v2.0</td>
+            <td class="px-4 py-3">
+              <span class="flex items-center">
+                <span class="status-indicator status-idle"></span>
+                <span>Queued</span>
+              </span>
+            </td>
+            <td class="px-4 py-3">
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-gray-400 h-2.5 rounded-full" style="width: 0%"></div>
+              </div>
+            </td>
+            <td class="px-4 py-3">--</td>
+            <td class="px-4 py-3">--</td>
+            <td class="px-4 py-3">
+              <button class="text-indigo-600 hover:text-indigo-900 mr-3">
+                <i class="ph ph-eye"></i>
+              </button>
+              <button class="text-red-600 hover:text-red-900">
+                <i class="ph ph-stop"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Training Performance Charts -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+    <!-- Training Metrics Chart -->
+    <div class="bg-white rounded-xl shadow-md p-6 chart-appear">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Training Metrics</h2>
+        <div class="flex space-x-2">
+          <button class="text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-md">Current Job</button>
+          <button class="text-sm text-gray-500 px-3 py-1 rounded-md hover:bg-gray-100">Compare Jobs</button>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="trainingMetricsChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Resource Utilization Chart -->
+    <div class="bg-white rounded-xl shadow-md p-6 chart-appear" style="animation-delay: 0.2s">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Resource Utilization</h2>
+        <div class="flex space-x-2">
+          <button class="text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-md">Live</button>
+          <button class="text-sm text-gray-500 px-3 py-1 rounded-md hover:bg-gray-100">History</button>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="resourceUtilizationChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Training History & Model Versions -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Training History -->
+    <div class="bg-white rounded-xl shadow-md p-6 animate-fadeIn">
+      <h2 class="text-xl font-bold text-gray-800 mb-6">Training History</h2>
+      <div class="space-y-4">
+        <div class="flex items-start space-x-4 p-3 rounded-lg hover:bg-gray-50">
+          <div class="bg-green-100 p-2 rounded-full">
+            <i class="ph ph-check-circle text-green-600"></i>
+          </div>
+          <div>
+            <p class="font-medium text-gray-800">Training Completed</p>
+            <p class="text-sm text-gray-500">Heart Disease Prediction Model v3.1 training finished with 96.2% accuracy</p>
+            <p class="text-xs text-gray-400 mt-1">2 days ago</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4 p-3 rounded-lg hover:bg-gray-50">
+          <div class="bg-blue-100 p-2 rounded-full">
+            <i class="ph ph-arrow-line-up text-blue-600"></i>
+          </div>
+          <div>
+            <p class="font-medium text-gray-800">Model Performance Improved</p>
+            <p class="text-sm text-gray-500">Diabetes model accuracy increased from 87% to 89% after retraining</p>
+            <p class="text-xs text-gray-400 mt-1">5 days ago</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4 p-3 rounded-lg hover:bg-gray-50">
+          <div class="bg-yellow-100 p-2 rounded-full">
+            <i class="ph ph-warning text-yellow-600"></i>
+          </div>
+          <div>
+            <p class="font-medium text-gray-800">Training Interrupted</p>
+            <p class="text-sm text-gray-500">Respiratory Analysis training stopped due to resource constraints</p>
+            <p class="text-xs text-gray-400 mt-1">1 week ago</p>
+          </div>
+        </div>
+        <div class="flex items-start space-x-4 p-3 rounded-lg hover:bg-gray-50">
+          <div class="bg-purple-100 p-2 rounded-full">
+            <i class="ph ph-git-fork text-purple-600"></i>
+          </div>
+          <div>
+            <p class="font-medium text-gray-800">New Model Branch Created</p>
+            <p class="text-sm text-gray-500">Created experimental branch for neural network architecture changes</p>
+            <p class="text-xs text-gray-400 mt-1">2 weeks ago</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Model Versions -->
+    <div class="bg-white rounded-xl shadow-md p-6 animate-fadeIn">
+      <h2 class="text-xl font-bold text-gray-800 mb-6">Model Versions</h2>
+      <div class="space-y-4">
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+          <div>
+            <p class="font-medium text-gray-800">Heart Disease Prediction</p>
+            <p class="text-sm text-gray-500">Version 3.1 • 96.2% accuracy</p>
+          </div>
+          <div class="text-right">
+            <p class="text-sm font-medium text-green-600">Production</p>
+            <p class="text-xs text-gray-500">Deployed: 2 days ago</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+          <div>
+            <p class="font-medium text-gray-800">Heart Disease Prediction</p>
+            <p class="text-sm text-gray-500">Version 3.0 • 94.7% accuracy</p>
+          </div>
+          <div class="text-right">
+            <p class="text-sm font-medium text-gray-600">Archived</p>
+            <p class="text-xs text-gray-500">Replaced: 2 days ago</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+          <div>
+            <p class="font-medium text-gray-800">Diabetes Risk Assessment</p>
+            <p class="text-sm text-gray-500">Version 2.0 • 89% accuracy</p>
+          </div>
+          <div class="text-right">
+            <p class="text-sm font-medium text-green-600">Production</p>
+            <p class="text-xs text-gray-500">Deployed: 5 days ago</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+          <div>
+            <p class="font-medium text-gray-800">Cancer Detection</p>
+            <p class="text-sm text-gray-500">Version 1.5 • 92.7% accuracy</p>
+          </div>
+          <div class="text-right">
+            <p class="text-sm font-medium text-green-600">Production</p>
+            <p class="text-xs text-gray-500">Deployed: 3 weeks ago</p>
+          </div>
+        </div>
+        
+        <button class="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg transition flex items-center justify-center space-x-2">
+          <i class="ph ph-plus"></i>
+          <span>Compare Model Versions</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="text-center py-6 bg-gradient-to-r from-indigo-700 to-indigo-600 text-white">
+  <div class="container mx-auto px-6">
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 mb-6">
+      <div class="flex items-center space-x-2">
+        <i class="ph ph-heartbeat text-2xl"></i>
+        <span class="font-semibold">Smart Healthcare Management System</span>
+      </div>
+      <div class="text-sm">
+        © 2025 SHMS | AI-ML Developer Dashboard
+      </div>
+      <div class="flex items-center space-x-4">
+        <a href="#" class="hover:text-indigo-200 transition">
+          <i class="ph ph-info text-xl"></i>
+        </a>
+      </div>
+    </div>
+    
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+      <div class="max-w-md text-center md:text-left">
+        <p class="text-sm">
+          Advanced AI-ML infrastructure for predictive healthcare analytics and intelligent patient care solutions.
+        </p>
+      </div>
+
+      <div class="flex space-x-5 text-white">
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-facebook-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-twitter-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-linkedin-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-envelope text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-phone text-2xl"></i></a>
+      </div>
+    </div>
+
+    <div class="text-center text-sm text-indigo-200 mt-6 border-t border-indigo-700 pt-4">
+      © 2025 Smart Healthcare Management System | AI-ML Developer Interface
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Update current date and time
+  function updateDateTime() {
+    const now = new Date();
+    const options = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    };
+    document.getElementById('currentDateTime').textContent = now.toLocaleDateString('en-US', options);
+  }
+  updateDateTime();
+  setInterval(updateDateTime, 1000);
+
+  // Top menu toggle
+  const menuBtn = document.getElementById('menuBtn');
+  const menuDropdown = document.getElementById('menuDropdown');
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuDropdown.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+      menuDropdown.classList.add('hidden');
+    }
+  });
+
+  // Dropdown functionality
+  const dropdownButtons = document.querySelectorAll('.dropdownBtn');
+  let activeDropdown = null;
+
+  dropdownButtons.forEach(btn => {
+    const dropdown = btn.nextElementSibling;
+    if (!dropdown) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeDropdown && activeDropdown !== dropdown) {
+        activeDropdown.classList.remove('show');
+      }
+      if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        activeDropdown = null;
+      } else {
+        dropdown.classList.add('show');
+        activeDropdown = dropdown;
+      }
+    });
+
+    btn.addEventListener('mouseenter', () => dropdown.classList.add('show'));
+    btn.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!dropdown.matches(':hover')) {
+          dropdown.classList.remove('show');
+        }
+      }, 100);
+    });
+    
+    if (dropdown) {
+      dropdown.addEventListener('mouseleave', () => {
+        dropdown.classList.remove('show');
+        if (activeDropdown === dropdown) activeDropdown = null;
+      });
+    }
+  });
+
+  document.body.addEventListener('click', () => {
+    if (activeDropdown) {
+      activeDropdown.classList.remove('show');
+      activeDropdown = null;
+    }
+  });
+
+  // Hide/show navbar on scroll
+  let lastScroll = 0;
+  const featureNavbar = document.getElementById('featureNavbar');
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+    if (currentScroll > lastScroll && currentScroll > 100) {
+      featureNavbar.style.transform = 'translateY(-100%)';
+    } else {
+      featureNavbar.style.transform = 'translateY(0)';
+    }
+    lastScroll = currentScroll;
+  });
+
+  // Training form submission
+  document.getElementById('startTraining').addEventListener('click', function() {
+    const modelType = document.getElementById('modelType').value;
+    const dataset = document.getElementById('dataset').value;
+    
+    if (!modelType || !dataset) {
+      alert('Please select a model type and dataset to start training.');
+      return;
+    }
+    
+    // In a real application, this would submit the form data to a backend
+    alert(`Training started for ${modelType} using ${dataset} dataset.`);
+    
+    // Simulate adding a new training job to the table
+    const tableBody = document.querySelector('table tbody');
+    const newRow = document.createElement('tr');
+    newRow.className = 'bg-white border-b hover:bg-gray-50';
+    newRow.innerHTML = `
+      <td class="px-4 py-3 font-medium text-gray-900">TRN-2024-0013</td>
+      <td class="px-4 py-3">${document.getElementById('modelType').options[document.getElementById('modelType').selectedIndex].text}</td>
+      <td class="px-4 py-3">
+        <span class="flex items-center">
+          <span class="status-indicator status-training"></span>
+          <span>Training</span>
+        </span>
+      </td>
+      <td class="px-4 py-3">
+        <div class="w-full bg-gray-200 rounded-full h-2.5">
+          <div class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+        </div>
+      </td>
+      <td class="px-4 py-3">Just now</td>
+      <td class="px-4 py-3">2h 15m</td>
+      <td class="px-4 py-3">
+        <button class="text-indigo-600 hover:text-indigo-900 mr-3">
+          <i class="ph ph-eye"></i>
+        </button>
+        <button class="text-red-600 hover:text-red-900">
+          <i class="ph ph-stop"></i>
+        </button>
+      </td>
+    `;
+    
+    tableBody.insertBefore(newRow, tableBody.firstChild);
+    
+    // Simulate progress update
+    let progress = 0;
+    const progressBar = newRow.querySelector('.bg-blue-600');
+    const interval = setInterval(() => {
+      progress += 1;
+      progressBar.style.width = `${progress}%`;
+      
+      if (progress >= 100) {
+        clearInterval(interval);
+        const statusCell = newRow.querySelector('.flex.items-center');
+        statusCell.innerHTML = `
+          <span class="status-indicator status-active"></span>
+          <span>Completed</span>
+        `;
+      }
+    }, 1000);
+  });
+
+  // Schedule training button
+  document.getElementById('scheduleTraining').addEventListener('click', function() {
+    const modelType = document.getElementById('modelType').value;
+    const dataset = document.getElementById('dataset').value;
+    
+    if (!modelType || !dataset) {
+      alert('Please select a model type and dataset to schedule training.');
+      return;
+    }
+    
+    // In a real application, this would open a scheduling modal
+    alert(`Training scheduled for ${modelType} using ${dataset} dataset.`);
+  });
+
+  // Chart.js configurations
+  const chartColors = {
+    primary: '#6366F1',
+    secondary: '#8B5CF6',
+    success: '#10B981',
+    warning: '#F59E0B',
+    danger: '#EF4444',
+    info: '#3B82F6'
+  };
+
+  // Initialize Charts
+  document.addEventListener('DOMContentLoaded', function() {
+    // Training Metrics Chart
+    const trainingCtx = document.getElementById('trainingMetricsChart').getContext('2d');
+    const trainingMetricsChart = new Chart(trainingCtx, {
+      type: 'line',
+      data: {
+        labels: ['Epoch 1', 'Epoch 10', 'Epoch 20', 'Epoch 30', 'Epoch 40', 'Epoch 50', 'Epoch 60', 'Epoch 70', 'Epoch 80', 'Epoch 90', 'Epoch 100'],
+        datasets: [{
+          label: 'Training Accuracy',
+          data: [65, 72, 78, 82, 85, 87, 89, 91, 92, 93, 94],
+          borderColor: 'rgb(99, 102, 241)',
+          backgroundColor: 'rgba(99, 102, 241, 0.1)',
+          tension: 0.3,
+          fill: true
+        }, {
+          label: 'Validation Accuracy',
+          data: [62, 70, 76, 80, 83, 85, 86, 88, 89, 90, 91],
+          borderColor: 'rgb(139, 92, 246)',
+          backgroundColor: 'rgba(139, 92, 246, 0.1)',
+          tension: 0.3,
+          fill: true
+        }, {
+          label: 'Training Loss',
+          data: [1.2, 0.8, 0.6, 0.45, 0.35, 0.28, 0.22, 0.18, 0.15, 0.12, 0.09],
+          borderColor: 'rgb(239, 68, 68)',
+          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          tension: 0.3,
+          fill: true,
+          yAxisID: 'y1'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: false,
+            min: 50,
+            max: 100,
+            ticks: {
+              callback: function(value) {
+                return value + '%';
+              }
+            },
+            title: {
+              display: true,
+              text: 'Accuracy'
+            }
+          },
+          y1: {
+            position: 'right',
+            beginAtZero: true,
+            max: 1.5,
+            ticks: {
+              callback: function(value) {
+                return value.toFixed(2);
+              }
+            },
+            title: {
+              display: true,
+              text: 'Loss'
+            },
+            grid: {
+              drawOnChartArea: false,
+            },
+          }
+        }
+      }
+    });
+
+    // Resource Utilization Chart
+    const resourceCtx = document.getElementById('resourceUtilizationChart').getContext('2d');
+    const resourceUtilizationChart = new Chart(resourceCtx, {
+      type: 'bar',
+      data: {
+        labels: ['CPU', 'GPU', 'Memory', 'Storage', 'Network'],
+        datasets: [{
+          label: 'Current Usage',
+          data: [65, 82, 45, 30, 15],
+          backgroundColor: [
+            'rgba(99, 102, 241, 0.7)',
+            'rgba(139, 92, 246, 0.7)',
+            'rgba(236, 72, 153, 0.7)',
+            'rgba(16, 185, 129, 0.7)',
+            'rgba(245, 158, 11, 0.7)'
+          ],
+          borderColor: [
+            'rgb(99, 102, 241)',
+            'rgb(139, 92, 246)',
+            'rgb(236, 72, 153)',
+            'rgb(16, 185, 129)',
+            'rgb(245, 158, 11)'
+          ],
+          borderWidth: 1
+        }, {
+          label: 'Peak Usage',
+          data: [78, 92, 68, 42, 28],
+          backgroundColor: [
+            'rgba(99, 102, 241, 0.4)',
+            'rgba(139, 92, 246, 0.4)',
+            'rgba(236, 72, 153, 0.4)',
+            'rgba(16, 185, 129, 0.4)',
+            'rgba(245, 158, 11, 0.4)'
+          ],
+          borderColor: [
+            'rgb(99, 102, 241)',
+            'rgb(139, 92, 246)',
+            'rgb(236, 72, 153)',
+            'rgb(16, 185, 129)',
+            'rgb(245, 158, 11)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            ticks: {
+              callback: function(value) {
+                return value + '%';
+              }
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'top',
+          }
+        }
+      }
+    });
+  });
+
+  // Add hover effect to dashboard cards
+  const dashboardCards = document.querySelectorAll('.card-hover');
+  dashboardCards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transition = 'all 0.3s ease';
+    });
+  });
+
+  // Loading animation
+  window.addEventListener('load', () => {
+    const loader = document.getElementById('loadingScreen');
+    loader.classList.add('opacity-0');
+    setTimeout(() => {
+      loader.style.display = 'none';
+    }, 700);
+    document.body.classList.add('loaded');
+  });
+</script>
+</body>
+</html>

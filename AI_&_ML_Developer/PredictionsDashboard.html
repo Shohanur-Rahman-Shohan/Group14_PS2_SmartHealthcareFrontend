@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Predictions Dashboard | SHMS AI-ML Developer</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  @keyframes chartAppear {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .animate-fadeIn { animation: fadeIn 0.6s ease-out forwards; }
+  .animate-slideUp { animation: slideUp 0.7s ease-out forwards; }
+  .animate-pulse-slow { animation: pulse 3s ease-in-out infinite; }
+  .chart-appear { animation: chartAppear 0.8s ease-out forwards; }
+
+  .dropdownContent {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none;
+    position: absolute;
+    z-index: 50;
+    left: 0;
+  }
+  .dropdownContent.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .card-hover {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  .stat-number {
+    font-feature-settings: 'tnum';
+    font-variant-numeric: tabular-nums;
+  }
+  .gradient-border {
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899) border-box;
+    border: 2px solid transparent;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #f1f1f1; }
+  ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: #4f46e5; }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Chart containers */
+  .chart-container { position: relative; height: 300px; }
+  
+  /* Progress bars */
+  .progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e5e7eb;
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease-in-out;
+  }
+  
+  /* Status indicators */
+  .status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+  
+  .status-active { background-color: #10b981; }
+  .status-processing { background-color: #f59e0b; }
+  .status-error { background-color: #ef4444; }
+  .status-idle { background-color: #6b7280; }
+
+  /* Prediction status */
+  .prediction-high-risk { background-color: #ef4444; color: white; }
+  .prediction-medium-risk { background-color: #f59e0b; color: white; }
+  .prediction-low-risk { background-color: #10b981; color: white; }
+  .prediction-no-risk { background-color: #3b82f6; color: white; }
+
+  /* Form styles */
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  .form-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  
+  .form-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  }
+
+  /* Tabs */
+  .tab-container {
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .tab-button {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .tab-button.active {
+    color: #6366f1;
+    border-bottom-color: #6366f1;
+  }
+  
+  .tab-button:hover:not(.active) {
+    color: #374151;
+    border-bottom-color: #d1d5db;
+  }
+  
+  .tab-content {
+    display: none;
+  }
+  
+  .tab-content.active {
+    display: block;
+  }
+
+  /* Data table styles */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .data-table th {
+    background-color: #f9fafb;
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .data-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .data-table tr:hover {
+    background-color: #f9fafb;
+  }
+
+  /* Live prediction indicator */
+  @keyframes livePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  .live-indicator {
+    animation: livePulse 2s infinite;
+  }
+</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen flex flex-col">
+
+<!-- Top Navbar -->
+<nav class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+  <h1 class="text-2xl font-bold tracking-wide flex items-center space-x-2">
+    <i class="ph ph-heartbeat text-3xl"></i>
+    <span>SHMS</span>
+  </h1>
+
+  <span class="text-xl font-bold flex items-center space-x-2">
+    <i class="ph ph-code"></i>
+    <span>AI-ML Developer</span>
+  </span>
+
+  <div class="relative flex items-center space-x-2">
+    
+    <!-- Notification Button -->
+    <a href="Notification.html" class="relative p-2 rounded-full hover:bg-indigo-600 focus:outline-none">
+      <i class="ph ph-bell text-xl"></i>
+      <!-- Notification badge -->
+      <span id="notificationBadge" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+        5
+      </span>
+    </a>
+
+    <!-- Three-dot menu -->
+    <div class="relative">
+      <button id="menuBtn" class="text-white text-2xl focus:outline-none hover:bg-indigo-600 rounded-full p-2 transition" aria-label="Menu">
+        <i class="ph ph-dots-three-vertical"></i>
+      </button>
+      <div id="menuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded-md shadow-lg z-50">
+        <a href="Profile.html" class="block px-4 py-2 hover:bg-indigo-100 rounded-t-md flex items-center space-x-2">
+          <i class="ph ph-user"></i>
+          <span>Profile</span>
+        </a>
+        <a href="Setting.html" class="block px-4 py-2 hover:bg-indigo-100 flex items-center space-x-2">
+          <i class="ph ph-gear"></i>
+          <span>Settings</span>
+        </a>
+        <a href="../Login.html" class="block px-4 py-2 hover:bg-indigo-100 text-red-600 rounded-b-md flex items-center space-x-2">
+          <i class="ph ph-sign-out"></i>
+          <span>Logout</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Feature Navbar -->
+<nav id="featureNavbar" class="bg-indigo-800 text-white shadow-md sticky top-0 z-40 transition-transform duration-300" style="top: 64px;">
+  <div class="container mx-auto flex flex-wrap justify-center md:justify-start items-center px-4 py-2 space-x-2">
+
+    <div class="relative">
+      <a href="Home.html" class="px-5 py-2 rounded-md hover:bg-indigo-700 block transition">Home</a>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">AI Model Management</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="TrainRetrainModel.html" class="block px-4 py-2 hover:bg-indigo-100">Train / Retrain Models</a>
+        <a href="ModelVersionControl.html" class="block px-4 py-2 hover:bg-indigo-100">Model Version Control</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Data & Pipeline</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="DataManagement.html" class="block px-4 py-2 hover:bg-indigo-100">Data Management</a>
+        <a href="PipelineHealth.html" class="block px-4 py-2 hover:bg-indigo-100">Pipeline Health & Quality</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md bg-indigo-600 font-semibold dropdownBtn transition">Monitoring & Analytics</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="PredictionsDashboard.html" class="block px-4 py-2 hover:bg-indigo-100">Predictions Dashboard</a>
+        <a href="RealtimePerformance.html" class="block px-4 py-2 hover:bg-indigo-100">Real-Time Performance</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">System Administration</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="SystemMonitor.html" class="block px-4 py-2 hover:bg-indigo-100">System Monitor</a>
+        <a href="ApiManagement.html" class="block px-4 py-2 hover:bg-indigo-100">API Management</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Verification Tools</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="cvVerification.html" class="block px-4 py-2 hover:bg-indigo-100">CV Verification</a>
+        <a href="DegreeVerification.html" class="block px-4 py-2 hover:bg-indigo-100">Degree Verification</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Reports</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="AiSystemReport.html" class="block px-4 py-2 hover:bg-indigo-100">AI System Report</a>
+        <a href="LogsAndReport.html" class="block px-4 py-2 hover:bg-indigo-100">Logs & Reports</a>
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+<!-- Current Time Display -->
+<div class="container mx-auto px-6 pt-4">
+  <div class="bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-md p-4 flex justify-between items-center transition-colors duration-300">
+    <div class="flex items-center space-x-4">
+      <div class="bg-blue-100 p-3 rounded-full">
+        <i class="ph ph-chart-line text-blue-700 text-2xl"></i>
+      </div>
+      <div>
+        <p class="text-sm text-white/80">Current Date & Time</p>
+        <p id="currentDateTime" class="text-lg font-semibold text-white"></p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2">
+      <span class="relative flex h-3 w-3">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+      </span>
+      <span class="text-sm font-medium text-white/90">Live Predictions Active</span>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<main class="flex-grow container mx-auto px-6 py-8">
+  <!-- Welcome Section -->
+  <div class="mb-10 animate-fadeIn">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">Predictions Dashboard</h1>
+    <p class="text-gray-600">Monitor real-time predictions, model performance, and prediction analytics across all healthcare AI models.</p>
+  </div>
+
+  <!-- Prediction Overview Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+    <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.1s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-blue-100 text-sm">Total Predictions Today</p>
+          <h3 class="text-2xl font-bold stat-number">1,247</h3>
+        </div>
+        <div class="bg-blue-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-chart-line text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-blue-100">
+          <i class="ph ph-arrow-up mr-1"></i>
+          <span>12% increase from yesterday</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.2s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-green-100 text-sm">Average Accuracy</p>
+          <h3 class="text-2xl font-bold stat-number">94.7%</h3>
+        </div>
+        <div class="bg-green-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-target text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-green-100">
+          <i class="ph ph-trend-up mr-1"></i>
+          <span>2.3% improvement</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.3s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-purple-100 text-sm">High-Risk Predictions</p>
+          <h3 class="text-2xl font-bold stat-number">42</h3>
+        </div>
+        <div class="bg-purple-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-warning text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-purple-100">
+          <i class="ph ph-arrow-down mr-1"></i>
+          <span>8% decrease from last week</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.4s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-orange-100 text-sm">Avg. Response Time</p>
+          <h3 class="text-2xl font-bold stat-number">142 ms</h3>
+        </div>
+        <div class="bg-orange-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-gauge text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-orange-100">
+          <i class="ph ph-arrow-down mr-1"></i>
+          <span>15 ms improvement</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs for Predictions Dashboard -->
+  <div class="bg-white rounded-xl shadow-md mb-10 animate-fadeIn">
+    <div class="tab-container">
+      <div class="flex overflow-x-auto">
+        <button class="tab-button active" data-tab="live-predictions">Live Predictions</button>
+        <button class="tab-button" data-tab="prediction-analytics">Prediction Analytics</button>
+        <button class="tab-button" data-tab="model-performance">Model Performance</button>
+        <button class="tab-button" data-tab="prediction-history">Prediction History</button>
+      </div>
+    </div>
+
+    <!-- Live Predictions Tab -->
+    <div id="live-predictions" class="tab-content active p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Live Predictions</h2>
+        <div class="flex items-center space-x-2">
+          <span class="live-indicator bg-red-500 h-3 w-3 rounded-full"></span>
+          <span class="text-sm font-medium text-gray-700">Live Stream Active</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <!-- Live Prediction Feed -->
+        <div class="lg:col-span-2 bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Real-Time Prediction Feed</h3>
+          <div class="space-y-4 max-h-96 overflow-y-auto">
+            <div class="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg">
+              <div class="bg-red-100 p-2 rounded-full">
+                <i class="ph ph-warning text-red-600"></i>
+              </div>
+              <div class="flex-1">
+                <p class="font-medium text-gray-800">High Risk of Heart Disease Detected</p>
+                <p class="text-sm text-gray-500">Patient ID: P-7842 • Confidence: 92.7%</p>
+                <p class="text-xs text-gray-400 mt-1">Just now</p>
+              </div>
+              <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">High Risk</span>
+            </div>
+            <div class="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg">
+              <div class="bg-yellow-100 p-2 rounded-full">
+                <i class="ph ph-warning text-yellow-600"></i>
+              </div>
+              <div class="flex-1">
+                <p class="font-medium text-gray-800">Medium Diabetes Risk Identified</p>
+                <p class="text-sm text-gray-500">Patient ID: P-9156 • Confidence: 76.3%</p>
+                <p class="text-xs text-gray-400 mt-1">30 seconds ago</p>
+              </div>
+              <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Medium Risk</span>
+            </div>
+            <div class="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg">
+              <div class="bg-green-100 p-2 rounded-full">
+                <i class="ph ph-check-circle text-green-600"></i>
+              </div>
+              <div class="flex-1">
+                <p class="font-medium text-gray-800">Low Respiratory Risk Assessment</p>
+                <p class="text-sm text-gray-500">Patient ID: P-6321 • Confidence: 88.5%</p>
+                <p class="text-xs text-gray-400 mt-1">1 minute ago</p>
+              </div>
+              <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Low Risk</span>
+            </div>
+            <div class="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg">
+              <div class="bg-blue-100 p-2 rounded-full">
+                <i class="ph ph-check-circle text-blue-600"></i>
+              </div>
+              <div class="flex-1">
+                <p class="font-medium text-gray-800">No Cancer Risk Detected</p>
+                <p class="text-sm text-gray-500">Patient ID: P-4592 • Confidence: 95.2%</p>
+                <p class="text-xs text-gray-400 mt-1">2 minutes ago</p>
+              </div>
+              <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">No Risk</span>
+            </div>
+            <div class="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg">
+              <div class="bg-red-100 p-2 rounded-full">
+                <i class="ph ph-warning text-red-600"></i>
+              </div>
+              <div class="flex-1">
+                <p class="font-medium text-gray-800">High Neurological Risk Identified</p>
+                <p class="text-sm text-gray-500">Patient ID: P-3278 • Confidence: 89.1%</p>
+                <p class="text-xs text-gray-400 mt-1">3 minutes ago</p>
+              </div>
+              <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">High Risk</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prediction Statistics -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Prediction Statistics</h3>
+          <div class="space-y-6">
+            <div>
+              <h4 class="text-sm font-medium text-gray-700 mb-2">Prediction Distribution</h4>
+              <div class="space-y-2">
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">High Risk</span>
+                  <span class="text-sm font-medium text-gray-800">3.4%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill bg-red-500" style="width: 3.4%"></div>
+                </div>
+                
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Medium Risk</span>
+                  <span class="text-sm font-medium text-gray-800">12.7%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill bg-yellow-500" style="width: 12.7%"></div>
+                </div>
+                
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Low Risk</span>
+                  <span class="text-sm font-medium text-gray-800">28.9%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill bg-green-500" style="width: 28.9%"></div>
+                </div>
+                
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">No Risk</span>
+                  <span class="text-sm font-medium text-gray-800">55.0%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill bg-blue-500" style="width: 55.0%"></div>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <h4 class="text-sm font-medium text-gray-700 mb-2">Model Usage</h4>
+              <div class="space-y-2">
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Heart Disease</span>
+                  <span class="text-sm font-medium text-gray-800">42%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill bg-purple-500" style="width: 42%"></div>
+                </div>
+                
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Diabetes</span>
+                  <span class="text-sm font-medium text-gray-800">28%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill bg-indigo-500" style="width: 28%"></div>
+                </div>
+                
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Cancer Detection</span>
+                  <span class="text-sm font-medium text-gray-800">18%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill bg-pink-500" style="width: 18%"></div>
+                </div>
+                
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Other Models</span>
+                  <span class="text-sm font-medium text-gray-800">12%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill bg-gray-500" style="width: 12%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <button class="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 transition-colors">
+            <div class="flex items-center">
+              <div class="bg-indigo-100 p-2 rounded-lg mr-3">
+                <i class="ph ph-plus text-indigo-600"></i>
+              </div>
+              <span class="font-medium text-gray-800">New Prediction</span>
+            </div>
+            <i class="ph ph-arrow-right text-gray-400"></i>
+          </button>
+          
+          <button class="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 transition-colors">
+            <div class="flex items-center">
+              <div class="bg-green-100 p-2 rounded-lg mr-3">
+                <i class="ph ph-export text-green-600"></i>
+              </div>
+              <span class="font-medium text-gray-800">Export Data</span>
+            </div>
+            <i class="ph ph-arrow-right text-gray-400"></i>
+          </button>
+          
+          <button class="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 transition-colors">
+            <div class="flex items-center">
+              <div class="bg-blue-100 p-2 rounded-lg mr-3">
+                <i class="ph ph-chart-line text-blue-600"></i>
+              </div>
+              <span class="font-medium text-gray-800">Generate Report</span>
+            </div>
+            <i class="ph ph-arrow-right text-gray-400"></i>
+          </button>
+          
+          <button class="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 transition-colors">
+            <div class="flex items-center">
+              <div class="bg-purple-100 p-2 rounded-lg mr-3">
+                <i class="ph ph-bell text-purple-600"></i>
+              </div>
+              <span class="font-medium text-gray-800">Alert Settings</span>
+            </div>
+            <i class="ph ph-arrow-right text-gray-400"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prediction Analytics Tab -->
+    <div id="prediction-analytics" class="tab-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Prediction Analytics</h2>
+        <div class="flex space-x-2">
+          <button class="text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-md">Last 7 Days</button>
+          <button class="text-sm text-gray-500 px-3 py-1 rounded-md hover:bg-gray-100">Last 30 Days</button>
+          <button class="text-sm text-gray-500 px-3 py-1 rounded-md hover:bg-gray-100">Custom Range</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Prediction Trends -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Prediction Trends</h3>
+          <div class="chart-container">
+            <canvas id="predictionTrendsChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Risk Distribution -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Risk Distribution</h3>
+          <div class="chart-container">
+            <canvas id="riskDistributionChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Model Comparison -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Model Performance Comparison</h3>
+        <div class="chart-container">
+          <canvas id="modelComparisonChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Model Performance Tab -->
+    <div id="model-performance" class="tab-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Model Performance</h2>
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center space-x-2">
+          <i class="ph ph-export"></i>
+          <span>Export Report</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Model Accuracy Over Time -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Model Accuracy Over Time</h3>
+          <div class="chart-container">
+            <canvas id="accuracyOverTimeChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Model Response Times -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Model Response Times</h3>
+          <div class="chart-container">
+            <canvas id="responseTimeChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Performance Metrics Table -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Performance Metrics</h3>
+        <div class="overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Accuracy</th>
+                <th>Precision</th>
+                <th>Recall</th>
+                <th>F1-Score</th>
+                <th>Response Time</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-medium text-gray-900">Heart Disease Prediction</td>
+                <td>96.2%</td>
+                <td>94.8%</td>
+                <td>95.7%</td>
+                <td>95.2%</td>
+                <td>128 ms</td>
+                <td><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Optimal</span></td>
+              </tr>
+              <tr>
+                <td class="font-medium text-gray-900">Diabetes Risk Assessment</td>
+                <td>89.0%</td>
+                <td>87.5%</td>
+                <td>88.2%</td>
+                <td>87.8%</td>
+                <td>142 ms</td>
+                <td><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Optimal</span></td>
+              </tr>
+              <tr>
+                <td class="font-medium text-gray-900">Cancer Detection</td>
+                <td>92.7%</td>
+                <td>91.3%</td>
+                <td>92.1%</td>
+                <td>91.7%</td>
+                <td>245 ms</td>
+                <td><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Optimal</span></td>
+              </tr>
+              <tr>
+                <td class="font-medium text-gray-900">Respiratory Analysis</td>
+                <td>87.4%</td>
+                <td>85.2%</td>
+                <td>86.8%</td>
+                <td>86.0%</td>
+                <td>198 ms</td>
+                <td><span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Needs Review</span></td>
+              </tr>
+              <tr>
+                <td class="font-medium text-gray-900">Neurological Disorder</td>
+                <td>84.6%</td>
+                <td>82.9%</td>
+                <td>83.7%</td>
+                <td>83.3%</td>
+                <td>312 ms</td>
+                <td><span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Needs Review</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prediction History Tab -->
+    <div id="prediction-history" class="tab-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Prediction History</h2>
+        <div class="flex space-x-3">
+          <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 py-2 px-4 rounded-md flex items-center space-x-2">
+            <i class="ph ph-funnel"></i>
+            <span>Filter</span>
+          </button>
+          <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 py-2 px-4 rounded-md flex items-center space-x-2">
+            <i class="ph ph-magnifying-glass"></i>
+            <span>Search</span>
+          </button>
+          <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center space-x-2">
+            <i class="ph ph-export"></i>
+            <span>Export</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Prediction ID</th>
+              <th>Patient ID</th>
+              <th>Model</th>
+              <th>Prediction</th>
+              <th>Confidence</th>
+              <th>Timestamp</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="font-medium text-gray-900">PRED-7842</td>
+              <td>P-7842</td>
+              <td>Heart Disease</td>
+              <td>High Risk</td>
+              <td>92.7%</td>
+              <td>2024-03-15 14:32:15</td>
+              <td><span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">High Risk</span></td>
+              <td>
+                <div class="flex space-x-2">
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-eye"></i>
+                  </button>
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-note-pencil"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium text-gray-900">PRED-9156</td>
+              <td>P-9156</td>
+              <td>Diabetes</td>
+              <td>Medium Risk</td>
+              <td>76.3%</td>
+              <td>2024-03-15 14:30:42</td>
+              <td><span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Medium Risk</span></td>
+              <td>
+                <div class="flex space-x-2">
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-eye"></i>
+                  </button>
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-note-pencil"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium text-gray-900">PRED-6321</td>
+              <td>P-6321</td>
+              <td>Respiratory</td>
+              <td>Low Risk</td>
+              <td>88.5%</td>
+              <td>2024-03-15 14:29:18</td>
+              <td><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Low Risk</span></td>
+              <td>
+                <div class="flex space-x-2">
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-eye"></i>
+                  </button>
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-note-pencil"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium text-gray-900">PRED-4592</td>
+              <td>P-4592</td>
+              <td>Cancer Detection</td>
+              <td>No Risk</td>
+              <td>95.2%</td>
+              <td>2024-03-15 14:27:55</td>
+              <td><span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">No Risk</span></td>
+              <td>
+                <div class="flex space-x-2">
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-eye"></i>
+                  </button>
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-note-pencil"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium text-gray-900">PRED-3278</td>
+              <td>P-3278</td>
+              <td>Neurological</td>
+              <td>High Risk</td>
+              <td>89.1%</td>
+              <td>2024-03-15 14:26:33</td>
+              <td><span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">High Risk</span></td>
+              <td>
+                <div class="flex space-x-2">
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-eye"></i>
+                  </button>
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-note-pencil"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="flex justify-between items-center mt-6">
+        <div class="text-sm text-gray-700">
+          Showing 1 to 5 of 1,247 predictions
+        </div>
+        <div class="flex space-x-2">
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+            Previous
+          </button>
+          <button class="px-3 py-1 bg-indigo-600 text-white rounded-md">
+            1
+          </button>
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+            2
+          </button>
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+            3
+          </button>
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent High-Risk Alerts -->
+  <div class="bg-white rounded-xl shadow-md p-6 animate-fadeIn">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl font-bold text-gray-800">Recent High-Risk Alerts</h2>
+      <button class="text-sm bg-indigo-600 text-white px-4 py-2 rounded-md flex items-center">
+        <i class="ph ph-bell-ringing mr-1"></i>
+        <span>Alert Settings</span>
+      </button>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="border border-red-200 rounded-lg p-4 bg-red-50">
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex items-center">
+            <div class="bg-red-100 p-2 rounded-full mr-3">
+              <i class="ph ph-warning text-red-600"></i>
+            </div>
+            <h3 class="font-semibold text-red-800">Critical Heart Risk</h3>
+          </div>
+          <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">Urgent</span>
+        </div>
+        <p class="text-sm text-red-700 mb-2">Patient P-7842 shows 92.7% probability of heart disease.</p>
+        <p class="text-xs text-red-600">Detected: Just now</p>
+      </div>
+      
+      <div class="border border-red-200 rounded-lg p-4 bg-red-50">
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex items-center">
+            <div class="bg-red-100 p-2 rounded-full mr-3">
+              <i class="ph ph-warning text-red-600"></i>
+            </div>
+            <h3 class="font-semibold text-red-800">Neurological Alert</h3>
+          </div>
+          <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">Urgent</span>
+        </div>
+        <p class="text-sm text-red-700 mb-2">Patient P-3278 shows 89.1% probability of neurological disorder.</p>
+        <p class="text-xs text-red-600">Detected: 3 minutes ago</p>
+      </div>
+      
+      <div class="border border-yellow-200 rounded-lg p-4 bg-yellow-50">
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex items-center">
+            <div class="bg-yellow-100 p-2 rounded-full mr-3">
+              <i class="ph ph-warning text-yellow-600"></i>
+            </div>
+            <h3 class="font-semibold text-yellow-800">Diabetes Risk</h3>
+          </div>
+          <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Medium</span>
+        </div>
+        <p class="text-sm text-yellow-700 mb-2">Patient P-9156 shows 76.3% probability of diabetes.</p>
+        <p class="text-xs text-yellow-600">Detected: 30 seconds ago</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="text-center py-6 bg-gradient-to-r from-indigo-700 to-indigo-600 text-white">
+  <div class="container mx-auto px-6">
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 mb-6">
+      <div class="flex items-center space-x-2">
+        <i class="ph ph-heartbeat text-2xl"></i>
+        <span class="font-semibold">Smart Healthcare Management System</span>
+      </div>
+      <div class="text-sm">
+        © 2025 SHMS | AI-ML Developer Dashboard
+      </div>
+      <div class="flex items-center space-x-4">
+        <a href="#" class="hover:text-indigo-200 transition">
+          <i class="ph ph-info text-xl"></i>
+        </a>
+      </div>
+    </div>
+    
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+      <div class="max-w-md text-center md:text-left">
+        <p class="text-sm">
+          Advanced AI-ML infrastructure for predictive healthcare analytics and intelligent patient care solutions.
+        </p>
+      </div>
+
+      <div class="flex space-x-5 text-white">
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-facebook-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-twitter-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-linkedin-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-envelope text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-phone text-2xl"></i></a>
+      </div>
+    </div>
+
+    <div class="text-center text-sm text-indigo-200 mt-6 border-t border-indigo-700 pt-4">
+      © 2025 Smart Healthcare Management System | AI-ML Developer Interface
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Update current date and time
+  function updateDateTime() {
+    const now = new Date();
+    const options = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    };
+    document.getElementById('currentDateTime').textContent = now.toLocaleDateString('en-US', options);
+  }
+  updateDateTime();
+  setInterval(updateDateTime, 1000);
+
+  // Top menu toggle
+  const menuBtn = document.getElementById('menuBtn');
+  const menuDropdown = document.getElementById('menuDropdown');
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuDropdown.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+      menuDropdown.classList.add('hidden');
+    }
+  });
+
+  // Dropdown functionality
+  const dropdownButtons = document.querySelectorAll('.dropdownBtn');
+  let activeDropdown = null;
+
+  dropdownButtons.forEach(btn => {
+    const dropdown = btn.nextElementSibling;
+    if (!dropdown) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeDropdown && activeDropdown !== dropdown) {
+        activeDropdown.classList.remove('show');
+      }
+      if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        activeDropdown = null;
+      } else {
+        dropdown.classList.add('show');
+        activeDropdown = dropdown;
+      }
+    });
+
+    btn.addEventListener('mouseenter', () => dropdown.classList.add('show'));
+    btn.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!dropdown.matches(':hover')) {
+          dropdown.classList.remove('show');
+        }
+      }, 100);
+    });
+    
+    if (dropdown) {
+      dropdown.addEventListener('mouseleave', () => {
+        dropdown.classList.remove('show');
+        if (activeDropdown === dropdown) activeDropdown = null;
+      });
+    }
+  });
+
+  document.body.addEventListener('click', () => {
+    if (activeDropdown) {
+      activeDropdown.classList.remove('show');
+      activeDropdown = null;
+    }
+  });
+
+  // Hide/show navbar on scroll
+  let lastScroll = 0;
+  const featureNavbar = document.getElementById('featureNavbar');
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+    if (currentScroll > lastScroll && currentScroll > 100) {
+      featureNavbar.style.transform = 'translateY(-100%)';
+    } else {
+      featureNavbar.style.transform = 'translateY(0)';
+    }
+    lastScroll = currentScroll;
+  });
+
+  // Tab functionality
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      // Remove active class from all buttons and contents
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      tabContents.forEach(content => content.classList.remove('active'));
+      
+      // Add active class to clicked button
+      button.classList.add('active');
+      
+      // Show corresponding content
+      const tabId = button.getAttribute('data-tab');
+      document.getElementById(tabId).classList.add('active');
+    });
+  });
+
+  // Animate numbers on scroll
+  const animateValue = (element, start, end, duration) => {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const value = Math.floor(progress * (end - start) + start);
+      element.textContent = value.toLocaleString();
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+    window.requestAnimationFrame(step);
+  };
+
+  // Observe stats for animation
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const statNumber = entry.target;
+        const targetValue = parseInt(statNumber.textContent.replace(/,/g, ''));
+        animateValue(statNumber, 0, targetValue, 1500);
+        observer.unobserve(statNumber);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('.stat-number').forEach(stat => {
+    observer.observe(stat);
+  });
+
+  // Chart.js configurations
+  const chartColors = {
+    primary: '#6366F1',
+    secondary: '#8B5CF6',
+    success: '#10B981',
+    warning: '#F59E0B',
+    danger: '#EF4444',
+    info: '#3B82F6'
+  };
+
+  // Initialize Charts
+  document.addEventListener('DOMContentLoaded', function() {
+    // Prediction Trends Chart
+    const trendsCtx = document.getElementById('predictionTrendsChart').getContext('2d');
+    const predictionTrendsChart = new Chart(trendsCtx, {
+      type: 'line',
+      data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{
+          label: 'Total Predictions',
+          data: [865, 932, 1002, 1105, 1247, 985, 892],
+          borderColor: 'rgb(99, 102, 241)',
+          backgroundColor: 'rgba(99, 102, 241, 0.1)',
+          tension: 0.3,
+          fill: true
+        }, {
+          label: 'High-Risk Predictions',
+          data: [32, 28, 35, 38, 42, 31, 29],
+          borderColor: 'rgb(239, 68, 68)',
+          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          tension: 0.3,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+
+    // Risk Distribution Chart
+    const riskCtx = document.getElementById('riskDistributionChart').getContext('2d');
+    const riskDistributionChart = new Chart(riskCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['High Risk', 'Medium Risk', 'Low Risk', 'No Risk'],
+        datasets: [{
+          data: [42, 158, 360, 687],
+          backgroundColor: [
+            'rgba(239, 68, 68, 0.7)',
+            'rgba(245, 158, 11, 0.7)',
+            'rgba(16, 185, 129, 0.7)',
+            'rgba(59, 130, 246, 0.7)'
+          ],
+          borderColor: [
+            'rgb(239, 68, 68)',
+            'rgb(245, 158, 11)',
+            'rgb(16, 185, 129)',
+            'rgb(59, 130, 246)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+          }
+        }
+      }
+    });
+
+    // Model Comparison Chart
+    const comparisonCtx = document.getElementById('modelComparisonChart').getContext('2d');
+    const modelComparisonChart = new Chart(comparisonCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Heart Disease', 'Diabetes', 'Cancer', 'Respiratory', 'Neurological'],
+        datasets: [{
+          label: 'Accuracy',
+          data: [96.2, 89.0, 92.7, 87.4, 84.6],
+          backgroundColor: 'rgba(99, 102, 241, 0.7)',
+          borderColor: 'rgb(99, 102, 241)',
+          borderWidth: 1
+        }, {
+          label: 'Precision',
+          data: [94.8, 87.5, 91.3, 85.2, 82.9],
+          backgroundColor: 'rgba(139, 92, 246, 0.7)',
+          borderColor: 'rgb(139, 92, 246)',
+          borderWidth: 1
+        }, {
+          label: 'Recall',
+          data: [95.7, 88.2, 92.1, 86.8, 83.7],
+          backgroundColor: 'rgba(236, 72, 153, 0.7)',
+          borderColor: 'rgb(236, 72, 153)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            ticks: {
+              callback: function(value) {
+                return value + '%';
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Accuracy Over Time Chart
+    const accuracyCtx = document.getElementById('accuracyOverTimeChart').getContext('2d');
+    const accuracyOverTimeChart = new Chart(accuracyCtx, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        datasets: [{
+          label: 'Heart Disease Model',
+          data: [91.2, 92.5, 93.1, 94.2, 94.8, 95.3, 95.7, 95.9, 96.1, 96.2, 96.2, 96.2],
+          borderColor: 'rgb(99, 102, 241)',
+          backgroundColor: 'rgba(99, 102, 241, 0.1)',
+          tension: 0.3,
+          fill: true
+        }, {
+          label: 'Diabetes Model',
+          data: [84.5, 85.2, 86.1, 86.8, 87.3, 87.9, 88.2, 88.5, 88.7, 88.9, 89.0, 89.0],
+          borderColor: 'rgb(139, 92, 246)',
+          backgroundColor: 'rgba(139, 92, 246, 0.1)',
+          tension: 0.3,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: false,
+            min: 80,
+            max: 100,
+            ticks: {
+              callback: function(value) {
+                return value + '%';
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Response Time Chart
+    const responseCtx = document.getElementById('responseTimeChart').getContext('2d');
+    const responseTimeChart = new Chart(responseCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Heart Disease', 'Diabetes', 'Cancer', 'Respiratory', 'Neurological'],
+        datasets: [{
+          label: 'Response Time (ms)',
+          data: [128, 142, 245, 198, 312],
+          backgroundColor: [
+            'rgba(99, 102, 241, 0.7)',
+            'rgba(139, 92, 246, 0.7)',
+            'rgba(236, 72, 153, 0.7)',
+            'rgba(16, 185, 129, 0.7)',
+            'rgba(245, 158, 11, 0.7)'
+          ],
+          borderColor: [
+            'rgb(99, 102, 241)',
+            'rgb(139, 92, 246)',
+            'rgb(236, 72, 153)',
+            'rgb(16, 185, 129)',
+            'rgb(245, 158, 11)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  });
+
+  // Add hover effect to dashboard cards
+  const dashboardCards = document.querySelectorAll('.card-hover');
+  dashboardCards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transition = 'all 0.3s ease';
+    });
+  });
+
+  // Simulate live prediction updates
+  function simulateLivePredictions() {
+    const liveFeed = document.querySelector('.max-h-96');
+    if (!liveFeed) return;
+    
+    const predictions = [
+      {
+        risk: 'High',
+        color: 'red',
+        model: 'Heart Disease',
+        patient: 'P-' + Math.floor(Math.random() * 10000),
+        confidence: (85 + Math.random() * 10).toFixed(1) + '%',
+        time: 'Just now'
+      },
+      {
+        risk: 'Medium',
+        color: 'yellow',
+        model: 'Diabetes',
+        patient: 'P-' + Math.floor(Math.random() * 10000),
+        confidence: (70 + Math.random() * 15).toFixed(1) + '%',
+        time: 'Just now'
+      },
+      {
+        risk: 'Low',
+        color: 'green',
+        model: 'Respiratory',
+        patient: 'P-' + Math.floor(Math.random() * 10000),
+        confidence: (80 + Math.random() * 15).toFixed(1) + '%',
+        time: 'Just now'
+      }
+    ];
+    
+    const prediction = predictions[Math.floor(Math.random() * predictions.length)];
+    
+    const newPrediction = document.createElement('div');
+    newPrediction.className = 'flex items-start space-x-4 p-4 border border-gray-200 rounded-lg';
+    newPrediction.innerHTML = `
+      <div class="bg-${prediction.color}-100 p-2 rounded-full">
+        <i class="ph ph-warning text-${prediction.color}-600"></i>
+      </div>
+      <div class="flex-1">
+        <p class="font-medium text-gray-800">${prediction.risk} Risk of ${prediction.model}</p>
+        <p class="text-sm text-gray-500">Patient ID: ${prediction.patient} • Confidence: ${prediction.confidence}</p>
+        <p class="text-xs text-gray-400 mt-1">${prediction.time}</p>
+      </div>
+      <span class="bg-${prediction.color}-100 text-${prediction.color}-800 text-xs px-2 py-1 rounded-full">${prediction.risk} Risk</span>
+    `;
+    
+    liveFeed.insertBefore(newPrediction, liveFeed.firstChild);
+    
+    // Remove oldest prediction if we have more than 5
+    if (liveFeed.children.length > 5) {
+      liveFeed.removeChild(liveFeed.lastChild);
+    }
+  }
+  
+  // Update live predictions every 10 seconds
+  setInterval(simulateLivePredictions, 10000);
+</script>
+</body>
+</html>

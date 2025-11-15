@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Management | SHMS AI-ML Developer</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  @keyframes chartAppear {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .animate-fadeIn { animation: fadeIn 0.6s ease-out forwards; }
+  .animate-slideUp { animation: slideUp 0.7s ease-out forwards; }
+  .animate-pulse-slow { animation: pulse 3s ease-in-out infinite; }
+  .chart-appear { animation: chartAppear 0.8s ease-out forwards; }
+
+  .dropdownContent {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none;
+    position: absolute;
+    z-index: 50;
+    left: 0;
+  }
+  .dropdownContent.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .card-hover {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  .stat-number {
+    font-feature-settings: 'tnum';
+    font-variant-numeric: tabular-nums;
+  }
+  .gradient-border {
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899) border-box;
+    border: 2px solid transparent;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #f1f1f1; }
+  ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: #4f46e5; }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Chart containers */
+  .chart-container { position: relative; height: 300px; }
+  
+  /* Progress bars */
+  .progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e5e7eb;
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease-in-out;
+  }
+  
+  /* Status indicators */
+  .status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+  
+  .status-active { background-color: #10b981; }
+  .status-processing { background-color: #f59e0b; }
+  .status-error { background-color: #ef4444; }
+  .status-idle { background-color: #6b7280; }
+
+  /* Data quality indicators */
+  .quality-excellent { background-color: #10b981; }
+  .quality-good { background-color: #3b82f6; }
+  .quality-fair { background-color: #f59e0b; }
+  .quality-poor { background-color: #ef4444; }
+
+  /* Form styles */
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  .form-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  
+  .form-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  }
+
+  /* Tabs */
+  .tab-container {
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .tab-button {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .tab-button.active {
+    color: #6366f1;
+    border-bottom-color: #6366f1;
+  }
+  
+  .tab-button:hover:not(.active) {
+    color: #374151;
+    border-bottom-color: #d1d5db;
+  }
+  
+  .tab-content {
+    display: none;
+  }
+  
+  .tab-content.active {
+    display: block;
+  }
+
+  /* Data table styles */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .data-table th {
+    background-color: #f9fafb;
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .data-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .data-table tr:hover {
+    background-color: #f9fafb;
+  }
+</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen flex flex-col">
+
+<!-- Top Navbar -->
+<nav class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+  <h1 class="text-2xl font-bold tracking-wide flex items-center space-x-2">
+    <i class="ph ph-heartbeat text-3xl"></i>
+    <span>SHMS</span>
+  </h1>
+
+  <span class="text-xl font-bold flex items-center space-x-2">
+    <i class="ph ph-code"></i>
+    <span>AI-ML Developer</span>
+  </span>
+
+  <div class="relative flex items-center space-x-2">
+    
+    <!-- Notification Button -->
+    <a href="Notification.html" class="relative p-2 rounded-full hover:bg-indigo-600 focus:outline-none">
+      <i class="ph ph-bell text-xl"></i>
+      <!-- Notification badge -->
+      <span id="notificationBadge" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+        5
+      </span>
+    </a>
+
+    <!-- Three-dot menu -->
+    <div class="relative">
+      <button id="menuBtn" class="text-white text-2xl focus:outline-none hover:bg-indigo-600 rounded-full p-2 transition" aria-label="Menu">
+        <i class="ph ph-dots-three-vertical"></i>
+      </button>
+      <div id="menuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded-md shadow-lg z-50">
+        <a href="Profile.html" class="block px-4 py-2 hover:bg-indigo-100 rounded-t-md flex items-center space-x-2">
+          <i class="ph ph-user"></i>
+          <span>Profile</span>
+        </a>
+        <a href="Setting.html" class="block px-4 py-2 hover:bg-indigo-100 flex items-center space-x-2">
+          <i class="ph ph-gear"></i>
+          <span>Settings</span>
+        </a>
+        <a href="../Login.html" class="block px-4 py-2 hover:bg-indigo-100 text-red-600 rounded-b-md flex items-center space-x-2">
+          <i class="ph ph-sign-out"></i>
+          <span>Logout</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Feature Navbar -->
+<nav id="featureNavbar" class="bg-indigo-800 text-white shadow-md sticky top-0 z-40 transition-transform duration-300" style="top: 64px;">
+  <div class="container mx-auto flex flex-wrap justify-center md:justify-start items-center px-4 py-2 space-x-2">
+
+    <div class="relative">
+      <a href="Home.html" class="px-5 py-2 rounded-md hover:bg-indigo-700 block transition">Home</a>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">AI Model Management</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="TrainRetrainModel.html" class="block px-4 py-2 hover:bg-indigo-100">Train / Retrain Models</a>
+        <a href="ModelVersionControl.html" class="block px-4 py-2 hover:bg-indigo-100">Model Version Control</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md bg-indigo-600 font-semibold dropdownBtn transition">Data & Pipeline</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="DataManagement.html" class="block px-4 py-2 hover:bg-indigo-100">Data Management</a>
+        <a href="PipelineHealth.html" class="block px-4 py-2 hover:bg-indigo-100">Pipeline Health & Quality</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Monitoring & Analytics</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="PredictionsDashboard.html" class="block px-4 py-2 hover:bg-indigo-100">Predictions Dashboard</a>
+        <a href="RealtimePerformance.html" class="block px-4 py-2 hover:bg-indigo-100">Real-Time Performance</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">System Administration</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="SystemMonitor.html" class="block px-4 py-2 hover:bg-indigo-100">System Monitor</a>
+        <a href="ApiManagement.html" class="block px-4 py-2 hover:bg-indigo-100">API Management</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Verification Tools</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="cvVerification.html" class="block px-4 py-2 hover:bg-indigo-100">CV Verification</a>
+        <a href="DegreeVerification.html" class="block px-4 py-2 hover:bg-indigo-100">Degree Verification</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Reports</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="AiSystemReport.html" class="block px-4 py-2 hover:bg-indigo-100">AI System Report</a>
+        <a href="LogsAndReport.html" class="block px-4 py-2 hover:bg-indigo-100">Logs & Reports</a>
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+<!-- Current Time Display -->
+<div class="container mx-auto px-6 pt-4">
+  <div class="bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-md p-4 flex justify-between items-center transition-colors duration-300">
+    <div class="flex items-center space-x-4">
+      <div class="bg-blue-100 p-3 rounded-full">
+        <i class="ph ph-database text-blue-700 text-2xl"></i>
+      </div>
+      <div>
+        <p class="text-sm text-white/80">Current Date & Time</p>
+        <p id="currentDateTime" class="text-lg font-semibold text-white"></p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2">
+      <span class="relative flex h-3 w-3">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+      </span>
+      <span class="text-sm font-medium text-white/90">Data Systems Online</span>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<main class="flex-grow container mx-auto px-6 py-8">
+  <!-- Welcome Section -->
+  <div class="mb-10 animate-fadeIn">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">Data Management</h1>
+    <p class="text-gray-600">Manage, monitor, and optimize your healthcare datasets for AI model training and analysis.</p>
+  </div>
+
+  <!-- Data Overview Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+    <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.1s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-blue-100 text-sm">Total Datasets</p>
+          <h3 class="text-2xl font-bold stat-number">24</h3>
+        </div>
+        <div class="bg-blue-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-database text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-blue-100">
+          <i class="ph ph-arrow-up mr-1"></i>
+          <span>3 new this week</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.2s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-green-100 text-sm">Data Volume</p>
+          <h3 class="text-2xl font-bold stat-number">4.2 TB</h3>
+        </div>
+        <div class="bg-green-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-hard-drives text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-green-100">
+          <i class="ph ph-trend-up mr-1"></i>
+          <span>12% growth this month</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.3s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-purple-100 text-sm">Data Quality Score</p>
+          <h3 class="text-2xl font-bold stat-number">92.4%</h3>
+        </div>
+        <div class="bg-purple-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-check-circle text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-purple-100">
+          <i class="ph ph-arrow-up mr-1"></i>
+          <span>3.2% improvement</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.4s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-orange-100 text-sm">Processing Jobs</p>
+          <h3 class="text-2xl font-bold stat-number">8</h3>
+        </div>
+        <div class="bg-orange-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-gear text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-orange-100">
+          <i class="ph ph-warning mr-1"></i>
+          <span>2 require attention</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs for Data Management -->
+  <div class="bg-white rounded-xl shadow-md mb-10 animate-fadeIn">
+    <div class="tab-container">
+      <div class="flex overflow-x-auto">
+        <button class="tab-button active" data-tab="datasets">Datasets</button>
+        <button class="tab-button" data-tab="quality">Data Quality</button>
+        <button class="tab-button" data-tab="processing">Data Processing</button>
+        <button class="tab-button" data-tab="sources">Data Sources</button>
+        <button class="tab-button" data-tab="governance">Data Governance</button>
+      </div>
+    </div>
+
+    <!-- Datasets Tab -->
+    <div id="datasets" class="tab-content active p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Datasets</h2>
+        <div class="flex space-x-3">
+          <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center space-x-2">
+            <i class="ph ph-plus"></i>
+            <span>Add Dataset</span>
+          </button>
+          <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 py-2 px-4 rounded-md flex items-center space-x-2">
+            <i class="ph ph-upload-simple"></i>
+            <span>Import</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Dataset Name</th>
+              <th>Type</th>
+              <th>Records</th>
+              <th>Size</th>
+              <th>Last Updated</th>
+              <th>Quality Score</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="font-medium text-gray-900">Patient Records 2024</td>
+              <td>Structured</td>
+              <td>124,582</td>
+              <td>2.4 GB</td>
+              <td>2 hours ago</td>
+              <td>
+                <div class="flex items-center">
+                  <span class="status-indicator quality-excellent"></span>
+                  <span>96.2%</span>
+                </div>
+              </td>
+              <td>
+                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Active</span>
+              </td>
+              <td>
+                <div class="flex space-x-2">
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-eye"></i>
+                  </button>
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-pencil-simple"></i>
+                  </button>
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-download-simple"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium text-gray-900">Medical Imaging Database</td>
+              <td>Images</td>
+              <td>45,782</td>
+              <td>1.8 TB</td>
+              <td>5 hours ago</td>
+              <td>
+                <div class="flex items-center">
+                  <span class="status-indicator quality-good"></span>
+                  <span>88.7%</span>
+                </div>
+              </td>
+              <td>
+                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Active</span>
+              </td>
+              <td>
+                <div class="flex space-x-2">
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-eye"></i>
+                  </button>
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-pencil-simple"></i>
+                  </button>
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-download-simple"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium text-gray-900">Lab Results Archive</td>
+              <td>Structured</td>
+              <td>892,456</td>
+              <td>3.2 GB</td>
+              <td>1 day ago</td>
+              <td>
+                <div class="flex items-center">
+                  <span class="status-indicator quality-fair"></span>
+                  <span>76.5%</span>
+                </div>
+              </td>
+              <td>
+                <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Processing</span>
+              </td>
+              <td>
+                <div class="flex space-x-2">
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-eye"></i>
+                  </button>
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-pencil-simple"></i>
+                  </button>
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-download-simple"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium text-gray-900">Genomic Sequences</td>
+              <td>Sequences</td>
+              <td>12,458</td>
+              <td>650 GB</td>
+              <td>3 days ago</td>
+              <td>
+                <div class="flex items-center">
+                  <span class="status-indicator quality-poor"></span>
+                  <span>62.3%</span>
+                </div>
+              </td>
+              <td>
+                <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">Needs Attention</span>
+              </td>
+              <td>
+                <div class="flex space-x-2">
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-eye"></i>
+                  </button>
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-pencil-simple"></i>
+                  </button>
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-download-simple"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium text-gray-900">Clinical Notes NLP</td>
+              <td>Text</td>
+              <td>245,782</td>
+              <td>4.5 GB</td>
+              <td>1 week ago</td>
+              <td>
+                <div class="flex items-center">
+                  <span class="status-indicator quality-good"></span>
+                  <span>84.1%</span>
+                </div>
+              </td>
+              <td>
+                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Active</span>
+              </td>
+              <td>
+                <div class="flex space-x-2">
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-eye"></i>
+                  </button>
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-pencil-simple"></i>
+                  </button>
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-download-simple"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Data Quality Tab -->
+    <div id="quality" class="tab-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Data Quality Metrics</h2>
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center space-x-2">
+          <i class="ph ph-export"></i>
+          <span>Export Report</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Quality Score Distribution -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Quality Score Distribution</h3>
+          <div class="chart-container">
+            <canvas id="qualityDistributionChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Data Completeness -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Data Completeness</h3>
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700">Patient Records</span>
+                <span class="text-sm text-gray-500">98.2%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill bg-green-500" style="width: 98.2%"></div>
+              </div>
+            </div>
+            
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700">Medical Images</span>
+                <span class="text-sm text-gray-500">92.7%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill bg-blue-500" style="width: 92.7%"></div>
+              </div>
+            </div>
+            
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700">Lab Results</span>
+                <span class="text-sm text-gray-500">87.4%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill bg-yellow-500" style="width: 87.4%"></div>
+              </div>
+            </div>
+            
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700">Genomic Data</span>
+                <span class="text-sm text-gray-500">76.5%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill bg-red-500" style="width: 76.5%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quality Issues -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Data Quality Issues</h3>
+        <div class="overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Dataset</th>
+                <th>Issue Type</th>
+                <th>Severity</th>
+                <th>Affected Records</th>
+                <th>Detection Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-medium text-gray-900">Genomic Sequences</td>
+                <td>Missing Values</td>
+                <td><span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">High</span></td>
+                <td>2,458</td>
+                <td>2024-03-15</td>
+                <td><span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Pending</span></td>
+                <td>
+                  <button class="text-indigo-600 hover:text-indigo-900 text-sm">Resolve</button>
+                </td>
+              </tr>
+              <tr>
+                <td class="font-medium text-gray-900">Lab Results Archive</td>
+                <td>Inconsistent Formatting</td>
+                <td><span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Medium</span></td>
+                <td>12,458</td>
+                <td>2024-03-14</td>
+                <td><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Resolved</span></td>
+                <td>
+                  <button class="text-indigo-600 hover:text-indigo-900 text-sm">View</button>
+                </td>
+              </tr>
+              <tr>
+                <td class="font-medium text-gray-900">Patient Records 2024</td>
+                <td>Duplicate Entries</td>
+                <td><span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Medium</span></td>
+                <td>845</td>
+                <td>2024-03-12</td>
+                <td><span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">In Progress</span></td>
+                <td>
+                  <button class="text-indigo-600 hover:text-indigo-900 text-sm">Resolve</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Processing Tab -->
+    <div id="processing" class="tab-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Data Processing Jobs</h2>
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center space-x-2">
+          <i class="ph ph-plus"></i>
+          <span>New Processing Job</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Active Processing Jobs -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Active Processing Jobs</h3>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <span class="status-indicator status-processing"></span>
+                <div>
+                  <p class="font-medium text-gray-800">Data Cleaning - Lab Results</p>
+                  <p class="text-sm text-gray-500">Removing duplicates and formatting issues</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-sm font-medium text-yellow-600">65% Complete</p>
+                <p class="text-xs text-gray-500">ETA: 45 minutes</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <span class="status-indicator status-processing"></span>
+                <div>
+                  <p class="font-medium text-gray-800">Feature Engineering - Patient Data</p>
+                  <p class="text-sm text-gray-500">Creating derived features for ML models</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-sm font-medium text-yellow-600">32% Complete</p>
+                <p class="text-xs text-gray-500">ETA: 2 hours</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <span class="status-indicator status-processing"></span>
+                <div>
+                  <p class="font-medium text-gray-800">Image Preprocessing - X-Rays</p>
+                  <p class="text-sm text-gray-500">Normalizing and augmenting medical images</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-sm font-medium text-yellow-600">12% Complete</p>
+                <p class="text-xs text-gray-500">ETA: 5 hours</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Processing Statistics -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Processing Statistics</h3>
+          <div class="space-y-6">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-sm text-gray-500">Jobs Completed Today</p>
+                <p class="text-2xl font-bold text-gray-800">24</p>
+              </div>
+              <div class="bg-green-100 p-3 rounded-full">
+                <i class="ph ph-check-circle text-green-600 text-xl"></i>
+              </div>
+            </div>
+            
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-sm text-gray-500">Average Processing Time</p>
+                <p class="text-2xl font-bold text-gray-800">42 min</p>
+              </div>
+              <div class="bg-blue-100 p-3 rounded-full">
+                <i class="ph ph-clock text-blue-600 text-xl"></i>
+              </div>
+            </div>
+            
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-sm text-gray-500">Data Processed Today</p>
+                <p class="text-2xl font-bold text-gray-800">3.2 GB</p>
+              </div>
+              <div class="bg-purple-100 p-3 rounded-full">
+                <i class="ph ph-hard-drives text-purple-600 text-xl"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Processing Templates -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Processing Templates</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
+            <div class="flex items-center mb-3">
+              <div class="bg-blue-100 p-2 rounded-lg mr-3">
+                <i class="ph ph-magic-wand text-blue-600"></i>
+              </div>
+              <h4 class="font-medium text-gray-800">Data Cleaning</h4>
+            </div>
+            <p class="text-sm text-gray-600 mb-3">Remove duplicates, handle missing values, and standardize formats</p>
+            <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-md text-sm">
+              Use Template
+            </button>
+          </div>
+          
+          <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
+            <div class="flex items-center mb-3">
+              <div class="bg-green-100 p-2 rounded-lg mr-3">
+                <i class="ph ph-cpu text-green-600"></i>
+              </div>
+              <h4 class="font-medium text-gray-800">Feature Engineering</h4>
+            </div>
+            <p class="text-sm text-gray-600 mb-3">Create derived features and transform variables for ML</p>
+            <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-md text-sm">
+              Use Template
+            </button>
+          </div>
+          
+          <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
+            <div class="flex items-center mb-3">
+              <div class="bg-purple-100 p-2 rounded-lg mr-3">
+                <i class="ph ph-image text-purple-600"></i>
+              </div>
+              <h4 class="font-medium text-gray-800">Image Preprocessing</h4>
+            </div>
+            <p class="text-sm text-gray-600 mb-3">Resize, normalize, and augment medical images</p>
+            <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-md text-sm">
+              Use Template
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Sources Tab -->
+    <div id="sources" class="tab-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Data Sources</h2>
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center space-x-2">
+          <i class="ph ph-plus"></i>
+          <span>Add Data Source</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Data Sources List -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Connected Data Sources</h3>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <div class="bg-blue-100 p-2 rounded-lg mr-3">
+                  <i class="ph ph-database text-blue-600"></i>
+                </div>
+                <div>
+                  <p class="font-medium text-gray-800">Hospital EHR System</p>
+                  <p class="text-sm text-gray-500">Electronic Health Records Database</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-sm font-medium text-green-600">Connected</p>
+                <p class="text-xs text-gray-500">Last sync: 15 min ago</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <div class="bg-green-100 p-2 rounded-lg mr-3">
+                  <i class="ph ph-cloud-arrow-down text-green-600"></i>
+                </div>
+                <div>
+                  <p class="font-medium text-gray-800">Lab Information System</p>
+                  <p class="text-sm text-gray-500">Laboratory Results and Tests</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-sm font-medium text-green-600">Connected</p>
+                <p class="text-xs text-gray-500">Last sync: 2 hours ago</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <div class="bg-purple-100 p-2 rounded-lg mr-3">
+                  <i class="ph ph-image-square text-purple-600"></i>
+                </div>
+                <div>
+                  <p class="font-medium text-gray-800">PACS System</p>
+                  <p class="text-sm text-gray-500">Medical Imaging Archive</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-sm font-medium text-green-600">Connected</p>
+                <p class="text-xs text-gray-500">Last sync: 1 hour ago</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <div class="bg-yellow-100 p-2 rounded-lg mr-3">
+                  <i class="ph ph-warning text-yellow-600"></i>
+                </div>
+                <div>
+                  <p class="font-medium text-gray-800">Genomics Database</p>
+                  <p class="text-sm text-gray-500">DNA Sequencing Data</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-sm font-medium text-red-600">Disconnected</p>
+                <p class="text-xs text-gray-500">Connection lost: 3 days ago</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Ingestion Metrics -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Data Ingestion Metrics</h3>
+          <div class="chart-container">
+            <canvas id="ingestionMetricsChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Governance Tab -->
+    <div id="governance" class="tab-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Data Governance</h2>
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center space-x-2">
+          <i class="ph ph-shield-check"></i>
+          <span>Compliance Report</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Compliance Status -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Compliance Status</h3>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <div class="bg-green-100 p-2 rounded-full mr-3">
+                  <i class="ph ph-check-circle text-green-600"></i>
+                </div>
+                <span class="font-medium text-gray-800">HIPAA Compliance</span>
+              </div>
+              <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Compliant</span>
+            </div>
+            
+            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <div class="bg-green-100 p-2 rounded-full mr-3">
+                  <i class="ph ph-check-circle text-green-600"></i>
+                </div>
+                <span class="font-medium text-gray-800">GDPR Compliance</span>
+              </div>
+              <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Compliant</span>
+            </div>
+            
+            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <div class="bg-yellow-100 p-2 rounded-full mr-3">
+                  <i class="ph ph-warning text-yellow-600"></i>
+                </div>
+                <span class="font-medium text-gray-800">Data Retention Policy</span>
+              </div>
+              <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Review Needed</span>
+            </div>
+            
+            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <div class="bg-green-100 p-2 rounded-full mr-3">
+                  <i class="ph ph-check-circle text-green-600"></i>
+                </div>
+                <span class="font-medium text-gray-800">Access Control</span>
+              </div>
+              <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Enforced</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Access Logs -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Data Access</h3>
+          <div class="space-y-4">
+            <div class="flex items-start space-x-4 p-3 rounded-lg hover:bg-gray-50">
+              <div class="bg-blue-100 p-2 rounded-full">
+                <i class="ph ph-user text-blue-600"></i>
+              </div>
+              <div>
+                <p class="font-medium text-gray-800">Dr. Sarah Johnson</p>
+                <p class="text-sm text-gray-500">Accessed Patient Records dataset</p>
+                <p class="text-xs text-gray-400 mt-1">30 minutes ago</p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-4 p-3 rounded-lg hover:bg-gray-50">
+              <div class="bg-green-100 p-2 rounded-full">
+                <i class="ph ph-user text-green-600"></i>
+              </div>
+              <div>
+                <p class="font-medium text-gray-800">AI Training Pipeline</p>
+                <p class="text-sm text-gray-500">Processed Medical Imaging dataset</p>
+                <p class="text-xs text-gray-400 mt-1">2 hours ago</p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-4 p-3 rounded-lg hover:bg-gray-50">
+              <div class="bg-purple-100 p-2 rounded-full">
+                <i class="ph ph-user text-purple-600"></i>
+              </div>
+              <div>
+                <p class="font-medium text-gray-800">Research Team</p>
+                <p class="text-sm text-gray-500">Exported anonymized lab results</p>
+                <p class="text-xs text-gray-400 mt-1">5 hours ago</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Policies -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Data Policies</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="border border-gray-200 rounded-lg p-4">
+            <div class="flex items-center mb-3">
+              <div class="bg-blue-100 p-2 rounded-lg mr-3">
+                <i class="ph ph-shield text-blue-600"></i>
+              </div>
+              <h4 class="font-medium text-gray-800">Data Privacy Policy</h4>
+            </div>
+            <p class="text-sm text-gray-600 mb-3">Guidelines for handling sensitive patient information and ensuring privacy compliance.</p>
+            <button class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">View Policy</button>
+          </div>
+          
+          <div class="border border-gray-200 rounded-lg p-4">
+            <div class="flex items-center mb-3">
+              <div class="bg-green-100 p-2 rounded-lg mr-3">
+                <i class="ph ph-clock-counter-clockwise text-green-600"></i>
+              </div>
+              <h4 class="font-medium text-gray-800">Data Retention Policy</h4>
+            </div>
+            <p class="text-sm text-gray-600 mb-3">Rules for how long different types of data should be stored before archival or deletion.</p>
+            <button class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">View Policy</button>
+          </div>
+          
+          <div class="border border-gray-200 rounded-lg p-4">
+            <div class="flex items-center mb-3">
+              <div class="bg-purple-100 p-2 rounded-lg mr-3">
+                <i class="ph ph-users text-purple-600"></i>
+              </div>
+              <h4 class="font-medium text-gray-800">Access Control Policy</h4>
+            </div>
+            <p class="text-sm text-gray-600 mb-3">Defines who can access what data and under which circumstances.</p>
+            <button class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">View Policy</button>
+          </div>
+          
+          <div class="border border-gray-200 rounded-lg p-4">
+            <div class="flex items-center mb-3">
+              <div class="bg-yellow-100 p-2 rounded-lg mr-3">
+                <i class="ph ph-backup text-yellow-600"></i>
+              </div>
+              <h4 class="font-medium text-gray-800">Data Backup Policy</h4>
+            </div>
+            <p class="text-sm text-gray-600 mb-3">Procedures for regular data backups and disaster recovery plans.</p>
+            <button class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">View Policy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="bg-white rounded-xl shadow-md p-6 animate-fadeIn">
+    <h2 class="text-xl font-bold text-gray-800 mb-6">Quick Actions</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <button class="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 transition-colors">
+        <div class="flex items-center">
+          <div class="bg-indigo-100 p-2 rounded-lg mr-3">
+            <i class="ph ph-upload-simple text-indigo-600"></i>
+          </div>
+          <span class="font-medium text-gray-800">Upload Dataset</span>
+        </div>
+        <i class="ph ph-arrow-right text-gray-400"></i>
+      </button>
+      
+      <button class="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 transition-colors">
+        <div class="flex items-center">
+          <div class="bg-green-100 p-2 rounded-lg mr-3">
+            <i class="ph ph-magic-wand text-green-600"></i>
+          </div>
+          <span class="font-medium text-gray-800">Data Cleaning</span>
+        </div>
+        <i class="ph ph-arrow-right text-gray-400"></i>
+      </button>
+      
+      <button class="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 transition-colors">
+        <div class="flex items-center">
+          <div class="bg-blue-100 p-2 rounded-lg mr-3">
+            <i class="ph ph-chart-line text-blue-600"></i>
+          </div>
+          <span class="font-medium text-gray-800">Quality Report</span>
+        </div>
+        <i class="ph ph-arrow-right text-gray-400"></i>
+      </button>
+      
+      <button class="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 transition-colors">
+        <div class="flex items-center">
+          <div class="bg-purple-100 p-2 rounded-lg mr-3">
+            <i class="ph ph-shield-check text-purple-600"></i>
+          </div>
+          <span class="font-medium text-gray-800">Compliance Check</span>
+        </div>
+        <i class="ph ph-arrow-right text-gray-400"></i>
+      </button>
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="text-center py-6 bg-gradient-to-r from-indigo-700 to-indigo-600 text-white">
+  <div class="container mx-auto px-6">
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 mb-6">
+      <div class="flex items-center space-x-2">
+        <i class="ph ph-heartbeat text-2xl"></i>
+        <span class="font-semibold">Smart Healthcare Management System</span>
+      </div>
+      <div class="text-sm">
+        © 2025 SHMS | AI-ML Developer Dashboard
+      </div>
+      <div class="flex items-center space-x-4">
+        <a href="#" class="hover:text-indigo-200 transition">
+          <i class="ph ph-info text-xl"></i>
+        </a>
+      </div>
+    </div>
+    
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+      <div class="max-w-md text-center md:text-left">
+        <p class="text-sm">
+          Advanced AI-ML infrastructure for predictive healthcare analytics and intelligent patient care solutions.
+        </p>
+      </div>
+
+      <div class="flex space-x-5 text-white">
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-facebook-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-twitter-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-linkedin-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-envelope text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-phone text-2xl"></i></a>
+      </div>
+    </div>
+
+    <div class="text-center text-sm text-indigo-200 mt-6 border-t border-indigo-700 pt-4">
+      © 2025 Smart Healthcare Management System | AI-ML Developer Interface
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Update current date and time
+  function updateDateTime() {
+    const now = new Date();
+    const options = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    };
+    document.getElementById('currentDateTime').textContent = now.toLocaleDateString('en-US', options);
+  }
+  updateDateTime();
+  setInterval(updateDateTime, 1000);
+
+  // Top menu toggle
+  const menuBtn = document.getElementById('menuBtn');
+  const menuDropdown = document.getElementById('menuDropdown');
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuDropdown.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+      menuDropdown.classList.add('hidden');
+    }
+  });
+
+  // Dropdown functionality
+  const dropdownButtons = document.querySelectorAll('.dropdownBtn');
+  let activeDropdown = null;
+
+  dropdownButtons.forEach(btn => {
+    const dropdown = btn.nextElementSibling;
+    if (!dropdown) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeDropdown && activeDropdown !== dropdown) {
+        activeDropdown.classList.remove('show');
+      }
+      if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        activeDropdown = null;
+      } else {
+        dropdown.classList.add('show');
+        activeDropdown = dropdown;
+      }
+    });
+
+    btn.addEventListener('mouseenter', () => dropdown.classList.add('show'));
+    btn.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!dropdown.matches(':hover')) {
+          dropdown.classList.remove('show');
+        }
+      }, 100);
+    });
+    
+    if (dropdown) {
+      dropdown.addEventListener('mouseleave', () => {
+        dropdown.classList.remove('show');
+        if (activeDropdown === dropdown) activeDropdown = null;
+      });
+    }
+  });
+
+  document.body.addEventListener('click', () => {
+    if (activeDropdown) {
+      activeDropdown.classList.remove('show');
+      activeDropdown = null;
+    }
+  });
+
+  // Hide/show navbar on scroll
+  let lastScroll = 0;
+  const featureNavbar = document.getElementById('featureNavbar');
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+    if (currentScroll > lastScroll && currentScroll > 100) {
+      featureNavbar.style.transform = 'translateY(-100%)';
+    } else {
+      featureNavbar.style.transform = 'translateY(0)';
+    }
+    lastScroll = currentScroll;
+  });
+
+  // Tab functionality
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      // Remove active class from all buttons and contents
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      tabContents.forEach(content => content.classList.remove('active'));
+      
+      // Add active class to clicked button
+      button.classList.add('active');
+      
+      // Show corresponding content
+      const tabId = button.getAttribute('data-tab');
+      document.getElementById(tabId).classList.add('active');
+    });
+  });
+
+  // Animate numbers on scroll
+  const animateValue = (element, start, end, duration) => {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const value = Math.floor(progress * (end - start) + start);
+      element.textContent = value.toLocaleString();
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+    window.requestAnimationFrame(step);
+  };
+
+  // Observe stats for animation
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const statNumber = entry.target;
+        const targetValue = parseInt(statNumber.textContent.replace(/,/g, ''));
+        animateValue(statNumber, 0, targetValue, 1500);
+        observer.unobserve(statNumber);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('.stat-number').forEach(stat => {
+    observer.observe(stat);
+  });
+
+  // Chart.js configurations
+  const chartColors = {
+    primary: '#6366F1',
+    secondary: '#8B5CF6',
+    success: '#10B981',
+    warning: '#F59E0B',
+    danger: '#EF4444',
+    info: '#3B82F6'
+  };
+
+  // Initialize Charts
+  document.addEventListener('DOMContentLoaded', function() {
+    // Quality Distribution Chart
+    const qualityCtx = document.getElementById('qualityDistributionChart').getContext('2d');
+    const qualityDistributionChart = new Chart(qualityCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Excellent (90-100%)', 'Good (80-89%)', 'Fair (70-79%)', 'Poor (<70%)'],
+        datasets: [{
+          data: [8, 6, 5, 3],
+          backgroundColor: [
+            'rgba(16, 185, 129, 0.7)',
+            'rgba(59, 130, 246, 0.7)',
+            'rgba(245, 158, 11, 0.7)',
+            'rgba(239, 68, 68, 0.7)'
+          ],
+          borderColor: [
+            'rgb(16, 185, 129)',
+            'rgb(59, 130, 246)',
+            'rgb(245, 158, 11)',
+            'rgb(239, 68, 68)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return `${context.label}: ${context.parsed} datasets`;
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Ingestion Metrics Chart
+    const ingestionCtx = document.getElementById('ingestionMetricsChart').getContext('2d');
+    const ingestionMetricsChart = new Chart(ingestionCtx, {
+      type: 'bar',
+      data: {
+        labels: ['EHR System', 'Lab System', 'PACS', 'Genomics', 'External Sources'],
+        datasets: [{
+          label: 'Data Volume (GB)',
+          data: [245, 120, 1800, 650, 85],
+          backgroundColor: 'rgba(99, 102, 241, 0.7)',
+          borderColor: 'rgb(99, 102, 241)',
+          borderWidth: 1
+        }, {
+          label: 'Records (Thousands)',
+          data: [124, 45, 12, 8, 25],
+          backgroundColor: 'rgba(139, 92, 246, 0.7)',
+          borderColor: 'rgb(139, 92, 246)',
+          borderWidth: 1,
+          yAxisID: 'y1'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Data Volume (GB)'
+            }
+          },
+          y1: {
+            position: 'right',
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Records (Thousands)'
+            },
+            grid: {
+              drawOnChartArea: false,
+            },
+          }
+        }
+      }
+    });
+  });
+
+  // Add hover effect to dashboard cards
+  const dashboardCards = document.querySelectorAll('.card-hover');
+  dashboardCards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transition = 'all 0.3s ease';
+    });
+  });
+</script>
+</body>
+</html>

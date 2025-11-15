@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI System Report | SHMS Reports</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  .animate-fadeIn { animation: fadeIn 0.6s ease-out forwards; }
+  .animate-slideUp { animation: slideUp 0.7s ease-out forwards; }
+  .animate-pulse-slow { animation: pulse 3s ease-in-out infinite; }
+
+  .dropdownContent {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none;
+    position: absolute;
+    z-index: 50;
+    left: 0;
+  }
+  .dropdownContent.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .card-hover {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  .stat-number {
+    font-feature-settings: 'tnum';
+    font-variant-numeric: tabular-nums;
+  }
+  .gradient-border {
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899) border-box;
+    border: 2px solid transparent;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #f1f1f1; }
+  ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: #4f46e5; }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Chart containers */
+  .chart-container { position: relative; height: 300px; }
+  
+  /* Progress bars */
+  .progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e5e7eb;
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease-in-out;
+  }
+  
+  /* Status indicators */
+  .status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+  
+  .status-active { background-color: #10b981; }
+  .status-processing { background-color: #f59e0b; }
+  .status-error { background-color: #ef4444; }
+  .status-idle { background-color: #6b7280; }
+
+  /* System health indicators */
+  .health-excellent { background-color: #10b981; color: white; }
+  .health-good { background-color: #3b82f6; color: white; }
+  .health-fair { background-color: #f59e0b; color: white; }
+  .health-poor { background-color: #ef4444; color: white; }
+
+  /* Form styles */
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  .form-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  
+  .form-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  }
+
+  /* Tabs */
+  .tab-container {
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .tab-button {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .tab-button.active {
+    color: #6366f1;
+    border-bottom-color: #6366f1;
+  }
+  
+  .tab-button:hover:not(.active) {
+    color: #374151;
+    border-bottom-color: #d1d5db;
+  }
+  
+  .tab-content {
+    display: none;
+  }
+  
+  .tab-content.active {
+    display: block;
+  }
+
+  /* Data table styles */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .data-table th {
+    background-color: #f9fafb;
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .data-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .data-table tr:hover {
+    background-color: #f9fafb;
+  }
+
+  /* Model card styles */
+  .model-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    transition: all 0.3s;
+  }
+  
+  .model-card:hover {
+    border-color: #6366f1;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Health indicator */
+  .health-indicator {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  
+  .health-excellent { background-color: #d1fae5; color: #065f46; }
+  .health-good { background-color: #dbeafe; color: #1e40af; }
+  .health-fair { background-color: #fef3c7; color: #92400e; }
+  .health-poor { background-color: #fee2e2; color: #991b1b; }
+
+  /* Metric card */
+  .metric-card {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    transition: all 0.3s;
+  }
+  
+  .metric-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen flex flex-col">
+
+<!-- Top Navbar -->
+<nav class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+  <h1 class="text-2xl font-bold tracking-wide flex items-center space-x-2">
+    <i class="ph ph-heartbeat text-3xl"></i>
+    <span>SHMS</span>
+  </h1>
+
+  <span class="text-xl font-bold flex items-center space-x-2">
+    <i class="ph ph-code"></i>
+    <span>AI-ML Developer</span>
+  </span>
+
+  <div class="relative flex items-center space-x-2">
+    
+    <!-- Notification Button -->
+    <a href="Notification.html" class="relative p-2 rounded-full hover:bg-indigo-600 focus:outline-none">
+      <i class="ph ph-bell text-xl"></i>
+      <!-- Notification badge -->
+      <span id="notificationBadge" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+        5
+      </span>
+    </a>
+
+    <!-- Three-dot menu -->
+    <div class="relative">
+      <button id="menuBtn" class="text-white text-2xl focus:outline-none hover:bg-indigo-600 rounded-full p-2 transition" aria-label="Menu">
+        <i class="ph ph-dots-three-vertical"></i>
+      </button>
+      <div id="menuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded-md shadow-lg z-50">
+        <a href="Profile.html" class="block px-4 py-2 hover:bg-indigo-100 rounded-t-md flex items-center space-x-2">
+          <i class="ph ph-user"></i>
+          <span>Profile</span>
+        </a>
+        <a href="Setting.html" class="block px-4 py-2 hover:bg-indigo-100 flex items-center space-x-2">
+          <i class="ph ph-gear"></i>
+          <span>Settings</span>
+        </a>
+        <a href="../Login.html" class="block px-4 py-2 hover:bg-indigo-100 text-red-600 rounded-b-md flex items-center space-x-2">
+          <i class="ph ph-sign-out"></i>
+          <span>Logout</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Feature Navbar -->
+<nav id="featureNavbar" class="bg-indigo-800 text-white shadow-md sticky top-0 z-40 transition-transform duration-300" style="top: 64px;">
+  <div class="container mx-auto flex flex-wrap justify-center md:justify-start items-center px-4 py-2 space-x-2">
+
+    <div class="relative">
+      <a href="Home.html" class="px-5 py-2 rounded-md hover:bg-indigo-700 block transition">Home</a>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">AI Model Management</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="TrainRetrainModel.html" class="block px-4 py-2 hover:bg-indigo-100">Train / Retrain Models</a>
+        <a href="ModelVersionControl.html" class="block px-4 py-2 hover:bg-indigo-100">Model Version Control</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Data & Pipeline</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="DataManagement.html" class="block px-4 py-2 hover:bg-indigo-100">Data Management</a>
+        <a href="PipelineHealth.html" class="block px-4 py-2 hover:bg-indigo-100">Pipeline Health & Quality</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Monitoring & Analytics</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="PredictionsDashboard.html" class="block px-4 py-2 hover:bg-indigo-100">Predictions Dashboard</a>
+        <a href="RealtimePerformance.html" class="block px-4 py-2 hover:bg-indigo-100">Real-Time Performance</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">System Administration</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="SystemMonitor.html" class="block px-4 py-2 hover:bg-indigo-100">System Monitor</a>
+        <a href="ApiManagement.html" class="block px-4 py-2 hover:bg-indigo-100">API Management</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Verification Tools</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="cvVerification.html" class="block px-4 py-2 hover:bg-indigo-100">CV Verification</a>
+        <a href="DegreeVerification.html" class="block px-4 py-2 hover:bg-indigo-100">Degree Verification</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md bg-indigo-600 font-semibold dropdownBtn transition">Reports</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="AiSystemReport.html" class="block px-4 py-2 hover:bg-indigo-100">AI System Report</a>
+        <a href="LogsAndReport.html" class="block px-4 py-2 hover:bg-indigo-100">Logs & Reports</a>
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+<!-- Current Time Display -->
+<div class="container mx-auto px-6 pt-4">
+  <div class="bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-md p-4 flex justify-between items-center transition-colors duration-300">
+    <div class="flex items-center space-x-4">
+      <div class="bg-blue-100 p-3 rounded-full">
+        <i class="ph ph-brain text-blue-700 text-2xl"></i>
+      </div>
+      <div>
+        <p class="text-sm text-white/80">Current Date & Time</p>
+        <p id="currentDateTime" class="text-lg font-semibold text-white"></p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2">
+      <span class="relative flex h-3 w-3">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+      </span>
+      <span class="text-sm font-medium text-white/90">AI Systems Operational</span>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<main class="flex-grow container mx-auto px-6 py-8">
+  <!-- Welcome Section -->
+  <div class="mb-10 animate-fadeIn">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">AI System Report</h1>
+    <p class="text-gray-600">Comprehensive overview of AI system performance, model health, and infrastructure status.</p>
+  </div>
+
+  <!-- AI System Overview Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+    <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.1s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-blue-100 text-sm">Active AI Models</p>
+          <h3 class="text-2xl font-bold stat-number">24</h3>
+        </div>
+        <div class="bg-blue-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-cpu text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-blue-100">
+          <i class="ph ph-arrow-up mr-1"></i>
+          <span>2 new models deployed this month</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.2s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-green-100 text-sm">System Health Score</p>
+          <h3 class="text-2xl font-bold stat-number">94.7%</h3>
+        </div>
+        <div class="bg-green-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-heart text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-green-100">
+          <i class="ph ph-trend-up mr-1"></i>
+          <span>2.3% improvement from last week</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.3s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-purple-100 text-sm">Avg. Prediction Accuracy</p>
+          <h3 class="text-2xl font-bold stat-number">89.2%</h3>
+        </div>
+        <div class="bg-purple-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-target text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-purple-100">
+          <i class="ph ph-arrow-up mr-1"></i>
+          <span>1.5% improvement this quarter</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.4s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-orange-100 text-sm">Daily Predictions</p>
+          <h3 class="text-2xl font-bold stat-number">12,458</h3>
+        </div>
+        <div class="bg-orange-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-lightning text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-orange-100">
+          <i class="ph ph-arrow-up mr-1"></i>
+          <span>8% increase from last week</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs for AI System Report -->
+  <div class="bg-white rounded-xl shadow-md mb-10 animate-fadeIn">
+    <div class="tab-container">
+      <div class="flex overflow-x-auto">
+        <button class="tab-button active" data-tab="system-overview">System Overview</button>
+        <button class="tab-button" data-tab="model-performance">Model Performance</button>
+        <button class="tab-button" data-tab="infrastructure">Infrastructure</button>
+        <button class="tab-button" data-tab="data-pipeline">Data Pipeline</button>
+        <button class="tab-button" data-tab="recommendations">Recommendations</button>
+      </div>
+    </div>
+
+    <!-- System Overview Tab -->
+    <div id="system-overview" class="tab-content active p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">AI System Overview</h2>
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center space-x-2">
+          <i class="ph ph-export"></i>
+          <span>Export Report</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- System Health Overview -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">System Health Overview</h3>
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700">Overall System Health</span>
+                <span class="text-sm font-medium text-gray-700">94.7%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill bg-green-500" style="width: 94.7%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700">Model Performance</span>
+                <span class="text-sm font-medium text-gray-700">89.2%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill bg-blue-500" style="width: 89.2%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700">Infrastructure Health</span>
+                <span class="text-sm font-medium text-gray-700">96.3%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill bg-purple-500" style="width: 96.3%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700">Data Pipeline Health</span>
+                <span class="text-sm font-medium text-gray-700">91.8%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill bg-orange-500" style="width: 91.8%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Metrics -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Key System Metrics</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="metric-card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-gray-500">Uptime</p>
+                  <p class="text-2xl font-bold text-green-600">99.97%</p>
+                </div>
+                <div class="bg-green-100 p-2 rounded-full">
+                  <i class="ph ph-timer text-green-600"></i>
+                </div>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-gray-500">Avg. Response Time</p>
+                  <p class="text-2xl font-bold text-blue-600">142 ms</p>
+                </div>
+                <div class="bg-blue-100 p-2 rounded-full">
+                  <i class="ph ph-gauge text-blue-600"></i>
+                </div>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-gray-500">Error Rate</p>
+                  <p class="text-2xl font-bold text-red-600">0.42%</p>
+                </div>
+                <div class="bg-red-100 p-2 rounded-full">
+                  <i class="ph ph-warning text-red-600"></i>
+                </div>
+              </div>
+            </div>
+            <div class="metric-card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-gray-500">Active Users</p>
+                  <p class="text-2xl font-bold text-purple-600">247</p>
+                </div>
+                <div class="bg-purple-100 p-2 rounded-full">
+                  <i class="ph ph-users text-purple-600"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- System Performance Trends -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">System Performance Trends</h3>
+        <div class="chart-container">
+          <canvas id="systemPerformanceChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Model Performance Tab -->
+    <div id="model-performance" class="tab-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Model Performance</h2>
+        <div class="flex space-x-3">
+          <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 py-2 px-4 rounded-md flex items-center space-x-2">
+            <i class="ph ph-funnel"></i>
+            <span>Filter</span>
+          </button>
+          <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center space-x-2">
+            <i class="ph ph-export"></i>
+            <span>Export</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Model Performance Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Model Card 1 -->
+        <div class="model-card">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h3 class="font-semibold text-gray-800">Heart Disease Prediction</h3>
+              <p class="text-sm text-gray-500">Version 3.2.1</p>
+            </div>
+            <span class="health-indicator health-excellent">Excellent</span>
+          </div>
+          
+          <div class="space-y-3 mb-4">
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Accuracy</span>
+              <span class="text-sm font-medium text-green-600">96.2%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-green-500" style="width: 96.2%"></div>
+            </div>
+            
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Precision</span>
+              <span class="text-sm font-medium text-green-600">94.8%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-green-500" style="width: 94.8%"></div>
+            </div>
+            
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Recall</span>
+              <span class="text-sm font-medium text-green-600">95.7%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-green-500" style="width: 95.7%"></div>
+            </div>
+          </div>
+          
+          <div class="flex justify-between text-xs text-gray-500">
+            <span>Last updated: 2 days ago</span>
+            <span>1,247 predictions today</span>
+          </div>
+        </div>
+
+        <!-- Model Card 2 -->
+        <div class="model-card">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h3 class="font-semibold text-gray-800">Diabetes Risk Assessment</h3>
+              <p class="text-sm text-gray-500">Version 2.1.4</p>
+            </div>
+            <span class="health-indicator health-good">Good</span>
+          </div>
+          
+          <div class="space-y-3 mb-4">
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Accuracy</span>
+              <span class="text-sm font-medium text-blue-600">89.0%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-blue-500" style="width: 89.0%"></div>
+            </div>
+            
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Precision</span>
+              <span class="text-sm font-medium text-blue-600">87.5%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-blue-500" style="width: 87.5%"></div>
+            </div>
+            
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Recall</span>
+              <span class="text-sm font-medium text-blue-600">88.2%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-blue-500" style="width: 88.2%"></div>
+            </div>
+          </div>
+          
+          <div class="flex justify-between text-xs text-gray-500">
+            <span>Last updated: 1 week ago</span>
+            <span>892 predictions today</span>
+          </div>
+        </div>
+
+        <!-- Model Card 3 -->
+        <div class="model-card">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h3 class="font-semibold text-gray-800">Cancer Detection</h3>
+              <p class="text-sm text-gray-500">Version 1.5.2</p>
+            </div>
+            <span class="health-indicator health-fair">Fair</span>
+          </div>
+          
+          <div class="space-y-3 mb-4">
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Accuracy</span>
+              <span class="text-sm font-medium text-yellow-600">84.6%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-yellow-500" style="width: 84.6%"></div>
+            </div>
+            
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Precision</span>
+              <span class="text-sm font-medium text-yellow-600">82.9%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-yellow-500" style="width: 82.9%"></div>
+            </div>
+            
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Recall</span>
+              <span class="text-sm font-medium text-yellow-600">83.7%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-yellow-500" style="width: 83.7%"></div>
+            </div>
+          </div>
+          
+          <div class="flex justify-between text-xs text-gray-500">
+            <span>Last updated: 3 weeks ago</span>
+            <span>654 predictions today</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Model Performance Trends -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Model Performance Trends</h3>
+        <div class="chart-container">
+          <canvas id="modelPerformanceChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Infrastructure Tab -->
+    <div id="infrastructure" class="tab-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Infrastructure Status</h2>
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center space-x-2">
+          <i class="ph ph-export"></i>
+          <span>Export Report</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Resource Usage -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Resource Usage</h3>
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700">CPU Usage</span>
+                <span class="text-sm font-medium text-gray-700">68%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill bg-blue-500" style="width: 68%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700">Memory Usage</span>
+                <span class="text-sm font-medium text-gray-700">76%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill bg-purple-500" style="width: 76%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700">GPU Usage</span>
+                <span class="text-sm font-medium text-gray-700">45%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill bg-green-500" style="width: 45%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700">Storage Usage</span>
+                <span class="text-sm font-medium text-gray-700">42%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill bg-orange-500" style="width: 42%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Infrastructure Health -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Infrastructure Health</h3>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <div class="bg-green-100 p-2 rounded-full mr-3">
+                  <i class="ph ph-check-circle text-green-600"></i>
+                </div>
+                <span>API Gateway</span>
+              </div>
+              <span class="health-indicator health-excellent">Healthy</span>
+            </div>
+            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <div class="bg-green-100 p-2 rounded-full mr-3">
+                  <i class="ph ph-check-circle text-green-600"></i>
+                </div>
+                <span>Model Servers</span>
+              </div>
+              <span class="health-indicator health-excellent">Healthy</span>
+            </div>
+            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <div class="bg-yellow-100 p-2 rounded-full mr-3">
+                  <i class="ph ph-warning text-yellow-600"></i>
+                </div>
+                <span>Database Cluster</span>
+              </div>
+              <span class="health-indicator health-fair">Degraded</span>
+            </div>
+            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <div class="bg-green-100 p-2 rounded-full mr-3">
+                  <i class="ph ph-check-circle text-green-600"></i>
+                </div>
+                <span>Cache Layer</span>
+              </div>
+              <span class="health-indicator health-excellent">Healthy</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Infrastructure Metrics -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Infrastructure Metrics</h3>
+        <div class="chart-container">
+          <canvas id="infrastructureMetricsChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Pipeline Tab -->
+    <div id="data-pipeline" class="tab-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Data Pipeline Health</h2>
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center space-x-2">
+          <i class="ph ph-export"></i>
+          <span>Export Report</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Pipeline Status -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Pipeline Status</h3>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <div class="bg-green-100 p-2 rounded-full mr-3">
+                  <i class="ph ph-check-circle text-green-600"></i>
+                </div>
+                <span>Data Ingestion</span>
+              </div>
+              <span class="health-indicator health-excellent">Running</span>
+            </div>
+            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <div class="bg-green-100 p-2 rounded-full mr-3">
+                  <i class="ph ph-check-circle text-green-600"></i>
+                </div>
+                <span>Data Validation</span>
+              </div>
+              <span class="health-indicator health-excellent">Running</span>
+            </div>
+            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <div class="bg-yellow-100 p-2 rounded-full mr-3">
+                  <i class="ph ph-warning text-yellow-600"></i>
+                </div>
+                <span>Feature Engineering</span>
+              </div>
+              <span class="health-indicator health-fair">Slow</span>
+            </div>
+            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <div class="bg-green-100 p-2 rounded-full mr-3">
+                  <i class="ph ph-check-circle text-green-600"></i>
+                </div>
+                <span>Model Training</span>
+              </div>
+              <span class="health-indicator health-excellent">Idle</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Quality Metrics -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Data Quality Metrics</h3>
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700">Completeness</span>
+                <span class="text-sm font-medium text-gray-700">98.2%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill bg-green-500" style="width: 98.2%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700">Accuracy</span>
+                <span class="text-sm font-medium text-gray-700">95.7%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill bg-green-500" style="width: 95.7%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700">Consistency</span>
+                <span class="text-sm font-medium text-gray-700">92.4%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill bg-blue-500" style="width: 92.4%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700">Timeliness</span>
+                <span class="text-sm font-medium text-gray-700">88.9%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill bg-yellow-500" style="width: 88.9%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Flow Visualization -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Data Flow Metrics</h3>
+        <div class="chart-container">
+          <canvas id="dataFlowChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recommendations Tab -->
+    <div id="recommendations" class="tab-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">AI System Recommendations</h2>
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center space-x-2">
+          <i class="ph ph-check-circle"></i>
+          <span>Apply Recommendations</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Critical Recommendations -->
+        <div class="bg-white rounded-lg border border-red-200 p-6">
+          <h3 class="text-lg font-semibold text-red-800 mb-4 flex items-center">
+            <i class="ph ph-warning mr-2"></i>
+            Critical Recommendations
+          </h3>
+          <div class="space-y-4">
+            <div class="p-4 border border-red-200 rounded-lg bg-red-50">
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="font-medium text-red-800">Upgrade Cancer Detection Model</h4>
+                <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">High Priority</span>
+              </div>
+              <p class="text-sm text-red-700 mb-2">Model accuracy has dropped below 85% threshold. Immediate retraining recommended.</p>
+              <div class="flex justify-between text-xs text-red-600">
+                <span>Impact: High</span>
+                <span>Effort: Medium</span>
+              </div>
+            </div>
+            <div class="p-4 border border-red-200 rounded-lg bg-red-50">
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="font-medium text-red-800">Database Performance Issue</h4>
+                <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">High Priority</span>
+              </div>
+              <p class="text-sm text-red-700 mb-2">Query response times have increased by 45%. Index optimization required.</p>
+              <div class="flex justify-between text-xs text-red-600">
+                <span>Impact: High</span>
+                <span>Effort: Low</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Improvement Recommendations -->
+        <div class="bg-white rounded-lg border border-blue-200 p-6">
+          <h3 class="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+            <i class="ph ph-lightbulb mr-2"></i>
+            Improvement Recommendations
+          </h3>
+          <div class="space-y-4">
+            <div class="p-4 border border-blue-200 rounded-lg bg-blue-50">
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="font-medium text-blue-800">Implement Model A/B Testing</h4>
+                <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Medium Priority</span>
+              </div>
+              <p class="text-sm text-blue-700 mb-2">Set up A/B testing framework to compare model versions before full deployment.</p>
+              <div class="flex justify-between text-xs text-blue-600">
+                <span>Impact: Medium</span>
+                <span>Effort: Medium</span>
+              </div>
+            </div>
+            <div class="p-4 border border-blue-200 rounded-lg bg-blue-50">
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="font-medium text-blue-800">Enhance Monitoring</h4>
+                <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Low Priority</span>
+              </div>
+              <p class="text-sm text-blue-700 mb-2">Add additional metrics for data drift detection and model performance degradation.</p>
+              <div class="flex justify-between text-xs text-blue-600">
+                <span>Impact: Medium</span>
+                <span>Effort: Low</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recommendation Impact Analysis -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Recommendation Impact Analysis</h3>
+        <div class="chart-container">
+          <canvas id="recommendationImpactChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Executive Summary -->
+  <div class="bg-white rounded-xl shadow-md p-6 animate-fadeIn">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl font-bold text-gray-800">Executive Summary</h2>
+      <button class="text-sm bg-indigo-600 text-white px-4 py-2 rounded-md flex items-center">
+        <i class="ph ph-file-pdf mr-1"></i>
+        <span>Download PDF</span>
+      </button>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <h3 class="font-semibold text-gray-800 mb-3">Key Achievements</h3>
+        <ul class="space-y-2 text-sm text-gray-600">
+          <li class="flex items-start">
+            <i class="ph ph-check-circle text-green-500 mr-2 mt-0.5"></i>
+            <span>Overall system health improved by 2.3% this quarter</span>
+          </li>
+          <li class="flex items-start">
+            <i class="ph ph-check-circle text-green-500 mr-2 mt-0.5"></i>
+            <span>Deployed 2 new AI models with 95%+ accuracy</span>
+          </li>
+          <li class="flex items-start">
+            <i class="ph ph-check-circle text-green-500 mr-2 mt-0.5"></i>
+            <span>Reduced average prediction response time by 15ms</span>
+          </li>
+          <li class="flex items-start">
+            <i class="ph ph-check-circle text-green-500 mr-2 mt-0.5"></i>
+            <span>Maintained 99.97% system uptime</span>
+          </li>
+        </ul>
+      </div>
+      
+      <div>
+        <h3 class="font-semibold text-gray-800 mb-3">Areas for Improvement</h3>
+        <ul class="space-y-2 text-sm text-gray-600">
+          <li class="flex items-start">
+            <i class="ph ph-warning text-yellow-500 mr-2 mt-0.5"></i>
+            <span>Cancer detection model performance below target (84.6%)</span>
+          </li>
+          <li class="flex items-start">
+            <i class="ph ph-warning text-yellow-500 mr-2 mt-0.5"></i>
+            <span>Database cluster showing performance degradation</span>
+          </li>
+          <li class="flex items-start">
+            <i class="ph ph-warning text-yellow-500 mr-2 mt-0.5"></i>
+            <span>Feature engineering pipeline running slower than expected</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="text-center py-6 bg-gradient-to-r from-indigo-700 to-indigo-600 text-white">
+  <div class="container mx-auto px-6">
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 mb-6">
+      <div class="flex items-center space-x-2">
+        <i class="ph ph-heartbeat text-2xl"></i>
+        <span class="font-semibold">Smart Healthcare Management System</span>
+      </div>
+      <div class="text-sm">
+        © 2025 SHMS | AI System Reports
+      </div>
+      <div class="flex items-center space-x-4">
+        <a href="#" class="hover:text-indigo-200 transition">
+          <i class="ph ph-info text-xl"></i>
+        </a>
+      </div>
+    </div>
+    
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+      <div class="max-w-md text-center md:text-left">
+        <p class="text-sm">
+          Advanced AI system reporting and analytics for SHMS healthcare infrastructure.
+        </p>
+      </div>
+
+      <div class="flex space-x-5 text-white">
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-facebook-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-twitter-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-linkedin-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-envelope text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-phone text-2xl"></i></a>
+      </div>
+    </div>
+
+    <div class="text-center text-sm text-indigo-200 mt-6 border-t border-indigo-700 pt-4">
+      © 2025 Smart Healthcare Management System | AI System Reports Interface
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Update current date and time
+  function updateDateTime() {
+    const now = new Date();
+    const options = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    };
+    document.getElementById('currentDateTime').textContent = now.toLocaleDateString('en-US', options);
+  }
+  updateDateTime();
+  setInterval(updateDateTime, 1000);
+
+  // Top menu toggle
+  const menuBtn = document.getElementById('menuBtn');
+  const menuDropdown = document.getElementById('menuDropdown');
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuDropdown.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+      menuDropdown.classList.add('hidden');
+    }
+  });
+
+  // Dropdown functionality
+  const dropdownButtons = document.querySelectorAll('.dropdownBtn');
+  let activeDropdown = null;
+
+  dropdownButtons.forEach(btn => {
+    const dropdown = btn.nextElementSibling;
+    if (!dropdown) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeDropdown && activeDropdown !== dropdown) {
+        activeDropdown.classList.remove('show');
+      }
+      if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        activeDropdown = null;
+      } else {
+        dropdown.classList.add('show');
+        activeDropdown = dropdown;
+      }
+    });
+
+    btn.addEventListener('mouseenter', () => dropdown.classList.add('show'));
+    btn.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!dropdown.matches(':hover')) {
+          dropdown.classList.remove('show');
+        }
+      }, 100);
+    });
+    
+    if (dropdown) {
+      dropdown.addEventListener('mouseleave', () => {
+        dropdown.classList.remove('show');
+        if (activeDropdown === dropdown) activeDropdown = null;
+      });
+    }
+  });
+
+  document.body.addEventListener('click', () => {
+    if (activeDropdown) {
+      activeDropdown.classList.remove('show');
+      activeDropdown = null;
+    }
+  });
+
+  // Hide/show navbar on scroll
+  let lastScroll = 0;
+  const featureNavbar = document.getElementById('featureNavbar');
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+    if (currentScroll > lastScroll && currentScroll > 100) {
+      featureNavbar.style.transform = 'translateY(-100%)';
+    } else {
+      featureNavbar.style.transform = 'translateY(0)';
+    }
+    lastScroll = currentScroll;
+  });
+
+  // Tab functionality
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      // Remove active class from all buttons and contents
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      tabContents.forEach(content => content.classList.remove('active'));
+      
+      // Add active class to clicked button
+      button.classList.add('active');
+      
+      // Show corresponding content
+      const tabId = button.getAttribute('data-tab');
+      document.getElementById(tabId).classList.add('active');
+    });
+  });
+
+  // Animate numbers on scroll
+  const animateValue = (element, start, end, duration) => {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const value = Math.floor(progress * (end - start) + start);
+      element.textContent = value.toLocaleString();
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+    window.requestAnimationFrame(step);
+  };
+
+  // Observe stats for animation
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const statNumber = entry.target;
+        const targetValue = parseInt(statNumber.textContent.replace(/,/g, ''));
+        animateValue(statNumber, 0, targetValue, 1500);
+        observer.unobserve(statNumber);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('.stat-number').forEach(stat => {
+    observer.observe(stat);
+  });
+
+  // Chart.js configurations
+  const chartColors = {
+    primary: '#6366F1',
+    secondary: '#8B5CF6',
+    success: '#10B981',
+    warning: '#F59E0B',
+    danger: '#EF4444',
+    info: '#3B82F6'
+  };
+
+  // Initialize Charts
+  document.addEventListener('DOMContentLoaded', function() {
+    // System Performance Chart
+    const systemPerformanceCtx = document.getElementById('systemPerformanceChart').getContext('2d');
+    const systemPerformanceChart = new Chart(systemPerformanceCtx, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        datasets: [{
+          label: 'System Health Score',
+          data: [88.2, 89.5, 90.1, 91.3, 92.0, 92.5, 93.1, 93.8, 94.2, 94.5, 94.7, 94.7],
+          borderColor: 'rgb(16, 185, 129)',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          tension: 0.3,
+          fill: true
+        }, {
+          label: 'Prediction Accuracy',
+          data: [85.4, 86.2, 86.8, 87.3, 87.9, 88.2, 88.5, 88.7, 88.9, 89.0, 89.1, 89.2],
+          borderColor: 'rgb(99, 102, 241)',
+          backgroundColor: 'rgba(99, 102, 241, 0.1)',
+          tension: 0.3,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: false,
+            min: 80,
+            max: 100,
+            ticks: {
+              callback: function(value) {
+                return value + '%';
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Model Performance Chart
+    const modelPerformanceCtx = document.getElementById('modelPerformanceChart').getContext('2d');
+    const modelPerformanceChart = new Chart(modelPerformanceCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Heart Disease', 'Diabetes', 'Cancer', 'Respiratory', 'Neurological'],
+        datasets: [{
+          label: 'Accuracy',
+          data: [96.2, 89.0, 84.6, 87.4, 82.9],
+          backgroundColor: 'rgba(99, 102, 241, 0.7)',
+          borderColor: 'rgb(99, 102, 241)',
+          borderWidth: 1
+        }, {
+          label: 'Precision',
+          data: [94.8, 87.5, 82.9, 85.2, 80.4],
+          backgroundColor: 'rgba(139, 92, 246, 0.7)',
+          borderColor: 'rgb(139, 92, 246)',
+          borderWidth: 1
+        }, {
+          label: 'Recall',
+          data: [95.7, 88.2, 83.7, 86.8, 81.6],
+          backgroundColor: 'rgba(236, 72, 153, 0.7)',
+          borderColor: 'rgb(236, 72, 153)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            ticks: {
+              callback: function(value) {
+                return value + '%';
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Infrastructure Metrics Chart
+    const infrastructureCtx = document.getElementById('infrastructureMetricsChart').getContext('2d');
+    const infrastructureMetricsChart = new Chart(infrastructureCtx, {
+      type: 'line',
+      data: {
+        labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+        datasets: [{
+          label: 'CPU Usage',
+          data: [45, 52, 65, 70, 68, 55],
+          borderColor: 'rgb(99, 102, 241)',
+          backgroundColor: 'rgba(99, 102, 241, 0.1)',
+          tension: 0.3,
+          fill: true
+        }, {
+          label: 'Memory Usage',
+          data: [65, 59, 70, 76, 72, 68],
+          borderColor: 'rgb(139, 92, 246)',
+          backgroundColor: 'rgba(139, 92, 246, 0.1)',
+          tension: 0.3,
+          fill: true
+        }, {
+          label: 'GPU Usage',
+          data: [35, 42, 45, 48, 45, 40],
+          borderColor: 'rgb(16, 185, 129)',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          tension: 0.3,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            ticks: {
+              callback: function(value) {
+                return value + '%';
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Data Flow Chart
+    const dataFlowCtx = document.getElementById('dataFlowChart').getContext('2d');
+    const dataFlowChart = new Chart(dataFlowCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Data Ingestion', 'Data Validation', 'Feature Engineering', 'Model Training', 'Prediction Serving'],
+        datasets: [{
+          label: 'Processing Time (ms)',
+          data: [120, 85, 245, 980, 142],
+          backgroundColor: [
+            'rgba(99, 102, 241, 0.7)',
+            'rgba(139, 92, 246, 0.7)',
+            'rgba(236, 72, 153, 0.7)',
+            'rgba(16, 185, 129, 0.7)',
+            'rgba(245, 158, 11, 0.7)'
+          ],
+          borderColor: [
+            'rgb(99, 102, 241)',
+            'rgb(139, 92, 246)',
+            'rgb(236, 72, 153)',
+            'rgb(16, 185, 129)',
+            'rgb(245, 158, 11)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+
+    // Recommendation Impact Chart
+    const recommendationCtx = document.getElementById('recommendationImpactChart').getContext('2d');
+    const recommendationImpactChart = new Chart(recommendationCtx, {
+      type: 'radar',
+      data: {
+        labels: ['Accuracy', 'Performance', 'Reliability', 'Cost Efficiency', 'Scalability'],
+        datasets: [{
+          label: 'Current State',
+          data: [89.2, 85, 94.7, 78, 82],
+          backgroundColor: 'rgba(99, 102, 241, 0.2)',
+          borderColor: 'rgb(99, 102, 241)',
+          pointBackgroundColor: 'rgb(99, 102, 241)',
+          pointBorderColor: '#fff',
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: 'rgb(99, 102, 241)'
+        }, {
+          label: 'After Recommendations',
+          data: [92.5, 92, 97.5, 85, 90],
+          backgroundColor: 'rgba(16, 185, 129, 0.2)',
+          borderColor: 'rgb(16, 185, 129)',
+          pointBackgroundColor: 'rgb(16, 185, 129)',
+          pointBorderColor: '#fff',
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: 'rgb(16, 185, 129)'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            angleLines: {
+              display: true
+            },
+            suggestedMin: 50,
+            suggestedMax: 100
+          }
+        }
+      }
+    });
+  });
+
+  // Add hover effect to dashboard cards
+  const dashboardCards = document.querySelectorAll('.card-hover');
+  dashboardCards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transition = 'all 0.3s ease';
+    });
+  });
+
+  // Simulate model performance updates
+  function simulateModelUpdates() {
+    const modelCards = document.querySelectorAll('.model-card');
+    if (!modelCards.length) return;
+    
+    // Randomly update one model card's metrics
+    const randomCard = modelCards[Math.floor(Math.random() * modelCards.length)];
+    const accuracyElement = randomCard.querySelector('.progress-fill:nth-child(2)');
+    const accuracyValue = randomCard.querySelector('.text-green-600, .text-blue-600, .text-yellow-600');
+    
+    if (accuracyElement && accuracyValue) {
+      const currentWidth = parseFloat(accuracyElement.style.width);
+      const change = (Math.random() * 2 - 1); // Random change between -1 and +1
+      const newWidth = Math.max(75, Math.min(99, currentWidth + change));
+      
+      accuracyElement.style.width = newWidth.toFixed(1) + '%';
+      
+      // Update the text value
+      const currentValue = parseFloat(accuracyValue.textContent);
+      const newValue = Math.max(75, Math.min(99, currentValue + change));
+      accuracyValue.textContent = newValue.toFixed(1) + '%';
+      
+      // Update health indicator if needed
+      if (newValue >= 90) {
+        const healthIndicator = randomCard.querySelector('.health-indicator');
+        if (healthIndicator) {
+          healthIndicator.className = 'health-indicator health-excellent';
+          healthIndicator.textContent = 'Excellent';
+        }
+      } else if (newValue >= 85) {
+        const healthIndicator = randomCard.querySelector('.health-indicator');
+        if (healthIndicator) {
+          healthIndicator.className = 'health-indicator health-good';
+          healthIndicator.textContent = 'Good';
+        }
+      } else if (newValue >= 80) {
+        const healthIndicator = randomCard.querySelector('.health-indicator');
+        if (healthIndicator) {
+          healthIndicator.className = 'health-indicator health-fair';
+          healthIndicator.textContent = 'Fair';
+        }
+      }
+    }
+  }
+  
+  // Update model metrics every 30 seconds
+  setInterval(simulateModelUpdates, 30000);
+</script>
+</body>
+</html>

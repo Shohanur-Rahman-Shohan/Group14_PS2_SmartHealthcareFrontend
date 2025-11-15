@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-ML Developer Notifications | SHMS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(100%); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  .animate-slideUp {
+    animation: slideUp 0.7s ease-out forwards;
+  }
+  .animate-slideInRight {
+    animation: slideInRight 0.5s ease-out forwards;
+  }
+  .dropdownContent {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none;
+    position: absolute;
+    z-index: 50;
+    left: 0;
+  }
+  .dropdownContent.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .card-hover {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.15);
+  }
+  .gradient-border {
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899) border-box;
+    border: 2px solid transparent;
+  }
+  
+  /* Modal styles */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  
+  /* Toast notification styles */
+  .toast {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transform: translateX(150%);
+    transition: transform 0.3s ease;
+  }
+  .toast.show {
+    transform: translateX(0);
+  }
+  .toast-success {
+    background-color: #10b981;
+  }
+  .toast-error {
+    background-color: #ef4444;
+  }
+  .toast-warning {
+    background-color: #f59e0b;
+  }
+  .toast-info {
+    background-color: #3b82f6;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #6366f1;
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+  }
+  
+  /* Badge styles */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .badge-blue {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+  .badge-green {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+  .badge-purple {
+    background-color: #e9d5ff;
+    color: #6b21a8;
+  }
+  .badge-orange {
+    background-color: #fed7aa;
+    color: #9a3412;
+  }
+  .badge-red {
+    background-color: #fee2e2;
+    color: #dc2626;
+  }
+  .badge-teal {
+    background-color: #ccfbf1;
+    color: #0f766e;
+  }
+  
+  /* Notification styles */
+  .notification-item {
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+  }
+  .notification-item.unread {
+    border-left-color: #6366f1;
+    background-color: #f8faff;
+  }
+  .notification-item.important {
+    border-left-color: #ef4444;
+  }
+  .notification-item.model {
+    border-left-color: #8b5cf6;
+  }
+  .notification-item.training {
+    border-left-color: #10b981;
+  }
+  .notification-item.data {
+    border-left-color: #f59e0b;
+  }
+  
+  /* Form styles */
+  .form-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+  }
+  .form-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  }
+  
+  /* Toggle switch */
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+  }
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+  }
+  .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  input:checked + .toggle-slider {
+    background-color: #6366f1;
+  }
+  input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+  }
+</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen flex flex-col">
+
+<!-- Toast Container -->
+<div id="toastContainer"></div>
+
+<!-- Top Navbar -->
+<nav class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+  <h1 class="text-2xl font-bold tracking-wide flex items-center space-x-2">
+    <i class="ph ph-heartbeat text-3xl"></i>
+    <span>SHMS</span>
+  </h1>
+
+  <span class="text-xl font-bold flex items-center space-x-2">
+    <i class="ph ph-code"></i>
+    <span>AI-ML Developer</span>
+  </span>
+
+  <div class="relative flex items-center space-x-2">
+    
+    <!-- Notification Button -->
+    <a href="Notification.html" class="relative p-2 rounded-full hover:bg-indigo-600 focus:outline-none">
+      <i class="ph ph-bell text-xl"></i>
+      <!-- Notification badge -->
+      <span id="notificationBadge" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+        5
+      </span>
+    </a>
+
+    <!-- Three-dot menu -->
+    <div class="relative">
+      <button id="menuBtn" class="text-white text-2xl focus:outline-none hover:bg-indigo-600 rounded-full p-2 transition" aria-label="Menu">
+        <i class="ph ph-dots-three-vertical"></i>
+      </button>
+      <div id="menuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded-md shadow-lg z-50">
+        <a href="Profile.html" class="block px-4 py-2 hover:bg-indigo-100 rounded-t-md flex items-center space-x-2">
+          <i class="ph ph-user"></i>
+          <span>Profile</span>
+        </a>
+        <a href="Setting.html" class="block px-4 py-2 hover:bg-indigo-100 flex items-center space-x-2">
+          <i class="ph ph-gear"></i>
+          <span>Settings</span>
+        </a>
+        <a href="../Login.html" class="block px-4 py-2 hover:bg-indigo-100 text-red-600 rounded-b-md flex items-center space-x-2">
+          <i class="ph ph-sign-out"></i>
+          <span>Logout</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Feature Navbar -->
+<nav id="featureNavbar" class="bg-indigo-800 text-white shadow-md sticky top-0 z-40 transition-transform duration-300" style="top: 64px;">
+  <div class="container mx-auto flex flex-wrap justify-center md:justify-start items-center px-4 py-2 space-x-2">
+
+    <div class="relative">
+      <a href="Home.html" class="px-5 py-2 rounded-md hover:bg-indigo-700 block transition">Home</a>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">AI Model Management</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="TrainRetrainModel.html" class="block px-4 py-2 hover:bg-indigo-100">Train / Retrain Models</a>
+        <a href="ModelVersionControl.html" class="block px-4 py-2 hover:bg-indigo-100">Model Version Control</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Data & Pipeline</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="DataManagement.html" class="block px-4 py-2 hover:bg-indigo-100">Data Management</a>
+        <a href="PipelineHealth.html" class="block px-4 py-2 hover:bg-indigo-100">Pipeline Health & Quality</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Monitoring & Analytics</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="PredictionsDashboard.html" class="block px-4 py-2 hover:bg-indigo-100">Predictions Dashboard</a>
+        <a href="RealtimePerformance.html" class="block px-4 py-2 hover:bg-indigo-100">Real-Time Performance</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">System Administration</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="SystemMonitor.html" class="block px-4 py-2 hover:bg-indigo-100">System Monitor</a>
+        <a href="ApiManagement.html" class="block px-4 py-2 hover:bg-indigo-100">API Management</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Verification Tools</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="cvVerification.html" class="block px-4 py-2 hover:bg-indigo-100">CV Verification</a>
+        <a href="DegreeVerification.html" class="block px-4 py-2 hover:bg-indigo-100">Degree Verification</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Reports</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="AiSystemReport.html" class="block px-4 py-2 hover:bg-indigo-100">AI System Report</a>
+        <a href="LogsAndReport.html" class="block px-4 py-2 hover:bg-indigo-100">Logs & Reports</a>
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+<!-- Notifications Header -->
+<section class="px-6 py-8">
+  <div class="container mx-auto">
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden animate-fadeIn">
+      <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="text-center md:text-left mb-4 md:mb-0">
+            <h1 class="text-3xl font-bold mb-2">Developer Notifications</h1>
+            <p class="text-indigo-100 text-lg">Monitor AI/ML workflows, model training, and system alerts</p>
+          </div>
+          <div class="flex flex-wrap gap-3 justify-center">
+            <button id="markAllRead" class="px-4 py-2 bg-white text-indigo-600 rounded-lg font-medium hover:bg-indigo-50 transition">
+              <i class="ph ph-check-circle mr-2"></i>Mark All as Read
+            </button>
+            <button id="clearAll" class="px-4 py-2 bg-white text-indigo-600 rounded-lg font-medium hover:bg-indigo-50 transition">
+              <i class="ph ph-trash mr-2"></i>Clear All
+            </button>
+            <button id="notificationSettings" class="px-4 py-2 bg-white text-indigo-600 rounded-lg font-medium hover:bg-indigo-50 transition">
+              <i class="ph ph-gear mr-2"></i>Settings
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="p-6 grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+        <div class="bg-indigo-50 p-4 rounded-lg">
+          <p class="text-2xl font-bold text-indigo-700" id="totalNotifications">14</p>
+          <p class="text-gray-600 text-sm">Total Notifications</p>
+        </div>
+        <div class="bg-amber-50 p-4 rounded-lg">
+          <p class="text-2xl font-bold text-amber-700" id="unreadNotifications">6</p>
+          <p class="text-gray-600 text-sm">Unread</p>
+        </div>
+        <div class="bg-red-50 p-4 rounded-lg">
+          <p class="text-2xl font-bold text-red-700" id="importantNotifications">4</p>
+          <p class="text-gray-600 text-sm">Critical</p>
+        </div>
+        <div class="bg-green-50 p-4 rounded-lg">
+          <p class="text-2xl font-bold text-green-700" id="pendingNotifications">3</p>
+          <p class="text-gray-600 text-sm">Require Action</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Notifications Content -->
+<main class="px-6 py-4">
+  <div class="container mx-auto">
+    <div class="bg-white p-6 rounded-2xl shadow-lg card-hover gradient-border animate-fadeIn">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <h2 class="text-xl font-semibold text-indigo-700 mb-4 md:mb-0">AI-ML System Notifications</h2>
+        
+        <div class="flex flex-wrap gap-3">
+          <div class="relative">
+            <select id="filterStatus" class="form-input w-full md:w-auto">
+              <option value="all">All Status</option>
+              <option value="unread">Unread</option>
+              <option value="read">Read</option>
+              <option value="pending">Pending</option>
+              <option value="done">Done</option>
+            </select>
+          </div>
+          
+          <div class="relative">
+            <select id="filterType" class="form-input w-full md:w-auto">
+              <option value="all">All Types</option>
+              <option value="model">Model</option>
+              <option value="training">Training</option>
+              <option value="data">Data</option>
+              <option value="deployment">Deployment</option>
+              <option value="system">System</option>
+            </select>
+          </div>
+          
+          <div class="relative">
+            <input type="text" id="searchNotifications" placeholder="Search notifications..." class="form-input w-full md:w-64">
+          </div>
+        </div>
+      </div>
+      
+      <div class="space-y-4" id="notificationsList">
+        <!-- Notifications will be dynamically inserted here -->
+      </div>
+      
+      <div class="mt-6 flex justify-between items-center">
+        <p class="text-gray-600 text-sm">Showing <span id="showingCount">10</span> of <span id="totalCount">14</span> notifications</p>
+        <div class="flex space-x-2">
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition">Previous</button>
+          <button class="px-3 py-1 bg-indigo-600 text-white rounded-md text-sm">1</button>
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition">2</button>
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition">Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Notification Detail Modal -->
+<div id="notificationDetailModal" class="modal">
+  <div class="modal-content">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-semibold text-indigo-700">Notification Details</h3>
+      <button class="close-modal text-gray-500 hover:text-gray-700">
+        <i class="ph ph-x text-xl"></i>
+      </button>
+    </div>
+    
+    <div class="space-y-4">
+      <div>
+        <h4 class="font-medium text-gray-700 mb-1" id="detailTitle">Model Training Completed</h4>
+        <p class="text-gray-500 text-sm" id="detailDate">May 15, 2025 • 10:30 AM</p>
+      </div>
+      
+      <div id="detailType" class="badge badge-blue">Training</div>
+      
+      <div class="bg-gray-50 p-4 rounded-lg">
+        <p class="text-gray-700" id="detailMessage">
+          Heart Disease Prediction Model v2.3 has completed training. Accuracy: 94.2%, F1-Score: 0.91. Model is ready for evaluation and deployment.
+        </p>
+      </div>
+      
+      <div class="flex space-x-3 pt-4">
+        <button id="markAsPending" class="flex-1 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition font-medium">
+          Mark as Pending
+        </button>
+        <button id="markAsDone" class="flex-1 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-medium">
+          Mark as Done
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Notification Settings Modal -->
+<div id="notificationSettingsModal" class="modal">
+  <div class="modal-content">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-semibold text-indigo-700">Developer Notification Settings</h3>
+      <button class="close-modal text-gray-500 hover:text-gray-700">
+        <i class="ph ph-x text-xl"></i>
+      </button>
+    </div>
+    
+    <div class="space-y-6">
+      <div>
+        <h4 class="font-medium text-gray-700 mb-3">Notification Channels</h4>
+        <div class="space-y-4">
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-medium">Email Notifications</p>
+              <p class="text-gray-500 text-sm">Receive notifications via email</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-medium">Slack Integration</p>
+              <p class="text-gray-500 text-sm">Send critical alerts to Slack</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-medium">Push Notifications</p>
+              <p class="text-gray-500 text-sm">Receive browser push notifications</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+      
+      <div>
+        <h4 class="font-medium text-gray-700 mb-3">AI-ML Notification Types</h4>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="font-medium">Model Training Updates</span>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          
+          <div class="flex justify-between items-center">
+            <span class="font-medium">Data Pipeline Alerts</span>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          
+          <div class="flex justify-between items-center">
+            <span class="font-medium">Model Performance Drift</span>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          
+          <div class="flex justify-between items-center">
+            <span class="font-medium">Deployment Status</span>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          
+          <div class="flex justify-between items-center">
+            <span class="font-medium">System Resource Alerts</span>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="flex justify-end space-x-3 pt-6">
+      <button type="button" class="close-modal px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">Cancel</button>
+      <button type="button" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="text-center py-6 bg-gradient-to-r from-indigo-700 to-indigo-600 text-white mt-8">
+  <div class="container mx-auto px-6">
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 mb-6">
+      <div class="flex items-center space-x-2">
+        <i class="ph ph-brain text-2xl"></i>
+        <span class="font-semibold">SHMS AI-ML Platform</span>
+      </div>
+      <div class="text-sm">
+        © 2025 SHMS AI-ML | All Rights Reserved
+      </div>
+      <div class="flex items-center space-x-4">
+        <a href="#" class="hover:text-indigo-200 transition">
+          <i class="ph ph-info text-xl"></i>
+        </a>
+      </div>
+    </div>
+    
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+      <div class="max-w-md text-center md:text-left">
+        <p class="text-sm">
+          Empowering healthcare through intelligent AI/ML solutions — making diagnostics accurate, predictions reliable, and care personalized.
+        </p>
+      </div>
+
+      <div class="flex space-x-5 text-white">
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-github-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-linkedin-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-envelope text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-slack-logo text-2xl"></i></a>
+      </div>
+    </div>
+
+    <div class="text-center text-sm text-indigo-200 mt-6 border-t border-indigo-700 pt-4">
+      © 2025 Smart Healthcare Management System AI-ML Platform | Engineered for Intelligent Healthcare
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Toast notification function
+  function showToast(message, type = 'info', duration = 5000) {
+    const toastContainer = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type} animate-slideInRight`;
+    
+    // Set icon based on type
+    let icon = 'ph-info';
+    if (type === 'success') icon = 'ph-check-circle';
+    if (type === 'error') icon = 'ph-warning-circle';
+    if (type === 'warning') icon = 'ph-warning';
+    
+    toast.innerHTML = `
+      <i class="ph ${icon} text-xl"></i>
+      <span>${message}</span>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Show toast
+    setTimeout(() => {
+      toast.classList.add('show');
+    }, 100);
+    
+    // Auto hide after duration
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 300);
+    }, duration);
+  }
+
+  // Sample notifications data for AI-ML Developer
+  const notifications = [
+    {
+      id: 1,
+      title: "Model Training Completed",
+      message: "Heart Disease Prediction Model v2.3 has completed training. Accuracy: 94.2%, F1-Score: 0.91. Model is ready for evaluation.",
+      type: "training",
+      status: "unread",
+      date: "2025-05-15T10:30:00",
+      important: false
+    },
+    {
+      id: 2,
+      title: "Data Pipeline Failure",
+      message: "ETL pipeline for patient vitals dataset has failed. Error: Connection timeout to data source. Immediate attention required.",
+      type: "data",
+      status: "pending",
+      date: "2025-05-14T14:20:00",
+      important: true
+    },
+    {
+      id: 3,
+      title: "Model Performance Alert",
+      message: "Diabetes prediction model shows 8% performance degradation in production. F1-score dropped from 0.89 to 0.82. Review recommended.",
+      type: "model",
+      status: "unread",
+      date: "2025-05-14T09:15:00",
+      important: true
+    },
+    {
+      id: 4,
+      title: "New Dataset Available",
+      message: "Cardiology department has uploaded 2,500 new annotated ECG records. Dataset is ready for preprocessing and model retraining.",
+      type: "data",
+      status: "read",
+      date: "2025-05-13T16:45:00",
+      important: false
+    },
+    {
+      id: 5,
+      title: "Model Deployment Successful",
+      message: "Pneumonia detection model v1.5 has been successfully deployed to production endpoint. All health checks passed.",
+      type: "deployment",
+      status: "done",
+      date: "2025-05-13T11:30:00",
+      important: false
+    },
+    {
+      id: 6,
+      title: "GPU Resource Constraint",
+      message: "Training cluster GPU utilization at 92%. Scheduled training jobs may experience delays. Consider resource optimization.",
+      type: "system",
+      status: "unread",
+      date: "2025-05-12T17:20:00",
+      important: true
+    },
+    {
+      id: 7,
+      title: "Feature Engineering Complete",
+      message: "Automated feature engineering for radiology images completed. 15 new features generated and ready for model training.",
+      type: "data",
+      status: "read",
+      date: "2025-05-12T13:10:00",
+      important: false
+    },
+    {
+      id: 8,
+      title: "Hyperparameter Optimization Results",
+      message: "Bayesian optimization for stroke prediction model completed. Best parameters: learning_rate=0.001, layers=4, batch_size=32.",
+      type: "training",
+      status: "unread",
+      date: "2025-05-11T15:40:00",
+      important: false
+    },
+    {
+      id: 9,
+      title: "Model Registry Backup",
+      message: "Scheduled backup of model registry completed successfully. 47 models and metadata archived to cloud storage.",
+      type: "system",
+      status: "read",
+      date: "2025-05-10T10:00:00",
+      important: false
+    },
+    {
+      id: 10,
+      title: "A/B Testing Deployment",
+      message: "A/B testing framework deployed for cancer detection models. Traffic split configured: 70% to v2.1, 30% to v2.2.",
+      type: "deployment",
+      status: "pending",
+      date: "2025-05-09T08:30:00",
+      important: false
+    },
+    {
+      id: 11,
+      title: "Data Quality Alert",
+      message: "Anomaly detection flagged 124 records in patient lab results with missing critical values. Review required before next training cycle.",
+      type: "data",
+      status: "pending",
+      date: "2025-05-08T14:20:00",
+      important: true
+    },
+    {
+      id: 12,
+      title: "MLFlow Experiment Completed",
+      message: "Experiment 'transformer_architecture_tuning' completed. Top model achieved 96.3% accuracy on validation set.",
+      type: "training",
+      status: "read",
+      date: "2025-05-07T11:15:00",
+      important: false
+    },
+    {
+      id: 13,
+      title: "API Endpoint Scaling",
+      message: "Inference API auto-scaling triggered due to increased load. Additional 3 instances deployed to handle 240 RPS.",
+      type: "deployment",
+      status: "done",
+      date: "2025-05-06T16:30:00",
+      important: false
+    },
+    {
+      id: 14,
+      title: "Security Patch Available",
+      message: "Critical security update available for ML framework. Patch addresses vulnerability in model deserialization.",
+      type: "system",
+      status: "unread",
+      date: "2025-05-05T09:45:00",
+      important: true
+    }
+  ];
+
+  // Function to render notifications
+  function renderNotifications(filteredNotifications = notifications) {
+    const notificationsList = document.getElementById('notificationsList');
+    notificationsList.innerHTML = '';
+    
+    filteredNotifications.forEach(notification => {
+      const notificationElement = document.createElement('div');
+      notificationElement.className = `notification-item bg-white p-4 rounded-lg shadow-sm border border-gray-100 ${notification.status === 'unread' ? 'unread' : ''} ${notification.important ? 'important' : ''} ${notification.type}`;
+      
+      // Format date
+      const date = new Date(notification.date);
+      const formattedDate = date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+      const formattedTime = date.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+      
+      // Set badge color based on type
+      let badgeClass = 'badge-blue';
+      if (notification.type === 'data') badgeClass = 'badge-orange';
+      if (notification.type === 'training') badgeClass = 'badge-green';
+      if (notification.type === 'deployment') badgeClass = 'badge-purple';
+      if (notification.type === 'system') badgeClass = 'badge-teal';
+      if (notification.type === 'model') badgeClass = 'badge-red';
+      
+      // Set status badge
+      let statusBadge = '';
+      if (notification.status === 'pending') {
+        statusBadge = '<span class="badge badge-orange ml-2">Pending</span>';
+      } else if (notification.status === 'done') {
+        statusBadge = '<span class="badge badge-green ml-2">Done</span>';
+      }
+      
+      notificationElement.innerHTML = `
+        <div class="flex justify-between items-start">
+          <div class="flex-1">
+            <div class="flex items-start space-x-3">
+              <div class="mt-1">
+                ${notification.status === 'unread' ? 
+                  '<div class="w-2 h-2 bg-indigo-600 rounded-full"></div>' : 
+                  '<div class="w-2 h-2 bg-gray-300 rounded-full"></div>'
+                }
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center mb-1">
+                  <h3 class="font-semibold text-gray-800">${notification.title}</h3>
+                  <span class="badge ${badgeClass} ml-2">${notification.type.charAt(0).toUpperCase() + notification.type.slice(1)}</span>
+                  ${statusBadge}
+                </div>
+                <p class="text-gray-600 text-sm mb-2">${notification.message}</p>
+                <p class="text-gray-500 text-xs">${formattedDate} • ${formattedTime}</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex space-x-2 ml-4">
+            <button class="view-notification text-indigo-600 hover:text-indigo-800 p-1 rounded transition" data-id="${notification.id}">
+              <i class="ph ph-eye"></i>
+            </button>
+            <button class="mark-pending text-amber-600 hover:text-amber-800 p-1 rounded transition" data-id="${notification.id}">
+              <i class="ph ph-clock"></i>
+            </button>
+            <button class="mark-done text-green-600 hover:text-green-800 p-1 rounded transition" data-id="${notification.id}">
+              <i class="ph ph-check"></i>
+            </button>
+            <button class="delete-notification text-red-600 hover:text-red-800 p-1 rounded transition" data-id="${notification.id}">
+              <i class="ph ph-trash"></i>
+            </button>
+          </div>
+        </div>
+      `;
+      
+      notificationsList.appendChild(notificationElement);
+    });
+    
+    // Update counts
+    updateNotificationCounts();
+  }
+
+  // Function to update notification counts
+  function updateNotificationCounts() {
+    const total = notifications.length;
+    const unread = notifications.filter(n => n.status === 'unread').length;
+    const important = notifications.filter(n => n.important).length;
+    const pending = notifications.filter(n => n.status === 'pending').length;
+    
+    document.getElementById('totalNotifications').textContent = total;
+    document.getElementById('unreadNotifications').textContent = unread;
+    document.getElementById('importantNotifications').textContent = important;
+    document.getElementById('pendingNotifications').textContent = pending;
+    document.getElementById('showingCount').textContent = document.getElementById('notificationsList').children.length;
+    document.getElementById('totalCount').textContent = total;
+  }
+
+  // Function to filter notifications
+  function filterNotifications() {
+    const statusFilter = document.getElementById('filterStatus').value;
+    const typeFilter = document.getElementById('filterType').value;
+    const searchTerm = document.getElementById('searchNotifications').value.toLowerCase();
+    
+    let filtered = notifications;
+    
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(notification => notification.status === statusFilter);
+    }
+    
+    // Apply type filter
+    if (typeFilter !== 'all') {
+      filtered = filtered.filter(notification => notification.type === typeFilter);
+    }
+    
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(notification => 
+        notification.title.toLowerCase().includes(searchTerm) || 
+        notification.message.toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    renderNotifications(filtered);
+  }
+
+  // Function to mark notification as read
+  function markAsRead(id) {
+    const notification = notifications.find(n => n.id === id);
+    if (notification && notification.status === 'unread') {
+      notification.status = 'read';
+      renderNotifications();
+      showToast('Notification marked as read', 'success');
+    }
+  }
+
+  // Function to mark notification as pending
+  function markAsPending(id) {
+    const notification = notifications.find(n => n.id === id);
+    if (notification) {
+      notification.status = 'pending';
+      renderNotifications();
+      showToast('Notification marked as pending', 'info');
+    }
+  }
+
+  // Function to mark notification as done
+  function markAsDone(id) {
+    const notification = notifications.find(n => n.id === id);
+    if (notification) {
+      notification.status = 'done';
+      renderNotifications();
+      showToast('Notification marked as done', 'success');
+    }
+  }
+
+  // Function to delete notification
+  function deleteNotification(id) {
+    const index = notifications.findIndex(n => n.id === id);
+    if (index !== -1) {
+      notifications.splice(index, 1);
+      renderNotifications();
+      showToast('Notification deleted', 'success');
+    }
+  }
+
+  // Function to mark all notifications as read
+  function markAllAsRead() {
+    notifications.forEach(notification => {
+      if (notification.status === 'unread') {
+        notification.status = 'read';
+      }
+    });
+    renderNotifications();
+    showToast('All notifications marked as read', 'success');
+  }
+
+  // Function to clear all notifications
+  function clearAllNotifications() {
+    if (confirm('Are you sure you want to clear all notifications?')) {
+      notifications.length = 0;
+      renderNotifications();
+      showToast('All notifications cleared', 'success');
+    }
+  }
+
+  // Function to show notification details
+  function showNotificationDetails(id) {
+    const notification = notifications.find(n => n.id === id);
+    if (notification) {
+      document.getElementById('detailTitle').textContent = notification.title;
+      document.getElementById('detailDate').textContent = new Date(notification.date).toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      document.getElementById('detailMessage').textContent = notification.message;
+      
+      // Set badge based on type
+      const badge = document.getElementById('detailType');
+      badge.textContent = notification.type.charAt(0).toUpperCase() + notification.type.slice(1);
+      badge.className = 'badge ';
+      
+      if (notification.type === 'system') badge.classList.add('badge-blue');
+      if (notification.type === 'data') badge.classList.add('badge-orange');
+      if (notification.type === 'training') badge.classList.add('badge-green');
+      if (notification.type === 'deployment') badge.classList.add('badge-purple');
+      if (notification.type === 'model') badge.classList.add('badge-red');
+      
+      // Set button event handlers
+      document.getElementById('markAsPending').onclick = () => {
+        markAsPending(id);
+        closeModal('notificationDetailModal');
+      };
+      
+      document.getElementById('markAsDone').onclick = () => {
+        markAsDone(id);
+        closeModal('notificationDetailModal');
+      };
+      
+      openModal('notificationDetailModal');
+      
+      // Mark as read when viewing
+      if (notification.status === 'unread') {
+        notification.status = 'read';
+        updateNotificationCounts();
+      }
+    }
+  }
+
+  // Modal functionality
+  const modals = document.querySelectorAll('.modal');
+  const closeModalButtons = document.querySelectorAll('.close-modal');
+  
+  // Function to open modal
+  function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+  }
+  
+  // Function to close modal
+  function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.style.display = 'none';
+      document.body.style.overflow = 'auto'; // Restore scrolling
+    }
+  }
+  
+  // Close modal when clicking on close button or outside the modal
+  closeModalButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const modal = button.closest('.modal');
+      closeModal(modal.id);
+    });
+  });
+  
+  // Close modal when clicking outside the modal content
+  modals.forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeModal(modal.id);
+      }
+    });
+  });
+
+  // Top menu toggle
+  const menuBtn = document.getElementById('menuBtn');
+  const menuDropdown = document.getElementById('menuDropdown');
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuDropdown.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+      menuDropdown.classList.add('hidden');
+    }
+  });
+
+  // Dropdown functionality
+  const dropdownButtons = document.querySelectorAll('.dropdownBtn');
+  let activeDropdown = null;
+
+  dropdownButtons.forEach(btn => {
+    const dropdown = btn.nextElementSibling;
+    if (!dropdown) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeDropdown && activeDropdown !== dropdown) {
+        activeDropdown.classList.remove('show');
+      }
+      if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        activeDropdown = null;
+      } else {
+        dropdown.classList.add('show');
+        activeDropdown = dropdown;
+      }
+    });
+
+    btn.addEventListener('mouseenter', () => dropdown.classList.add('show'));
+    btn.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!dropdown.matches(':hover')) {
+          dropdown.classList.remove('show');
+        }
+      }, 100);
+    });
+    
+    if (dropdown) {
+      dropdown.addEventListener('mouseleave', () => {
+        dropdown.classList.remove('show');
+        if (activeDropdown === dropdown) activeDropdown = null;
+      });
+    }
+  });
+
+  document.body.addEventListener('click', () => {
+    if (activeDropdown) {
+      activeDropdown.classList.remove('show');
+      activeDropdown = null;
+    }
+  });
+
+  // Hide/show navbar on scroll
+  let lastScroll = 0;
+  const featureNavbar = document.getElementById('featureNavbar');
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+    if (currentScroll > lastScroll && currentScroll > 100) {
+      featureNavbar.style.transform = 'translateY(-100%)';
+    } else {
+      featureNavbar.style.transform = 'translateY(0)';
+    }
+    lastScroll = currentScroll;
+  });
+
+  // Event listeners for notification actions
+  document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('view-notification') || e.target.closest('.view-notification')) {
+      const button = e.target.classList.contains('view-notification') ? e.target : e.target.closest('.view-notification');
+      const id = parseInt(button.getAttribute('data-id'));
+      showNotificationDetails(id);
+    }
+    
+    if (e.target.classList.contains('mark-pending') || e.target.closest('.mark-pending')) {
+      const button = e.target.classList.contains('mark-pending') ? e.target : e.target.closest('.mark-pending');
+      const id = parseInt(button.getAttribute('data-id'));
+      markAsPending(id);
+    }
+    
+    if (e.target.classList.contains('mark-done') || e.target.closest('.mark-done')) {
+      const button = e.target.classList.contains('mark-done') ? e.target : e.target.closest('.mark-done');
+      const id = parseInt(button.getAttribute('data-id'));
+      markAsDone(id);
+    }
+    
+    if (e.target.classList.contains('delete-notification') || e.target.closest('.delete-notification')) {
+      const button = e.target.classList.contains('delete-notification') ? e.target : e.target.closest('.delete-notification');
+      const id = parseInt(button.getAttribute('data-id'));
+      deleteNotification(id);
+    }
+  });
+
+  // Event listeners for filter controls
+  document.getElementById('filterStatus').addEventListener('change', filterNotifications);
+  document.getElementById('filterType').addEventListener('change', filterNotifications);
+  document.getElementById('searchNotifications').addEventListener('input', filterNotifications);
+
+  // Event listeners for bulk actions
+  document.getElementById('markAllRead').addEventListener('click', markAllAsRead);
+  document.getElementById('clearAll').addEventListener('click', clearAllNotifications);
+  document.getElementById('notificationSettings').addEventListener('click', () => {
+    openModal('notificationSettingsModal');
+  });
+
+  // Initialize the page
+  document.addEventListener('DOMContentLoaded', () => {
+    renderNotifications();
+  });
+</script>
+</body>
+</html>

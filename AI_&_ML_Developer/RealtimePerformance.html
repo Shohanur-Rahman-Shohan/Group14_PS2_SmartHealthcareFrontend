@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Performance | SHMS AI-ML Developer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-fadeIn { animation: fadeIn 0.6s ease-out forwards; }
+        .animate-slideUp { animation: slideUp 0.7s ease-out forwards; }
+        .animate-pulse-slow { animation: pulse 3s ease-in-out infinite; }
+        .float-animation { animation: float 3s ease-in-out infinite; }
+
+        .dropdownContent {
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            opacity: 0;
+            transform: translateY(-5px);
+            pointer-events: none;
+            position: absolute;
+            z-index: 50;
+            left: 0;
+        }
+        .dropdownContent.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .card-hover {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        .stat-number {
+            font-feature-settings: 'tnum';
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4f46e5; }
+
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Chart containers */
+        .chart-container { position: relative; height: 300px; }
+        
+        /* Performance indicators */
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        
+        .status-optimal { background-color: #10b981; }
+        .status-warning { background-color: #f59e0b; }
+        .status-critical { background-color: #ef4444; }
+        .status-idle { background-color: #6b7280; }
+        
+        /* Progress bars */
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e5e7eb;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease-in-out;
+        }
+        
+        /* Real-time data elements */
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background-color: #ef4444;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+        
+        /* Streaming chart styles */
+        .streaming-chart {
+            background: linear-gradient(90deg, transparent 50%, rgba(99, 102, 241, 0.03) 50%);
+            background-size: 20px 100%;
+        }
+        
+        /* Enhanced model cards */
+        .model-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid;
+        }
+        
+        .model-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Custom toggle switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #10b981;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* Responsive improvements */
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 250px;
+            }
+            
+            .grid-cols-1 {
+                grid-template-columns: 1fr;
+            }
+            
+            .lg\:grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .lg\:grid-cols-3 {
+                grid-template-columns: 1fr;
+            }
+            
+            .md\:grid-cols-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .md\:grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Custom gradient backgrounds for cards */
+        .gradient-card-1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .gradient-card-2 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .gradient-card-3 {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .gradient-card-4 {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        /* Glowing effect for cards */
+        .glow {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen flex flex-col">
+  <!-- Top Navbar -->
+  <nav class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+    <h1 class="text-2xl font-bold tracking-wide flex items-center space-x-2">
+      <i class="ph ph-heartbeat text-3xl"></i>
+      <span>SHMS</span>
+    </h1>
+
+    <span class="text-xl font-bold flex items-center space-x-2">
+      <i class="ph ph-code"></i>
+      <span>AI-ML Developer</span>
+    </span>
+
+    <div class="relative flex items-center space-x-2">
+      
+      <!-- Notification Button -->
+      <a href="Notification.html" class="relative p-2 rounded-full hover:bg-indigo-600 focus:outline-none">
+        <i class="ph ph-bell text-xl"></i>
+        <!-- Notification badge -->
+        <span id="notificationBadge" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+          5
+        </span>
+      </a>
+
+      <!-- Three-dot menu -->
+      <div class="relative">
+        <button id="menuBtn" class="text-white text-2xl focus:outline-none hover:bg-indigo-600 rounded-full p-2 transition" aria-label="Menu">
+          <i class="ph ph-dots-three-vertical"></i>
+        </button>
+        <div id="menuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded-md shadow-lg z-50">
+          <a href="Profile.html" class="block px-4 py-2 hover:bg-indigo-100 rounded-t-md flex items-center space-x-2">
+            <i class="ph ph-user"></i>
+            <span>Profile</span>
+          </a>
+          <a href="Setting.html" class="block px-4 py-2 hover:bg-indigo-100 flex items-center space-x-2">
+            <i class="ph ph-gear"></i>
+            <span>Settings</span>
+          </a>
+          <a href="../Login.html" class="block px-4 py-2 hover:bg-indigo-100 text-red-600 rounded-b-md flex items-center space-x-2">
+            <i class="ph ph-sign-out"></i>
+            <span>Logout</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Feature Navbar -->
+  <nav id="featureNavbar" class="bg-indigo-800 text-white shadow-md sticky top-0 z-40 transition-transform duration-300" style="top: 64px;">
+    <div class="container mx-auto flex flex-wrap justify-center md:justify-start items-center px-4 py-2 space-x-2">
+
+      <div class="relative">
+        <a href="Home.html" class="px-5 py-2 rounded-md bg-indigo-600 font-semibold block">Home</a>
+      </div>
+
+      <div class="relative">
+        <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">AI Model Management</button>
+        <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+          <a href="TrainRetrainModel.html" class="block px-4 py-2 hover:bg-indigo-100">Train / Retrain Models</a>
+          <a href="ModelVersionControl.html" class="block px-4 py-2 hover:bg-indigo-100">Model Version Control</a>
+        </div>
+      </div>
+
+      <div class="relative">
+        <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Data & Pipeline</button>
+        <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+          <a href="DataManagement.html" class="block px-4 py-2 hover:bg-indigo-100">Data Management</a>
+          <a href="PipelineHealth.html" class="block px-4 py-2 hover:bg-indigo-100">Pipeline Health & Quality</a>
+        </div>
+      </div>
+
+      <div class="relative">
+        <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Monitoring & Analytics</button>
+        <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+          <a href="PredictionsDashboard.html" class="block px-4 py-2 hover:bg-indigo-100">Predictions Dashboard</a>
+          <a href="RealtimePerformance.html" class="block px-4 py-2 hover:bg-indigo-100">Real-Time Performance</a>
+        </div>
+      </div>
+
+      <div class="relative">
+        <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">System Administration</button>
+        <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+          <a href="SystemMonitor.html" class="block px-4 py-2 hover:bg-indigo-100">System Monitor</a>
+          <a href="ApiManagement.html" class="block px-4 py-2 hover:bg-indigo-100">API Management</a>
+        </div>
+      </div>
+
+      <div class="relative">
+        <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Verification Tools</button>
+        <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+          <a href="cvVerification.html" class="block px-4 py-2 hover:bg-indigo-100">CV Verification</a>
+          <a href="DegreeVerification.html" class="block px-4 py-2 hover:bg-indigo-100">Degree Verification</a>
+        </div>
+      </div>
+
+      <div class="relative">
+        <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Reports</button>
+        <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+          <a href="AiSystemReport.html" class="block px-4 py-2 hover:bg-indigo-100">AI System Report</a>
+          <a href="LogsAndReport.html" class="block px-4 py-2 hover:bg-indigo-100">Logs & Reports</a>
+        </div>
+      </div>
+
+    </div>
+  </nav>
+    <!-- Current Time Display -->
+    <div class="container mx-auto px-6 pt-4">
+        <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg shadow-md p-4 flex justify-between items-center transition-colors duration-300 glow">
+            <div class="flex items-center space-x-4">
+                <div class="bg-blue-100 p-3 rounded-full">
+                    <i class="ph ph-calendar-check text-blue-700 text-2xl"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-white/80">Current Date & Time</p>
+                    <p id="currentDateTime" class="text-lg font-semibold text-white"></p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="live-badge flex items-center">
+                    <span class="relative flex h-2 w-2 mr-1">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                    </span>
+                    LIVE
+                </span>
+                <span class="text-sm font-medium text-white/90">Real-Time Monitoring</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-6 py-8">
+        <!-- Header Section -->
+        <div class="mb-10 animate-fadeIn">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between">
+                <div class="mb-4 md:mb-0">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Real-Time Performance</h1>
+                    <p class="text-gray-600">Monitor live system performance, model inference, and data processing in real-time.</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition flex items-center space-x-2">
+                        <i class="ph ph-export"></i>
+                        <span>Export Report</span>
+                    </button>
+                    <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition flex items-center space-x-2">
+                        <i class="ph ph-play-circle"></i>
+                        <span>Start Live Session</span>
+                    </button>
+                    <button id="refreshData" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition flex items-center space-x-2">
+                        <i class="ph ph-arrow-clockwise"></i>
+                        <span>Refresh Data</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real-Time Performance Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <div class="gradient-card-1 text-white p-5 rounded-xl shadow-lg card-hover glow">
+                <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <p class="text-white/80 text-sm font-medium">Active Requests</p>
+                        <p class="text-3xl font-bold stat-number mt-1">142</p>
+                    </div>
+                    <div class="bg-white/20 p-3 rounded-lg float-animation">
+                        <i class="ph ph-cpu text-2xl"></i>
+                    </div>
+                </div>
+                <div class="flex items-center text-sm">
+                    <i class="ph ph-trend-up mr-1"></i>
+                    <span>+12 from last minute</span>
+                </div>
+            </div>
+
+            <div class="gradient-card-2 text-white p-5 rounded-xl shadow-lg card-hover glow">
+                <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <p class="text-white/80 text-sm font-medium">Avg. Response Time</p>
+                        <p class="text-3xl font-bold stat-number mt-1">68ms</p>
+                    </div>
+                    <div class="bg-white/20 p-3 rounded-lg float-animation" style="animation-delay: 0.2s;">
+                        <i class="ph ph-gauge text-2xl"></i>
+                    </div>
+                </div>
+                <div class="flex items-center text-sm">
+                    <i class="ph ph-trend-down mr-1"></i>
+                    <span>-5ms from average</span>
+                </div>
+            </div>
+
+            <div class="gradient-card-3 text-white p-5 rounded-xl shadow-lg card-hover glow">
+                <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <p class="text-white/80 text-sm font-medium">Success Rate</p>
+                        <p class="text-3xl font-bold stat-number mt-1">99.2%</p>
+                    </div>
+                    <div class="bg-white/20 p-3 rounded-lg float-animation" style="animation-delay: 0.4s;">
+                        <i class="ph ph-check-circle text-2xl"></i>
+                    </div>
+                </div>
+                <div class="flex items-center text-sm">
+                    <i class="ph ph-arrow-up mr-1"></i>
+                    <span>+0.3% from last hour</span>
+                </div>
+            </div>
+
+            <div class="gradient-card-4 text-white p-5 rounded-xl shadow-lg card-hover glow">
+                <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <p class="text-white/80 text-sm font-medium">Model Throughput</p>
+                        <p class="text-3xl font-bold stat-number mt-1">245/s</p>
+                    </div>
+                    <div class="bg-white/20 p-3 rounded-lg float-animation" style="animation-delay: 0.6s;">
+                        <i class="ph ph-lightning text-2xl"></i>
+                    </div>
+                </div>
+                <div class="flex items-center text-sm">
+                    <i class="ph ph-trend-up mr-1"></i>
+                    <span>+18 from last minute</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real-Time Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+            <!-- Request Rate Chart -->
+            <div class="bg-white rounded-xl shadow-md p-6 animate-fadeIn">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-2 md:mb-0">Request Rate (Last 5 Minutes)</h2>
+                    <div class="flex items-center space-x-2">
+                        <span class="live-badge">LIVE</span>
+                        <div class="flex space-x-2">
+                            <button class="text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-md">5m</button>
+                            <button class="text-sm text-gray-500 px-3 py-1 rounded-md hover:bg-gray-100">15m</button>
+                            <button class="text-sm text-gray-500 px-3 py-1 rounded-md hover:bg-gray-100">1h</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container streaming-chart">
+                    <canvas id="requestRateChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Response Time Chart -->
+            <div class="bg-white rounded-xl shadow-md p-6 animate-fadeIn">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-2 md:mb-0">Response Time Distribution</h2>
+                    <div class="flex items-center space-x-2">
+                        <span class="live-badge">LIVE</span>
+                        <div class="flex space-x-2">
+                            <button class="text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-md">Current</button>
+                            <button class="text-sm text-gray-500 px-3 py-1 rounded-md hover:bg-gray-100">Trend</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="responseTimeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Error Rate Chart -->
+            <div class="bg-white rounded-xl shadow-md p-6 animate-fadeIn">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-2 md:mb-0">Error Rate & Alerts</h2>
+                    <div class="flex items-center space-x-2">
+                        <span class="live-badge">LIVE</span>
+                        <div class="flex space-x-2">
+                            <button class="text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-md">Errors</button>
+                            <button class="text-sm text-gray-500 px-3 py-1 rounded-md hover:bg-gray-100">Alerts</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container streaming-chart">
+                    <canvas id="errorRateChart"></canvas>
+                </div>
+            </div>
+
+            <!-- System Resources -->
+            <div class="bg-white rounded-xl shadow-md p-6 animate-fadeIn">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-2 md:mb-0">System Resources</h2>
+                    <div class="flex items-center space-x-2">
+                        <span class="live-badge">LIVE</span>
+                        <div class="flex space-x-2">
+                            <button class="text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-md">CPU/Memory</button>
+                            <button class="text-sm text-gray-500 px-3 py-1 rounded-md hover:bg-gray-100">GPU</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="systemResourcesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model Performance & Active Requests -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+            <!-- Model Performance -->
+            <div class="lg:col-span-2 bg-white rounded-xl shadow-md p-6 animate-fadeIn">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">Model Performance Metrics</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Heart Disease Model -->
+                    <div class="model-card border-l-green-500 border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                                <span class="status-indicator status-optimal"></span>
+                                <h3 class="font-semibold text-gray-800">Heart Disease Model</h3>
+                            </div>
+                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Optimal</span>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Inference Time:</span>
+                                <span class="font-medium">42ms</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Accuracy:</span>
+                                <span class="font-medium text-green-600">96.2%</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Requests/min:</span>
+                                <span class="font-medium">128</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Cache Hit Rate:</span>
+                                <span class="font-medium">87%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Diabetes Model -->
+                    <div class="model-card border-l-yellow-500 border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                                <span class="status-indicator status-warning"></span>
+                                <h3 class="font-semibold text-gray-800">Diabetes Model</h3>
+                            </div>
+                            <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Warning</span>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Inference Time:</span>
+                                <span class="font-medium">78ms</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Accuracy:</span>
+                                <span class="font-medium text-yellow-600">89.5%</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Requests/min:</span>
+                                <span class="font-medium">94</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Cache Hit Rate:</span>
+                                <span class="font-medium">72%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Cancer Detection Model -->
+                    <div class="model-card border-l-green-500 border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                                <span class="status-indicator status-optimal"></span>
+                                <h3 class="font-semibold text-gray-800">Cancer Detection</h3>
+                            </div>
+                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Optimal</span>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Inference Time:</span>
+                                <span class="font-medium">65ms</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Accuracy:</span>
+                                <span class="font-medium text-green-600">92.7%</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Requests/min:</span>
+                                <span class="font-medium">156</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Cache Hit Rate:</span>
+                                <span class="font-medium">91%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Respiratory Model -->
+                    <div class="model-card border-l-red-500 border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                                <span class="status-indicator status-critical"></span>
+                                <h3 class="font-semibold text-gray-800">Respiratory Model</h3>
+                            </div>
+                            <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">Critical</span>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Inference Time:</span>
+                                <span class="font-medium">142ms</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Accuracy:</span>
+                                <span class="font-medium text-red-600">87.3%</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Requests/min:</span>
+                                <span class="font-medium">67</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Cache Hit Rate:</span>
+                                <span class="font-medium">58%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Requests Monitor -->
+            <div class="bg-white rounded-xl shadow-md p-6 animate-fadeIn">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">Active Requests Monitor</h2>
+                
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                <i class="ph ph-heartbeat text-green-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">Heart Disease Prediction</p>
+                                <p class="text-sm text-gray-500">Request #HD-2847</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-medium text-gray-600">Processing</p>
+                            <p class="text-xs text-gray-500">Started: 12s ago</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                <i class="ph ph-user-circle text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">Diabetes Risk Assessment</p>
+                                <p class="text-sm text-gray-500">Request #DB-5391</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-medium text-gray-600">Processing</p>
+                            <p class="text-xs text-gray-500">Started: 8s ago</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                <i class="ph ph-dna text-purple-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">Cancer Detection</p>
+                                <p class="text-sm text-gray-500">Request #CA-6724</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-medium text-gray-600">Queued</p>
+                            <p class="text-xs text-gray-500">Waiting: 3s</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
+                                <i class="ph ph-lungs text-yellow-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">Respiratory Analysis</p>
+                                <p class="text-sm text-gray-500">Request #RA-1853</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-medium text-gray-600">Processing</p>
+                            <p class="text-xs text-gray-500">Started: 15s ago</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                                <i class="ph ph-brain text-indigo-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">Neurological Assessment</p>
+                                <p class="text-sm text-gray-500">Request #NA-4298</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-medium text-gray-600">Queued</p>
+                            <p class="text-xs text-gray-500">Waiting: 5s</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 pt-4 border-t border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">Queue Length: <span class="font-medium">8 requests</span></span>
+                        <span class="text-sm text-gray-600">Avg Wait Time: <span class="font-medium">4.2s</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Health & Alerts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- System Health Dashboard -->
+            <div class="bg-white rounded-xl shadow-md p-6 animate-fadeIn">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">System Health Dashboard</h2>
+                
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-700">CPU Utilization</span>
+                            <span class="text-sm text-gray-500">68%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill bg-blue-500" style="width: 68%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Model inference: 42%, System: 26%</p>
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-700">Memory Usage</span>
+                            <span class="text-sm text-gray-500">72%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill bg-purple-500" style="width: 72%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Model cache: 1.2GB, Active: 2.8GB</p>
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-700">GPU Utilization</span>
+                            <span class="text-sm text-gray-500">84%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill bg-green-500" style="width: 84%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Training: 15%, Inference: 69%</p>
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-700">Network I/O</span>
+                            <span class="text-sm text-gray-500">45%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill bg-yellow-500" style="width: 45%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">In: 124 MB/s, Out: 87 MB/s</p>
+                    </div>
+                    
+                    <div class="pt-4 border-t border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Quick Actions</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button class="text-left px-3 py-2 bg-indigo-50 text-indigo-700 rounded-md hover:bg-indigo-100 transition flex items-center space-x-2">
+                                <i class="ph ph-arrow-clockwise"></i>
+                                <span class="text-sm">Restart Services</span>
+                            </button>
+                            <button class="text-left px-3 py-2 bg-green-50 text-green-700 rounded-md hover:bg-green-100 transition flex items-center space-x-2">
+                                <i class="ph ph-gauge"></i>
+                                <span class="text-sm">Scale Resources</span>
+                            </button>
+                            <button class="text-left px-3 py-2 bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 transition flex items-center space-x-2">
+                                <i class="ph ph-file-text"></i>
+                                <span class="text-sm">Generate Report</span>
+                            </button>
+                            <button class="text-left px-3 py-2 bg-red-50 text-red-700 rounded-md hover:bg-red-100 transition flex items-center space-x-2">
+                                <i class="ph ph-warning-circle"></i>
+                                <span class="text-sm">Emergency Stop</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-Time Alerts -->
+            <div class="bg-white rounded-xl shadow-md p-6 animate-fadeIn">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">Real-Time Alerts</h2>
+                
+                <div class="space-y-4">
+                    <div class="flex items-start space-x-4 p-3 rounded-lg border border-red-200 bg-red-50">
+                        <div class="bg-red-100 p-2 rounded-full">
+                            <i class="ph ph-warning text-red-600"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-800">High Response Time Detected</p>
+                            <p class="text-sm text-gray-500">Respiratory model exceeding 140ms threshold</p>
+                            <p class="text-xs text-gray-400 mt-1">Just now</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4 p-3 rounded-lg border border-yellow-200 bg-yellow-50">
+                        <div class="bg-yellow-100 p-2 rounded-full">
+                            <i class="ph ph-warning text-yellow-600"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-800">Memory Usage Alert</p>
+                            <p class="text-sm text-gray-500">System memory usage at 72%, approaching threshold</p>
+                            <p class="text-xs text-gray-400 mt-1">2 minutes ago</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4 p-3 rounded-lg border border-blue-200 bg-blue-50">
+                        <div class="bg-blue-100 p-2 rounded-full">
+                            <i class="ph ph-info text-blue-600"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-800">Increased Request Volume</p>
+                            <p class="text-sm text-gray-500">Request rate increased by 28% in last 5 minutes</p>
+                            <p class="text-xs text-gray-400 mt-1">5 minutes ago</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4 p-3 rounded-lg border border-green-200 bg-green-50">
+                        <div class="bg-green-100 p-2 rounded-full">
+                            <i class="ph ph-check-circle text-green-600"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-800">Performance Optimized</p>
+                            <p class="text-sm text-gray-500">Heart disease model cache optimization completed</p>
+                            <p class="text-xs text-gray-400 mt-1">10 minutes ago</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4 p-3 rounded-lg border border-purple-200 bg-purple-50">
+                        <div class="bg-purple-100 p-2 rounded-full">
+                            <i class="ph ph-lightning text-purple-600"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-800">GPU Utilization High</p>
+                            <p class="text-sm text-gray-500">GPU usage at 84% due to training job</p>
+                            <p class="text-xs text-gray-400 mt-1">15 minutes ago</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-6 bg-gradient-to-r from-indigo-700 to-indigo-600 text-white">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 mb-6">
+                <div class="flex items-center space-x-2">
+                    <i class="ph ph-heartbeat text-2xl"></i>
+                    <span class="font-semibold">Smart Healthcare Management System</span>
+                </div>
+                <div class="text-sm">
+                    © 2025 SHMS | AI-ML Developer Dashboard
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="#" class="hover:text-indigo-200 transition">
+                        <i class="ph ph-info text-xl"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                <div class="max-w-md text-center md:text-left">
+                    <p class="text-sm">
+                        Advanced AI-ML infrastructure for predictive healthcare analytics and intelligent patient care solutions.
+                    </p>
+                </div>
+
+                <div class="flex space-x-5 text-white">
+                    <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-facebook-logo text-2xl"></i></a>
+                    <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-twitter-logo text-2xl"></i></a>
+                    <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-linkedin-logo text-2xl"></i></a>
+                    <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-envelope text-2xl"></i></a>
+                    <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-phone text-2xl"></i></a>
+                </div>
+            </div>
+
+            <div class="text-center text-sm text-indigo-200 mt-6 border-t border-indigo-700 pt-4">
+                © 2025 Smart Healthcare Management System | AI-ML Developer Interface
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Update current date and time
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            document.getElementById('currentDateTime').textContent = now.toLocaleDateString('en-US', options);
+        }
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+
+        // Top menu toggle
+        const menuBtn = document.getElementById('menuBtn');
+        const menuDropdown = document.getElementById('menuDropdown');
+        menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menuDropdown.classList.toggle('hidden');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+                menuDropdown.classList.add('hidden');
+            }
+        });
+
+        // Dropdown functionality
+        const dropdownButtons = document.querySelectorAll('.dropdownBtn');
+        let activeDropdown = null;
+
+        dropdownButtons.forEach(btn => {
+            const dropdown = btn.nextElementSibling;
+            if (!dropdown) return;
+
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (activeDropdown && activeDropdown !== dropdown) {
+                    activeDropdown.classList.remove('show');
+                }
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                    activeDropdown = null;
+                } else {
+                    dropdown.classList.add('show');
+                    activeDropdown = dropdown;
+                }
+            });
+
+            btn.addEventListener('mouseenter', () => dropdown.classList.add('show'));
+            btn.addEventListener('mouseleave', () => {
+                setTimeout(() => {
+                    if (!dropdown.matches(':hover')) {
+                        dropdown.classList.remove('show');
+                    }
+                }, 100);
+            });
+            
+            if (dropdown) {
+                dropdown.addEventListener('mouseleave', () => {
+                    dropdown.classList.remove('show');
+                    if (activeDropdown === dropdown) activeDropdown = null;
+                });
+            }
+        });
+
+        document.body.addEventListener('click', () => {
+            if (activeDropdown) {
+                activeDropdown.classList.remove('show');
+                activeDropdown = null;
+            }
+        });
+
+        // Hide/show navbar on scroll
+        let lastScroll = 0;
+        const featureNavbar = document.getElementById('featureNavbar');
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            if (currentScroll > lastScroll && currentScroll > 100) {
+                featureNavbar.style.transform = 'translateY(-100%)';
+            } else {
+                featureNavbar.style.transform = 'translateY(0)';
+            }
+            lastScroll = currentScroll;
+        });
+
+        // Animate numbers on scroll
+        const animateValue = (element, start, end, duration) => {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const value = Math.floor(progress * (end - start) + start);
+                element.textContent = value.toLocaleString();
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        };
+
+        // Observe stats for animation
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const statNumber = entry.target;
+                    const targetValue = parseInt(statNumber.textContent.replace(/,/g, ''));
+                    animateValue(statNumber, 0, targetValue, 1500);
+                    observer.unobserve(statNumber);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.stat-number').forEach(stat => {
+            observer.observe(stat);
+        });
+
+        // Chart.js configurations
+        const chartColors = {
+            primary: '#6366F1',
+            secondary: '#8B5CF6',
+            success: '#10B981',
+            warning: '#F59E0B',
+            danger: '#EF4444',
+            info: '#3B82F6'
+        };
+
+        // Initialize Charts
+        document.addEventListener('DOMContentLoaded', function() {
+            // Request Rate Chart
+            const requestCtx = document.getElementById('requestRateChart').getContext('2d');
+            const requestRateChart = new Chart(requestCtx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Requests per Second',
+                        borderColor: chartColors.primary,
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.4,
+                        fill: true,
+                        data: []
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            ticks: {
+                                display: false
+                            },
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 200,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '/s';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    interaction: {
+                        intersect: false
+                    }
+                }
+            });
+
+            // Response Time Chart
+            const responseCtx = document.getElementById('responseTimeChart').getContext('2d');
+            const responseTimeChart = new Chart(responseCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['<50ms', '50-100ms', '100-200ms', '200-500ms', '>500ms'],
+                    datasets: [{
+                        label: 'Response Time Distribution',
+                        data: [65, 120, 45, 12, 3],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(34, 197, 94, 0.7)',
+                            'rgba(245, 158, 11, 0.7)',
+                            'rgba(249, 115, 22, 0.7)',
+                            'rgba(239, 68, 68, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgb(16, 185, 129)',
+                            'rgb(34, 197, 94)',
+                            'rgb(245, 158, 11)',
+                            'rgb(249, 115, 22)',
+                            'rgb(239, 68, 68)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.parsed.y} requests`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Error Rate Chart
+            const errorCtx = document.getElementById('errorRateChart').getContext('2d');
+            const errorRateChart = new Chart(errorCtx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Error Rate (%)',
+                        borderColor: chartColors.danger,
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.4,
+                        fill: true,
+                        data: []
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            ticks: {
+                                display: false
+                            },
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 5,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    interaction: {
+                        intersect: false
+                    }
+                }
+            });
+
+            // System Resources Chart
+            const resourcesCtx = document.getElementById('systemResourcesChart').getContext('2d');
+            const systemResourcesChart = new Chart(resourcesCtx, {
+                type: 'line',
+                data: {
+                    labels: ['5m ago', '4m ago', '3m ago', '2m ago', '1m ago', 'Current'],
+                    datasets: [{
+                        label: 'CPU Usage',
+                        data: [62, 65, 68, 70, 67, 68],
+                        borderColor: chartColors.primary,
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Memory Usage',
+                        data: [65, 68, 70, 72, 71, 72],
+                        borderColor: chartColors.info,
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Simulate real-time data updates
+            function updateCharts() {
+                // Update request rate chart
+                const newRequestData = {
+                    x: Date.now(),
+                    y: Math.floor(Math.random() * 50) + 100
+                };
+                requestRateChart.data.datasets[0].data.push(newRequestData);
+                if (requestRateChart.data.datasets[0].data.length > 30) {
+                    requestRateChart.data.datasets[0].data.shift();
+                }
+                requestRateChart.update('none');
+
+                // Update error rate chart
+                const newErrorData = {
+                    x: Date.now(),
+                    y: (Math.random() * 1.9 + 0.1).toFixed(1)
+                };
+                errorRateChart.data.datasets[0].data.push(newErrorData);
+                if (errorRateChart.data.datasets[0].data.length > 30) {
+                    errorRateChart.data.datasets[0].data.shift();
+                }
+                errorRateChart.update('none');
+            }
+
+            // Update charts every second
+            setInterval(updateCharts, 1000);
+        });
+
+        // Add hover effect to dashboard cards
+        const dashboardCards = document.querySelectorAll('.card-hover');
+        dashboardCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transition = 'all 0.3s ease';
+            });
+        });
+
+        // Simulate real-time updates for stats
+        function updateStats() {
+            const activeRequests = document.querySelector('.stat-number');
+            const currentValue = parseInt(activeRequests.textContent);
+            const change = Math.floor(Math.random() * 10) - 3; // Random change between -3 and +6
+            const newValue = Math.max(100, currentValue + change);
+            
+            // Animate the number change
+            animateValue(activeRequests, currentValue, newValue, 500);
+            
+            // Update other stats with small random variations
+            const responseTime = document.querySelectorAll('.stat-number')[1];
+            const responseValue = parseInt(responseTime.textContent);
+            const responseChange = Math.floor(Math.random() * 6) - 2;
+            const newResponseValue = Math.max(50, Math.min(120, responseValue + responseChange));
+            
+            animateValue(responseTime, responseValue, newResponseValue, 500);
+        }
+
+        // Update stats every 3 seconds
+        setInterval(updateStats, 3000);
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Refresh data button
+        document.getElementById('refreshData').addEventListener('click', function() {
+            // Show loading state
+            this.innerHTML = '<i class="ph ph-arrow-clockwise animate-spin"></i><span>Refreshing...</span>';
+            
+            // Simulate API call
+            setTimeout(() => {
+                this.innerHTML = '<i class="ph ph-arrow-clockwise"></i><span>Refresh Data</span>';
+                updateStats();
+                // Show success message
+                const toast = document.createElement('div');
+                toast.className = 'fixed top-20 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50';
+                toast.innerHTML = '<i class="ph ph-check-circle mr-2"></i> Data refreshed successfully';
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 3000);
+            }, 1500);
+        });
+
+        // Dark mode toggle
+        document.getElementById('darkModeToggle').addEventListener('change', function() {
+            if (this.checked) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        });
+
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.getElementById('darkModeToggle').checked = true;
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+</body>
+</html>

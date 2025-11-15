@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CV Verification | SHMS Verification Tools</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  .animate-fadeIn { animation: fadeIn 0.6s ease-out forwards; }
+  .animate-slideUp { animation: slideUp 0.7s ease-out forwards; }
+  .animate-pulse-slow { animation: pulse 3s ease-in-out infinite; }
+
+  .dropdownContent {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none;
+    position: absolute;
+    z-index: 50;
+    left: 0;
+  }
+  .dropdownContent.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .card-hover {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  .stat-number {
+    font-feature-settings: 'tnum';
+    font-variant-numeric: tabular-nums;
+  }
+  .gradient-border {
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899) border-box;
+    border: 2px solid transparent;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #f1f1f1; }
+  ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: #4f46e5; }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Chart containers */
+  .chart-container { position: relative; height: 300px; }
+  
+  /* Progress bars */
+  .progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e5e7eb;
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease-in-out;
+  }
+  
+  /* Status indicators */
+  .status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+  
+  .status-active { background-color: #10b981; }
+  .status-processing { background-color: #f59e0b; }
+  .status-error { background-color: #ef4444; }
+  .status-idle { background-color: #6b7280; }
+
+  /* Verification status */
+  .verification-verified { background-color: #10b981; color: white; }
+  .verification-pending { background-color: #f59e0b; color: white; }
+  .verification-failed { background-color: #ef4444; color: white; }
+  .verification-review { background-color: #8b5cf6; color: white; }
+
+  /* Form styles */
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  .form-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  
+  .form-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  }
+
+  /* Tabs */
+  .tab-container {
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .tab-button {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .tab-button.active {
+    color: #6366f1;
+    border-bottom-color: #6366f1;
+  }
+  
+  .tab-button:hover:not(.active) {
+    color: #374151;
+    border-bottom-color: #d1d5db;
+  }
+  
+  .tab-content {
+    display: none;
+  }
+  
+  .tab-content.active {
+    display: block;
+  }
+
+  /* Data table styles */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .data-table th {
+    background-color: #f9fafb;
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .data-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .data-table tr:hover {
+    background-color: #f9fafb;
+  }
+
+  /* Document preview */
+  .document-preview {
+    border: 2px dashed #d1d5db;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  
+  .document-preview:hover {
+    border-color: #6366f1;
+  }
+  
+  .document-preview.dragover {
+    border-color: #6366f1;
+    background-color: #f0f4ff;
+  }
+
+  /* Verification score */
+  .verification-score {
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+    padding: 1rem;
+    border-radius: 0.5rem;
+  }
+  
+  .score-high { background-color: #d1fae5; color: #065f46; }
+  .score-medium { background-color: #fef3c7; color: #92400e; }
+  .score-low { background-color: #fee2e2; color: #991b1b; }
+
+  /* Match indicators */
+  .match-indicator {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  
+  .match-high { background-color: #d1fae5; color: #065f46; }
+  .match-medium { background-color: #fef3c7; color: #92400e; }
+  .match-low { background-color: #fee2e2; color: #991b1b; }
+</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen flex flex-col">
+
+<!-- Top Navbar -->
+<nav class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+  <h1 class="text-2xl font-bold tracking-wide flex items-center space-x-2">
+    <i class="ph ph-heartbeat text-3xl"></i>
+    <span>SHMS</span>
+  </h1>
+
+  <span class="text-xl font-bold flex items-center space-x-2">
+    <i class="ph ph-code"></i>
+    <span>AI-ML Developer</span>
+  </span>
+
+  <div class="relative flex items-center space-x-2">
+    
+    <!-- Notification Button -->
+    <a href="Notification.html" class="relative p-2 rounded-full hover:bg-indigo-600 focus:outline-none">
+      <i class="ph ph-bell text-xl"></i>
+      <!-- Notification badge -->
+      <span id="notificationBadge" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+        5
+      </span>
+    </a>
+
+    <!-- Three-dot menu -->
+    <div class="relative">
+      <button id="menuBtn" class="text-white text-2xl focus:outline-none hover:bg-indigo-600 rounded-full p-2 transition" aria-label="Menu">
+        <i class="ph ph-dots-three-vertical"></i>
+      </button>
+      <div id="menuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded-md shadow-lg z-50">
+        <a href="Profile.html" class="block px-4 py-2 hover:bg-indigo-100 rounded-t-md flex items-center space-x-2">
+          <i class="ph ph-user"></i>
+          <span>Profile</span>
+        </a>
+        <a href="Setting.html" class="block px-4 py-2 hover:bg-indigo-100 flex items-center space-x-2">
+          <i class="ph ph-gear"></i>
+          <span>Settings</span>
+        </a>
+        <a href="../Login.html" class="block px-4 py-2 hover:bg-indigo-100 text-red-600 rounded-b-md flex items-center space-x-2">
+          <i class="ph ph-sign-out"></i>
+          <span>Logout</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Feature Navbar -->
+<nav id="featureNavbar" class="bg-indigo-800 text-white shadow-md sticky top-0 z-40 transition-transform duration-300" style="top: 64px;">
+  <div class="container mx-auto flex flex-wrap justify-center md:justify-start items-center px-4 py-2 space-x-2">
+
+    <div class="relative">
+      <a href="Home.html" class="px-5 py-2 rounded-md hover:bg-indigo-700 block transition">Home</a>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">AI Model Management</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="TrainRetrainModel.html" class="block px-4 py-2 hover:bg-indigo-100">Train / Retrain Models</a>
+        <a href="ModelVersionControl.html" class="block px-4 py-2 hover:bg-indigo-100">Model Version Control</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Data & Pipeline</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="DataManagement.html" class="block px-4 py-2 hover:bg-indigo-100">Data Management</a>
+        <a href="PipelineHealth.html" class="block px-4 py-2 hover:bg-indigo-100">Pipeline Health & Quality</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Monitoring & Analytics</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="PredictionsDashboard.html" class="block px-4 py-2 hover:bg-indigo-100">Predictions Dashboard</a>
+        <a href="RealtimePerformance.html" class="block px-4 py-2 hover:bg-indigo-100">Real-Time Performance</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">System Administration</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="SystemMonitor.html" class="block px-4 py-2 hover:bg-indigo-100">System Monitor</a>
+        <a href="ApiManagement.html" class="block px-4 py-2 hover:bg-indigo-100">API Management</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md bg-indigo-600 font-semibold dropdownBtn transition">Verification Tools</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="cvVerification.html" class="block px-4 py-2 hover:bg-indigo-100">CV Verification</a>
+        <a href="DegreeVerification.html" class="block px-4 py-2 hover:bg-indigo-100">Degree Verification</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Reports</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="AiSystemReport.html" class="block px-4 py-2 hover:bg-indigo-100">AI System Report</a>
+        <a href="LogsAndReport.html" class="block px-4 py-2 hover:bg-indigo-100">Logs & Reports</a>
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+<!-- Current Time Display -->
+<div class="container mx-auto px-6 pt-4">
+  <div class="bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-md p-4 flex justify-between items-center transition-colors duration-300">
+    <div class="flex items-center space-x-4">
+      <div class="bg-blue-100 p-3 rounded-full">
+        <i class="ph ph-file-text text-blue-700 text-2xl"></i>
+      </div>
+      <div>
+        <p class="text-sm text-white/80">Current Date & Time</p>
+        <p id="currentDateTime" class="text-lg font-semibold text-white"></p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2">
+      <span class="relative flex h-3 w-3">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+      </span>
+      <span class="text-sm font-medium text-white/90">Verification System Active</span>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<main class="flex-grow container mx-auto px-6 py-8">
+  <!-- Welcome Section -->
+  <div class="mb-10 animate-fadeIn">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">CV Verification System</h1>
+    <p class="text-gray-600">Automated CV analysis, credential verification, and candidate screening powered by AI.</p>
+  </div>
+
+  <!-- CV Verification Overview Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+    <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.1s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-blue-100 text-sm">CVs Processed Today</p>
+          <h3 class="text-2xl font-bold stat-number">142</h3>
+        </div>
+        <div class="bg-blue-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-file-text text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-blue-100">
+          <i class="ph ph-arrow-up mr-1"></i>
+          <span>18% increase from yesterday</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.2s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-green-100 text-sm">Verification Accuracy</p>
+          <h3 class="text-2xl font-bold stat-number">96.3%</h3>
+        </div>
+        <div class="bg-green-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-target text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-green-100">
+          <i class="ph ph-trend-up mr-1"></i>
+          <span>1.7% improvement</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.3s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-purple-100 text-sm">Pending Manual Review</p>
+          <h3 class="text-2xl font-bold stat-number">23</h3>
+        </div>
+        <div class="bg-purple-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-clock text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-purple-100">
+          <i class="ph ph-arrow-down mr-1"></i>
+          <span>5 resolved today</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-xl shadow-md p-6 card-hover animate-slideUp" style="animation-delay: 0.4s">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-orange-100 text-sm">Avg. Processing Time</p>
+          <h3 class="text-2xl font-bold stat-number">3.2 sec</h3>
+        </div>
+        <div class="bg-orange-400 bg-opacity-40 p-3 rounded-full">
+          <i class="ph ph-gauge text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center text-sm text-orange-100">
+          <i class="ph ph-arrow-down mr-1"></i>
+          <span>0.8 sec improvement</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs for CV Verification -->
+  <div class="bg-white rounded-xl shadow-md mb-10 animate-fadeIn">
+    <div class="tab-container">
+      <div class="flex overflow-x-auto">
+        <button class="tab-button active" data-tab="upload-verify">Upload & Verify</button>
+        <button class="tab-button" data-tab="verification-results">Verification Results</button>
+        <button class="tab-button" data-tab="manual-review">Manual Review</button>
+        <button class="tab-button" data-tab="verification-analytics">Verification Analytics</button>
+      </div>
+    </div>
+
+    <!-- Upload & Verify Tab -->
+    <div id="upload-verify" class="tab-content active p-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- CV Upload Section -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 class="text-xl font-bold text-gray-800 mb-4">Upload CV for Verification</h2>
+          
+          <div class="document-preview mb-6" id="documentPreview">
+            <i class="ph ph-file-cloud text-4xl text-gray-400 mb-2"></i>
+            <p class="text-gray-500">Drag & drop CV file here or click to browse</p>
+            <p class="text-sm text-gray-400 mt-2">Supported formats: PDF, DOC, DOCX (Max 10MB)</p>
+            <input type="file" id="cvUpload" class="hidden" accept=".pdf,.doc,.docx">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="candidateName">Candidate Name</label>
+            <input type="text" id="candidateName" class="form-input" placeholder="Enter candidate name">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="candidateEmail">Candidate Email</label>
+            <input type="email" id="candidateEmail" class="form-input" placeholder="Enter candidate email">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="positionApplied">Position Applied For</label>
+            <input type="text" id="positionApplied" class="form-input" placeholder="Enter position title">
+          </div>
+
+          <div class="flex space-x-3">
+            <button class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-4 rounded-md flex items-center justify-center space-x-2">
+              <i class="ph ph-magnifying-glass"></i>
+              <span>Verify CV</span>
+            </button>
+            <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 px-4 rounded-md">
+              <i class="ph ph-arrow-clockwise"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Verification Results Preview -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 class="text-xl font-bold text-gray-800 mb-4">Verification Results</h2>
+          
+          <div class="text-center mb-6">
+            <div class="verification-score score-high mb-4">
+              <div>VERIFICATION SCORE</div>
+              <div class="text-4xl">87%</div>
+            </div>
+            <p class="text-gray-600">This CV has a high probability of being authentic.</p>
+          </div>
+
+          <div class="space-y-4">
+            <div class="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <i class="ph ph-graduation-cap text-indigo-600 mr-3"></i>
+                <span>Education Verification</span>
+              </div>
+              <span class="match-indicator match-high">94% Match</span>
+            </div>
+
+            <div class="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <i class="ph ph-briefcase text-indigo-600 mr-3"></i>
+                <span>Work Experience</span>
+              </div>
+              <span class="match-indicator match-high">89% Match</span>
+            </div>
+
+            <div class="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <i class="ph ph-award text-indigo-600 mr-3"></i>
+                <span>Certifications</span>
+              </div>
+              <span class="match-indicator match-medium">76% Match</span>
+            </div>
+
+            <div class="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <i class="ph ph-skills text-indigo-600 mr-3"></i>
+                <span>Skills Validation</span>
+              </div>
+              <span class="match-indicator match-high">91% Match</span>
+            </div>
+
+            <div class="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
+              <div class="flex items-center">
+                <i class="ph ph-users text-indigo-600 mr-3"></i>
+                <span>References Check</span>
+              </div>
+              <span class="match-indicator match-low">62% Match</span>
+            </div>
+          </div>
+
+          <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div class="flex">
+              <i class="ph ph-warning text-yellow-600 mr-2"></i>
+              <div>
+                <h4 class="font-medium text-yellow-800">Attention Required</h4>
+                <p class="text-sm text-yellow-700">Reference details could not be fully verified. Manual review recommended.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Verification Results Tab -->
+    <div id="verification-results" class="tab-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Recent Verification Results</h2>
+        <div class="flex space-x-3">
+          <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 py-2 px-4 rounded-md flex items-center space-x-2">
+            <i class="ph ph-funnel"></i>
+            <span>Filter</span>
+          </button>
+          <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 py-2 px-4 rounded-md flex items-center space-x-2">
+            <i class="ph ph-magnifying-glass"></i>
+            <span>Search</span>
+          </button>
+          <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center space-x-2">
+            <i class="ph ph-export"></i>
+            <span>Export</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Candidate</th>
+              <th>Position</th>
+              <th>Verification Score</th>
+              <th>Education</th>
+              <th>Experience</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="font-medium text-gray-900">
+                <div class="flex items-center">
+                  <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                    <span class="text-indigo-600 font-medium">JS</span>
+                  </div>
+                  <div>
+                    <div>John Smith</div>
+                    <div class="text-xs text-gray-500">john.smith@email.com</div>
+                  </div>
+                </div>
+              </td>
+              <td>Senior Data Scientist</td>
+              <td>
+                <div class="flex items-center">
+                  <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                    <div class="bg-green-600 h-2 rounded-full" style="width: 87%"></div>
+                  </div>
+                  <span>87%</span>
+                </div>
+              </td>
+              <td><span class="match-indicator match-high">Verified</span></td>
+              <td><span class="match-indicator match-high">Verified</span></td>
+              <td><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Verified</span></td>
+              <td>2024-03-15</td>
+              <td>
+                <div class="flex space-x-2">
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-eye"></i>
+                  </button>
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-download"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium text-gray-900">
+                <div class="flex items-center">
+                  <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                    <span class="text-purple-600 font-medium">MJ</span>
+                  </div>
+                  <div>
+                    <div>Maria Johnson</div>
+                    <div class="text-xs text-gray-500">maria.j@email.com</div>
+                  </div>
+                </div>
+              </td>
+              <td>AI Research Engineer</td>
+              <td>
+                <div class="flex items-center">
+                  <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                    <div class="bg-yellow-500 h-2 rounded-full" style="width: 72%"></div>
+                  </div>
+                  <span>72%</span>
+                </div>
+              </td>
+              <td><span class="match-indicator match-high">Verified</span></td>
+              <td><span class="match-indicator match-medium">Partial</span></td>
+              <td><span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">Review</span></td>
+              <td>2024-03-14</td>
+              <td>
+                <div class="flex space-x-2">
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-eye"></i>
+                  </button>
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-download"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium text-gray-900">
+                <div class="flex items-center">
+                  <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                    <span class="text-red-600 font-medium">RD</span>
+                  </div>
+                  <div>
+                    <div>Robert Davis</div>
+                    <div class="text-xs text-gray-500">robert.davis@email.com</div>
+                  </div>
+                </div>
+              </td>
+              <td>ML Operations Lead</td>
+              <td>
+                <div class="flex items-center">
+                  <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                    <div class="bg-red-600 h-2 rounded-full" style="width: 45%"></div>
+                  </div>
+                  <span>45%</span>
+                </div>
+              </td>
+              <td><span class="match-indicator match-low">Failed</span></td>
+              <td><span class="match-indicator match-low">Failed</span></td>
+              <td><span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">Failed</span></td>
+              <td>2024-03-14</td>
+              <td>
+                <div class="flex space-x-2">
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-eye"></i>
+                  </button>
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-download"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium text-gray-900">
+                <div class="flex items-center">
+                  <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                    <span class="text-green-600 font-medium">SW</span>
+                  </div>
+                  <div>
+                    <div>Sarah Wilson</div>
+                    <div class="text-xs text-gray-500">sarah.wilson@email.com</div>
+                  </div>
+                </div>
+              </td>
+              <td>Data Engineer</td>
+              <td>
+                <div class="flex items-center">
+                  <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                    <div class="bg-green-600 h-2 rounded-full" style="width: 92%"></div>
+                  </div>
+                  <span>92%</span>
+                </div>
+              </td>
+              <td><span class="match-indicator match-high">Verified</span></td>
+              <td><span class="match-indicator match-high">Verified</span></td>
+              <td><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Verified</span></td>
+              <td>2024-03-13</td>
+              <td>
+                <div class="flex space-x-2">
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-eye"></i>
+                  </button>
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-download"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium text-gray-900">
+                <div class="flex items-center">
+                  <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                    <span class="text-blue-600 font-medium">TB</span>
+                  </div>
+                  <div>
+                    <div>Thomas Brown</div>
+                    <div class="text-xs text-gray-500">thomas.b@email.com</div>
+                  </div>
+                </div>
+              </td>
+              <td>AI Product Manager</td>
+              <td>
+                <div class="flex items-center">
+                  <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                    <div class="bg-yellow-500 h-2 rounded-full" style="width: 68%"></div>
+                  </div>
+                  <span>68%</span>
+                </div>
+              </td>
+              <td><span class="match-indicator match-medium">Partial</span></td>
+              <td><span class="match-indicator match-medium">Partial</span></td>
+              <td><span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Pending</span></td>
+              <td>2024-03-13</td>
+              <td>
+                <div class="flex space-x-2">
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-eye"></i>
+                  </button>
+                  <button class="text-indigo-600 hover:text-indigo-900">
+                    <i class="ph ph-download"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="flex justify-between items-center mt-6">
+        <div class="text-sm text-gray-700">
+          Showing 1 to 5 of 142 verifications
+        </div>
+        <div class="flex space-x-2">
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+            Previous
+          </button>
+          <button class="px-3 py-1 bg-indigo-600 text-white rounded-md">
+            1
+          </button>
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+            2
+          </button>
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+            3
+          </button>
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Manual Review Tab -->
+    <div id="manual-review" class="tab-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">CVs Requiring Manual Review</h2>
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center space-x-2">
+          <i class="ph ph-export"></i>
+          <span>Export List</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Review Card 1 -->
+        <div class="bg-white rounded-lg border border-yellow-200 p-6">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h3 class="font-semibold text-gray-800">David Chen</h3>
+              <p class="text-sm text-gray-500">AI Research Scientist</p>
+            </div>
+            <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Education Mismatch</span>
+          </div>
+          
+          <div class="space-y-3 mb-4">
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Education Verification</span>
+              <span class="text-sm font-medium text-red-600">Failed</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-red-500" style="width: 35%"></div>
+            </div>
+            
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Work Experience</span>
+              <span class="text-sm font-medium text-green-600">Verified</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-green-500" style="width: 88%"></div>
+            </div>
+          </div>
+          
+          <p class="text-sm text-gray-600 mb-4">University records do not match claimed degree. Requires manual verification with institution.</p>
+          
+          <div class="flex space-x-2">
+            <button class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-3 rounded-md text-sm">
+              Review Details
+            </button>
+            <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-3 rounded-md text-sm">
+              <i class="ph ph-ellipsis"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Review Card 2 -->
+        <div class="bg-white rounded-lg border border-yellow-200 p-6">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h3 class="font-semibold text-gray-800">Lisa Rodriguez</h3>
+              <p class="text-sm text-gray-500">Machine Learning Engineer</p>
+            </div>
+            <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Employment Gap</span>
+          </div>
+          
+          <div class="space-y-3 mb-4">
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Education Verification</span>
+              <span class="text-sm font-medium text-green-600">Verified</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-green-500" style="width: 92%"></div>
+            </div>
+            
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Work Experience</span>
+              <span class="text-sm font-medium text-yellow-600">Partial</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-yellow-500" style="width: 65%"></div>
+            </div>
+          </div>
+          
+          <p class="text-sm text-gray-600 mb-4">Unexplained 18-month employment gap detected. Candidate clarification required.</p>
+          
+          <div class="flex space-x-2">
+            <button class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-3 rounded-md text-sm">
+              Review Details
+            </button>
+            <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-3 rounded-md text-sm">
+              <i class="ph ph-ellipsis"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Review Card 3 -->
+        <div class="bg-white rounded-lg border border-yellow-200 p-6">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h3 class="font-semibold text-gray-800">Michael Thompson</h3>
+              <p class="text-sm text-gray-500">Data Science Lead</p>
+            </div>
+            <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Reference Issue</span>
+          </div>
+          
+          <div class="space-y-3 mb-4">
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Education Verification</span>
+              <span class="text-sm font-medium text-green-600">Verified</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-green-500" style="width: 94%"></div>
+            </div>
+            
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">References Check</span>
+              <span class="text-sm font-medium text-red-600">Failed</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-red-500" style="width: 28%"></div>
+            </div>
+          </div>
+          
+          <p class="text-sm text-gray-600 mb-4">Two professional references could not be verified. Contact information appears invalid.</p>
+          
+          <div class="flex space-x-2">
+            <button class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-3 rounded-md text-sm">
+              Review Details
+            </button>
+            <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-3 rounded-md text-sm">
+              <i class="ph ph-ellipsis"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review Statistics -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Review Statistics</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-indigo-600">23</div>
+            <div class="text-sm text-gray-600">Pending Reviews</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-green-600">5</div>
+            <div class="text-sm text-gray-600">Completed Today</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-blue-600">2.3 days</div>
+            <div class="text-sm text-gray-600">Avg. Resolution Time</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Verification Analytics Tab -->
+    <div id="verification-analytics" class="tab-content p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-800">Verification Analytics</h2>
+        <div class="flex space-x-2">
+          <button class="text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-md">Last 7 Days</button>
+          <button class="text-sm text-gray-500 px-3 py-1 rounded-md hover:bg-gray-100">Last 30 Days</button>
+          <button class="text-sm text-gray-500 px-3 py-1 rounded-md hover:bg-gray-100">Custom Range</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Verification Trends -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Verification Trends</h3>
+          <div class="chart-container">
+            <canvas id="verificationTrendsChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Verification Status Distribution -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Verification Status Distribution</h3>
+          <div class="chart-container">
+            <canvas id="statusDistributionChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Common Issues -->
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Common Verification Issues</h3>
+        <div class="space-y-4">
+          <div>
+            <div class="flex justify-between mb-1">
+              <span class="text-sm font-medium text-gray-700">Education Mismatch</span>
+              <span class="text-sm font-medium text-gray-700">42%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-red-500" style="width: 42%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between mb-1">
+              <span class="text-sm font-medium text-gray-700">Employment Gap</span>
+              <span class="text-sm font-medium text-gray-700">28%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-yellow-500" style="width: 28%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between mb-1">
+              <span class="text-sm font-medium text-gray-700">Reference Issues</span>
+              <span class="text-sm font-medium text-gray-700">18%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-blue-500" style="width: 18%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between mb-1">
+              <span class="text-sm font-medium text-gray-700">Skill Exaggeration</span>
+              <span class="text-sm font-medium text-gray-700">12%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill bg-purple-500" style="width: 12%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Verification Alerts -->
+  <div class="bg-white rounded-xl shadow-md p-6 animate-fadeIn">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl font-bold text-gray-800">Recent Verification Alerts</h2>
+      <button class="text-sm bg-indigo-600 text-white px-4 py-2 rounded-md flex items-center">
+        <i class="ph ph-bell-ringing mr-1"></i>
+        <span>Alert Settings</span>
+      </button>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="border border-red-200 rounded-lg p-4 bg-red-50">
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex items-center">
+            <div class="bg-red-100 p-2 rounded-full mr-3">
+              <i class="ph ph-warning text-red-600"></i>
+            </div>
+            <h3 class="font-semibold text-red-800">Suspicious Document</h3>
+          </div>
+          <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">Critical</span>
+        </div>
+        <p class="text-sm text-red-700 mb-2">CV for Robert Davis shows signs of document tampering.</p>
+        <p class="text-xs text-red-600">Detected: 2 hours ago</p>
+      </div>
+      
+      <div class="border border-yellow-200 rounded-lg p-4 bg-yellow-50">
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex items-center">
+            <div class="bg-yellow-100 p-2 rounded-full mr-3">
+              <i class="ph ph-warning text-yellow-600"></i>
+            </div>
+            <h3 class="font-semibold text-yellow-800">Degree Mismatch</h3>
+          </div>
+          <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Warning</span>
+        </div>
+        <p class="text-sm text-yellow-700 mb-2">David Chen's claimed university has no record of graduation.</p>
+        <p class="text-xs text-yellow-600">Detected: 5 hours ago</p>
+      </div>
+      
+      <div class="border border-blue-200 rounded-lg p-4 bg-blue-50">
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex items-center">
+            <div class="bg-blue-100 p-2 rounded-full mr-3">
+              <i class="ph ph-info text-blue-600"></i>
+            </div>
+            <h3 class="font-semibold text-blue-800">Reference Verification</h3>
+          </div>
+          <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Info</span>
+        </div>
+        <p class="text-sm text-blue-700 mb-2">Michael Thompson's references could not be contacted.</p>
+        <p class="text-xs text-blue-600">Detected: 1 day ago</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="text-center py-6 bg-gradient-to-r from-indigo-700 to-indigo-600 text-white">
+  <div class="container mx-auto px-6">
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 mb-6">
+      <div class="flex items-center space-x-2">
+        <i class="ph ph-heartbeat text-2xl"></i>
+        <span class="font-semibold">Smart Healthcare Management System</span>
+      </div>
+      <div class="text-sm">
+        © 2025 SHMS | Verification Tools Dashboard
+      </div>
+      <div class="flex items-center space-x-4">
+        <a href="#" class="hover:text-indigo-200 transition">
+          <i class="ph ph-info text-xl"></i>
+        </a>
+      </div>
+    </div>
+    
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+      <div class="max-w-md text-center md:text-left">
+        <p class="text-sm">
+          Advanced CV verification and credential validation for healthcare recruitment.
+        </p>
+      </div>
+
+      <div class="flex space-x-5 text-white">
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-facebook-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-twitter-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-linkedin-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-envelope text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-phone text-2xl"></i></a>
+      </div>
+    </div>
+
+    <div class="text-center text-sm text-indigo-200 mt-6 border-t border-indigo-700 pt-4">
+      © 2025 Smart Healthcare Management System | Verification Tools Interface
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Update current date and time
+  function updateDateTime() {
+    const now = new Date();
+    const options = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    };
+    document.getElementById('currentDateTime').textContent = now.toLocaleDateString('en-US', options);
+  }
+  updateDateTime();
+  setInterval(updateDateTime, 1000);
+
+  // Top menu toggle
+  const menuBtn = document.getElementById('menuBtn');
+  const menuDropdown = document.getElementById('menuDropdown');
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuDropdown.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+      menuDropdown.classList.add('hidden');
+    }
+  });
+
+  // Dropdown functionality
+  const dropdownButtons = document.querySelectorAll('.dropdownBtn');
+  let activeDropdown = null;
+
+  dropdownButtons.forEach(btn => {
+    const dropdown = btn.nextElementSibling;
+    if (!dropdown) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeDropdown && activeDropdown !== dropdown) {
+        activeDropdown.classList.remove('show');
+      }
+      if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        activeDropdown = null;
+      } else {
+        dropdown.classList.add('show');
+        activeDropdown = dropdown;
+      }
+    });
+
+    btn.addEventListener('mouseenter', () => dropdown.classList.add('show'));
+    btn.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!dropdown.matches(':hover')) {
+          dropdown.classList.remove('show');
+        }
+      }, 100);
+    });
+    
+    if (dropdown) {
+      dropdown.addEventListener('mouseleave', () => {
+        dropdown.classList.remove('show');
+        if (activeDropdown === dropdown) activeDropdown = null;
+      });
+    }
+  });
+
+  document.body.addEventListener('click', () => {
+    if (activeDropdown) {
+      activeDropdown.classList.remove('show');
+      activeDropdown = null;
+    }
+  });
+
+  // Hide/show navbar on scroll
+  let lastScroll = 0;
+  const featureNavbar = document.getElementById('featureNavbar');
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+    if (currentScroll > lastScroll && currentScroll > 100) {
+      featureNavbar.style.transform = 'translateY(-100%)';
+    } else {
+      featureNavbar.style.transform = 'translateY(0)';
+    }
+    lastScroll = currentScroll;
+  });
+
+  // Tab functionality
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      // Remove active class from all buttons and contents
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      tabContents.forEach(content => content.classList.remove('active'));
+      
+      // Add active class to clicked button
+      button.classList.add('active');
+      
+      // Show corresponding content
+      const tabId = button.getAttribute('data-tab');
+      document.getElementById(tabId).classList.add('active');
+    });
+  });
+
+  // Animate numbers on scroll
+  const animateValue = (element, start, end, duration) => {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const value = Math.floor(progress * (end - start) + start);
+      element.textContent = value.toLocaleString();
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+    window.requestAnimationFrame(step);
+  };
+
+  // Observe stats for animation
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const statNumber = entry.target;
+        const targetValue = parseInt(statNumber.textContent.replace(/,/g, ''));
+        animateValue(statNumber, 0, targetValue, 1500);
+        observer.unobserve(statNumber);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('.stat-number').forEach(stat => {
+    observer.observe(stat);
+  });
+
+  // Document upload functionality
+  const documentPreview = document.getElementById('documentPreview');
+  const fileInput = document.getElementById('cvUpload');
+
+  documentPreview.addEventListener('click', () => {
+    fileInput.click();
+  });
+
+  documentPreview.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    documentPreview.classList.add('dragover');
+  });
+
+  documentPreview.addEventListener('dragleave', () => {
+    documentPreview.classList.remove('dragover');
+  });
+
+  documentPreview.addEventListener('drop', (e) => {
+    e.preventDefault();
+    documentPreview.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+      fileInput.files = e.dataTransfer.files;
+      handleFileSelect(e.dataTransfer.files[0]);
+    }
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length) {
+      handleFileSelect(e.target.files[0]);
+    }
+  });
+
+  function handleFileSelect(file) {
+    const fileName = file.name;
+    const fileSize = (file.size / 1024 / 1024).toFixed(2); // MB
+    
+    documentPreview.innerHTML = `
+      <i class="ph ph-file-text text-3xl text-green-500 mb-2"></i>
+      <p class="font-medium text-gray-800">${fileName}</p>
+      <p class="text-sm text-gray-500">${fileSize} MB</p>
+      <p class="text-sm text-green-600 mt-2">Ready for verification</p>
+    `;
+  }
+
+  // Chart.js configurations
+  const chartColors = {
+    primary: '#6366F1',
+    secondary: '#8B5CF6',
+    success: '#10B981',
+    warning: '#F59E0B',
+    danger: '#EF4444',
+    info: '#3B82F6'
+  };
+
+  // Initialize Charts
+  document.addEventListener('DOMContentLoaded', function() {
+    // Verification Trends Chart
+    const trendsCtx = document.getElementById('verificationTrendsChart').getContext('2d');
+    const verificationTrendsChart = new Chart(trendsCtx, {
+      type: 'line',
+      data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{
+          label: 'CVs Processed',
+          data: [112, 124, 98, 135, 142, 76, 89],
+          borderColor: 'rgb(99, 102, 241)',
+          backgroundColor: 'rgba(99, 102, 241, 0.1)',
+          tension: 0.3,
+          fill: true
+        }, {
+          label: 'Manual Reviews',
+          data: [18, 22, 15, 26, 23, 8, 12],
+          borderColor: 'rgb(245, 158, 11)',
+          backgroundColor: 'rgba(245, 158, 11, 0.1)',
+          tension: 0.3,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+
+    // Status Distribution Chart
+    const statusCtx = document.getElementById('statusDistributionChart').getContext('2d');
+    const statusDistributionChart = new Chart(statusCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Verified', 'Pending Review', 'Failed', 'Manual Review'],
+        datasets: [{
+          data: [68, 12, 8, 12],
+          backgroundColor: [
+            'rgba(16, 185, 129, 0.7)',
+            'rgba(59, 130, 246, 0.7)',
+            'rgba(239, 68, 68, 0.7)',
+            'rgba(245, 158, 11, 0.7)'
+          ],
+          borderColor: [
+            'rgb(16, 185, 129)',
+            'rgb(59, 130, 246)',
+            'rgb(239, 68, 68)',
+            'rgb(245, 158, 11)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+          }
+        }
+      }
+    });
+  });
+
+  // Add hover effect to dashboard cards
+  const dashboardCards = document.querySelectorAll('.card-hover');
+  dashboardCards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transition = 'all 0.3s ease';
+    });
+  });
+
+  // Simulate verification updates
+  function simulateVerificationUpdates() {
+    const verificationTable = document.querySelector('#verification-results .data-table tbody');
+    if (!verificationTable) return;
+    
+    const names = ['James Wilson', 'Emma Thompson', 'Daniel Lee', 'Olivia Martinez'];
+    const positions = ['Data Analyst', 'ML Researcher', 'AI Engineer', 'Data Scientist'];
+    const statuses = ['Verified', 'Pending', 'Failed'];
+    
+    const name = names[Math.floor(Math.random() * names.length)];
+    const position = positions[Math.floor(Math.random() * positions.length)];
+    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    const score = Math.floor(Math.random() * 40) + 60;
+    
+    const initials = name.split(' ').map(n => n[0]).join('');
+    const colors = ['indigo', 'purple', 'green', 'blue', 'red'];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+      <td class="font-medium text-gray-900">
+        <div class="flex items-center">
+          <div class="w-8 h-8 bg-${color}-100 rounded-full flex items-center justify-center mr-3">
+            <span class="text-${color}-600 font-medium">${initials}</span>
+          </div>
+          <div>
+            <div>${name}</div>
+            <div class="text-xs text-gray-500">${name.toLowerCase().replace(' ', '.')}@email.com</div>
+          </div>
+        </div>
+      </td>
+      <td>${position}</td>
+      <td>
+        <div class="flex items-center">
+          <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
+            <div class="bg-${score > 80 ? 'green' : score > 60 ? 'yellow' : 'red'}-600 h-2 rounded-full" style="width: ${score}%"></div>
+          </div>
+          <span>${score}%</span>
+        </div>
+      </td>
+      <td><span class="match-indicator match-${score > 80 ? 'high' : score > 60 ? 'medium' : 'low'}">${score > 80 ? 'Verified' : score > 60 ? 'Partial' : 'Failed'}</span></td>
+      <td><span class="match-indicator match-${score > 80 ? 'high' : score > 60 ? 'medium' : 'low'}">${score > 80 ? 'Verified' : score > 60 ? 'Partial' : 'Failed'}</span></td>
+      <td><span class="bg-${status === 'Verified' ? 'green' : status === 'Pending' ? 'yellow' : 'red'}-100 text-${status === 'Verified' ? 'green' : status === 'Pending' ? 'yellow' : 'red'}-800 text-xs px-2 py-1 rounded-full">${status}</span></td>
+      <td>${new Date().toISOString().split('T')[0]}</td>
+      <td>
+        <div class="flex space-x-2">
+          <button class="text-indigo-600 hover:text-indigo-900">
+            <i class="ph ph-eye"></i>
+          </button>
+          <button class="text-indigo-600 hover:text-indigo-900">
+            <i class="ph ph-download"></i>
+          </button>
+        </div>
+      </td>
+    `;
+    
+    verificationTable.insertBefore(newRow, verificationTable.firstChild);
+    
+    // Remove oldest verification if we have more than 5
+    if (verificationTable.children.length > 5) {
+      verificationTable.removeChild(verificationTable.lastChild);
+    }
+  }
+  
+  // Update verification table every 20 seconds
+  setInterval(simulateVerificationUpdates, 20000);
+</script>
+</body>
+</html>

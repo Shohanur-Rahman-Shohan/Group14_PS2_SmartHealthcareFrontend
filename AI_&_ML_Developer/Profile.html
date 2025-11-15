@@ -1,0 +1,2241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile | SHMS AI-ML Developer</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(100%); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  .animate-slideUp {
+    animation: slideUp 0.7s ease-out forwards;
+  }
+  .animate-slideInRight {
+    animation: slideInRight 0.5s ease-out forwards;
+  }
+  .dropdownContent {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none;
+    position: absolute;
+    z-index: 50;
+    left: 0;
+  }
+  .dropdownContent.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .card-hover {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.15);
+  }
+  .gradient-border {
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899) border-box;
+    border: 2px solid transparent;
+  }
+  
+  /* Modal styles */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  .modal-large {
+    max-width: 900px;
+  }
+  
+  /* Toast notification styles */
+  .toast {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transform: translateX(150%);
+    transition: transform 0.3s ease;
+  }
+  .toast.show {
+    transform: translateX(0);
+  }
+  .toast-success {
+    background-color: #10b981;
+  }
+  .toast-error {
+    background-color: #ef4444;
+  }
+  .toast-warning {
+    background-color: #f59e0b;
+  }
+  .toast-info {
+    background-color: #3b82f6;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #6366f1;
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+  }
+  
+  /* Badge styles */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .badge-blue {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+  .badge-green {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+  .badge-purple {
+    background-color: #e9d5ff;
+    color: #6b21a8;
+  }
+  .badge-orange {
+    background-color: #fed7aa;
+    color: #9a3412;
+  }
+  
+  /* Progress bar */
+  .progress-container {
+    width: 100%;
+    background-color: #e5e7eb;
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 0.5rem;
+    border-radius: 0.5rem;
+    transition: width 0.5s ease-in-out;
+    background: linear-gradient(to right, #6366f1, #8b5cf6);
+  }
+  
+  /* Achievement card styles */
+  .achievement-card {
+    position: relative;
+    overflow: hidden;
+  }
+  .achievement-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, #6366f1, #8b5cf6, #ec4899);
+  }
+  
+  /* Form styles */
+  .form-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+  }
+  .form-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  }
+  
+  /* Table styles */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .data-table th {
+    background-color: #f8fafc;
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .data-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .data-table tr:hover {
+    background-color: #f9fafb;
+  }
+  
+  /* Wizard styles */
+  .wizard-step {
+    display: none;
+  }
+  .wizard-step.active {
+    display: block;
+  }
+  .wizard-progress {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+  .wizard-progress:before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #e5e7eb;
+    transform: translateY(-50%);
+    z-index: 1;
+  }
+  .wizard-progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
+  .wizard-progress-step .step-number {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background-color: #e5e7eb;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s;
+  }
+  .wizard-progress-step.active .step-number {
+    background-color: #6366f1;
+    color: white;
+  }
+  .wizard-progress-step.completed .step-number {
+    background-color: #10b981;
+    color: white;
+  }
+  .wizard-progress-step .step-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 500;
+  }
+  .wizard-progress-step.active .step-label {
+    color: #6366f1;
+  }
+  .wizard-progress-step.completed .step-label {
+    color: #10b981;
+  }
+</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen flex flex-col">
+
+<!-- Toast Container -->
+<div id="toastContainer"></div>
+
+<!-- Top Navbar -->
+<nav class="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+  <h1 class="text-2xl font-bold tracking-wide flex items-center space-x-2">
+    <i class="ph ph-heartbeat text-3xl"></i>
+    <span>SHMS</span>
+  </h1>
+
+  <span class="text-xl font-bold flex items-center space-x-2">
+    <i class="ph ph-code"></i>
+    <span>AI-ML Developer</span>
+  </span>
+
+  <div class="relative flex items-center space-x-2">
+    
+    <!-- Notification Button -->
+    <a href="Notification.html" class="relative p-2 rounded-full hover:bg-indigo-600 focus:outline-none">
+      <i class="ph ph-bell text-xl"></i>
+      <!-- Notification badge -->
+      <span id="notificationBadge" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+        5
+      </span>
+    </a>
+
+    <!-- Three-dot menu -->
+    <div class="relative">
+      <button id="menuBtn" class="text-white text-2xl focus:outline-none hover:bg-indigo-600 rounded-full p-2 transition" aria-label="Menu">
+        <i class="ph ph-dots-three-vertical"></i>
+      </button>
+      <div id="menuDropdown" class="hidden absolute right-0 mt-2 w-40 bg-white text-gray-800 rounded-md shadow-lg z-50">
+        <a href="Profile.html" class="block px-4 py-2 hover:bg-indigo-100 rounded-t-md flex items-center space-x-2">
+          <i class="ph ph-user"></i>
+          <span>Profile</span>
+        </a>
+        <a href="Setting.html" class="block px-4 py-2 hover:bg-indigo-100 flex items-center space-x-2">
+          <i class="ph ph-gear"></i>
+          <span>Settings</span>
+        </a>
+        <a href="../Login.html" class="block px-4 py-2 hover:bg-indigo-100 text-red-600 rounded-b-md flex items-center space-x-2">
+          <i class="ph ph-sign-out"></i>
+          <span>Logout</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Feature Navbar -->
+<nav id="featureNavbar" class="bg-indigo-800 text-white shadow-md sticky top-0 z-40 transition-transform duration-300" style="top: 64px;">
+  <div class="container mx-auto flex flex-wrap justify-center md:justify-start items-center px-4 py-2 space-x-2">
+
+    <div class="relative">
+      <a href="Home.html" class="px-5 py-2 rounded-md hover:bg-indigo-700 block transition">Home</a>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">AI Model Management</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="TrainRetrainModel.html" class="block px-4 py-2 hover:bg-indigo-100">Train / Retrain Models</a>
+        <a href="ModelVersionControl.html" class="block px-4 py-2 hover:bg-indigo-100">Model Version Control</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Data & Pipeline</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="DataManagement.html" class="block px-4 py-2 hover:bg-indigo-100">Data Management</a>
+        <a href="PipelineHealth.html" class="block px-4 py-2 hover:bg-indigo-100">Pipeline Health & Quality</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Monitoring & Analytics</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="PredictionsDashboard.html" class="block px-4 py-2 hover:bg-indigo-100">Predictions Dashboard</a>
+        <a href="RealtimePerformance.html" class="block px-4 py-2 hover:bg-indigo-100">Real-Time Performance</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">System Administration</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="SystemMonitor.html" class="block px-4 py-2 hover:bg-indigo-100">System Monitor</a>
+        <a href="ApiManagement.html" class="block px-4 py-2 hover:bg-indigo-100">API Management</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Verification Tools</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="cvVerification.html" class="block px-4 py-2 hover:bg-indigo-100">CV Verification</a>
+        <a href="DegreeVerification.html" class="block px-4 py-2 hover:bg-indigo-100">Degree Verification</a>
+      </div>
+    </div>
+
+    <div class="relative">
+      <button class="px-5 py-2 rounded-md hover:bg-indigo-700 dropdownBtn">Reports</button>
+      <div class="dropdownContent bg-white text-gray-800 mt-1 rounded-md shadow-lg min-w-max">
+        <a href="AiSystemReport.html" class="block px-4 py-2 hover:bg-indigo-100">AI System Report</a>
+        <a href="LogsAndReport.html" class="block px-4 py-2 hover:bg-indigo-100">Logs & Reports</a>
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+<!-- Profile Header -->
+<section class="px-6 py-8">
+  <div class="container mx-auto">
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden animate-fadeIn">
+      <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
+        <div class="flex flex-col md:flex-row items-center">
+          <div class="relative mb-4 md:mb-0 md:mr-6">
+            <div class="w-32 h-32 rounded-full bg-white flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
+              <i class="ph ph-user-circle text-indigo-600 text-7xl"></i>
+            </div>
+            <div class="absolute bottom-2 right-2 bg-green-500 rounded-full p-1 border-2 border-white">
+              <i class="ph ph-check text-white text-xs"></i>
+            </div>
+          </div>
+          <div class="text-center md:text-left">
+            <h1 class="text-3xl font-bold mb-2">Alex Chen</h1>
+            <p class="text-indigo-100 text-lg mb-2">AI-ML Developer</p>
+            <p class="text-indigo-200 text-sm max-w-2xl">Building intelligent healthcare solutions with machine learning and artificial intelligence. Specializing in predictive models for disease diagnosis and treatment optimization.</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+        <div class="bg-indigo-50 p-4 rounded-lg">
+          <p class="text-2xl font-bold text-indigo-700">3.5</p>
+          <p class="text-gray-600 text-sm">Years in SHMS</p>
+        </div>
+        <div class="bg-green-50 p-4 rounded-lg">
+          <p class="text-2xl font-bold text-green-700">24</p>
+          <p class="text-gray-600 text-sm">ML Models Deployed</p>
+        </div>
+        <div class="bg-purple-50 p-4 rounded-lg">
+          <p class="text-2xl font-bold text-purple-700">94%</p>
+          <p class="text-gray-600 text-sm">Model Accuracy</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Profile Content -->
+<main class="px-6 py-4">
+  <div class="container mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Personal Information -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Basic Information Card -->
+      <div class="bg-white p-6 rounded-2xl shadow-lg card-hover gradient-border animate-fadeIn" style="animation-delay: 0.1s;">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-semibold text-indigo-700">Personal Information</h3>
+          <button id="editPersonalInfo" class="text-indigo-600 hover:text-indigo-800 transition flex items-center space-x-1">
+            <i class="ph ph-pencil-simple"></i>
+            <span>Edit</span>
+          </button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-gray-500 text-sm">Full Name</label>
+            <p class="font-medium" id="personalName">Alex Chen</p>
+          </div>
+          <div>
+            <label class="text-gray-500 text-sm">Employee ID</label>
+            <p class="font-medium" id="employeeId">SHMS-AIML-0821</p>
+          </div>
+          <div>
+            <label class="text-gray-500 text-sm">Date of Birth</label>
+            <p class="font-medium" id="dob">August 21, 1992</p>
+          </div>
+          <div>
+            <label class="text-gray-500 text-sm">Gender</label>
+            <p class="font-medium" id="gender">Male</p>
+          </div>
+          <div>
+            <label class="text-gray-500 text-sm">Phone Number</label>
+            <p class="font-medium" id="phone">+1 (555) 987-6543</p>
+          </div>
+          <div>
+            <label class="text-gray-500 text-sm">Email Address</label>
+            <p class="font-medium" id="email">alex.chen@shms-hospital.org</p>
+          </div>
+          <div class="md:col-span-2">
+            <label class="text-gray-500 text-sm">Address</label>
+            <p class="font-medium" id="address">456 Tech Park Drive, Innovation District, Cityville, State 12345</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Professional Information Card -->
+      <div class="bg-white p-6 rounded-2xl shadow-lg card-hover gradient-border animate-fadeIn" style="animation-delay: 0.2s;">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-semibold text-indigo-700">Professional Information</h3>
+          <button id="editProfessionalInfo" class="text-indigo-600 hover:text-indigo-800 transition flex items-center space-x-1">
+            <i class="ph ph-pencil-simple"></i>
+            <span>Edit</span>
+          </button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-gray-500 text-sm">Designation</label>
+            <p class="font-medium" id="designation">AI-ML Developer</p>
+          </div>
+          <div>
+            <label class="text-gray-500 text-sm">Department</label>
+            <p class="font-medium" id="department">AI Research & Development</p>
+          </div>
+          <div>
+            <label class="text-gray-500 text-sm">Employee Type</label>
+            <p class="font-medium" id="employeeType">Full-time</p>
+          </div>
+          <div>
+            <label class="text-gray-500 text-sm">Join Date</label>
+            <p class="font-medium" id="joinDate">October 15, 2021</p>
+          </div>
+          <div class="md:col-span-2">
+            <label class="text-gray-500 text-sm">Responsibilities</label>
+            <p class="font-medium" id="responsibilities">Developing and deploying machine learning models for healthcare applications, including disease prediction, treatment optimization, and patient outcome forecasting. Maintaining and improving existing AI systems.</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Technical Skills Card -->
+      <div class="bg-white p-6 rounded-2xl shadow-lg card-hover gradient-border animate-fadeIn" style="animation-delay: 0.25s;">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-semibold text-indigo-700">Technical Skills</h3>
+          <button id="editSkills" class="text-indigo-600 hover:text-indigo-800 transition flex items-center space-x-1">
+            <i class="ph ph-pencil-simple"></i>
+            <span>Edit</span>
+          </button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-gray-500 text-sm">Programming Languages</label>
+            <p class="font-medium">Python, R, SQL, JavaScript</p>
+          </div>
+          <div>
+            <label class="text-gray-500 text-sm">ML Frameworks</label>
+            <p class="font-medium">TensorFlow, PyTorch, Scikit-learn, Keras</p>
+          </div>
+          <div>
+            <label class="text-gray-500 text-sm">Data Science Tools</label>
+            <p class="font-medium">Pandas, NumPy, Matplotlib, Seaborn</p>
+          </div>
+          <div>
+            <label class="text-gray-500 text-sm">Specializations</label>
+            <p class="font-medium">Deep Learning, NLP, Computer Vision, Predictive Analytics</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Emergency Contact Card -->
+      <div class="bg-white p-6 rounded-2xl shadow-lg card-hover gradient-border animate-fadeIn" style="animation-delay: 0.3s;">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-semibold text-indigo-700">Emergency Contact</h3>
+          <button id="editEmergencyContact" class="text-indigo-600 hover:text-indigo-800 transition flex items-center space-x-1">
+            <i class="ph ph-pencil-simple"></i>
+            <span>Edit</span>
+          </button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-gray-500 text-sm">Contact Name</label>
+            <p class="font-medium" id="emergencyName">Jennifer Chen</p>
+          </div>
+          <div>
+            <label class="text-gray-500 text-sm">Relationship</label>
+            <p class="font-medium" id="relationship">Spouse</p>
+          </div>
+          <div>
+            <label class="text-gray-500 text-sm">Phone Number</label>
+            <p class="font-medium" id="emergencyPhone">+1 (555) 123-4567</p>
+          </div>
+          <div>
+            <label class="text-gray-500 text-sm">Email Address</label>
+            <p class="font-medium" id="emergencyEmail">jennifer.chen@email.com</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Earned Degrees and Certificates Card -->
+      <div class="bg-white p-6 rounded-2xl shadow-lg card-hover gradient-border animate-fadeIn" style="animation-delay: 0.4s;">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-semibold text-indigo-700">Earned Degrees and Certificates</h3>
+          <button id="editDegreesCertificates" class="text-indigo-600 hover:text-indigo-800 transition flex items-center space-x-1">
+            <i class="ph ph-pencil-simple"></i>
+            <span>Edit</span>
+          </button>
+        </div>
+        
+        <div class="space-y-4">
+          <div class="flex items-start space-x-4 p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition">
+            <div class="bg-indigo-100 p-3 rounded-lg">
+              <i class="ph ph-graduation-cap text-indigo-600 text-xl"></i>
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between">
+                <h4 class="font-semibold text-gray-800">Master of Science in Artificial Intelligence</h4>
+                <span class="badge badge-blue">Degree</span>
+              </div>
+              <p class="text-gray-600 text-sm mt-1">Stanford University</p>
+              <p class="text-gray-500 text-xs mt-1">Completed: June 2020 | GPA: 3.9/4.0</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start space-x-4 p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition">
+            <div class="bg-green-100 p-3 rounded-lg">
+              <i class="ph ph-medal text-green-600 text-xl"></i>
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between">
+                <h4 class="font-semibold text-gray-800">TensorFlow Developer Certificate</h4>
+                <span class="badge badge-green">Certificate</span>
+              </div>
+              <p class="text-gray-600 text-sm mt-1">Google</p>
+              <p class="text-gray-500 text-xs mt-1">Issued: March 2021 | Valid until: March 2024</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start space-x-4 p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition">
+            <div class="bg-purple-100 p-3 rounded-lg">
+              <i class="ph ph-file-text text-purple-600 text-xl"></i>
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between">
+                <h4 class="font-semibold text-gray-800">AWS Certified Machine Learning Specialist</h4>
+                <span class="badge badge-purple">Certificate</span>
+              </div>
+              <p class="text-gray-600 text-sm mt-1">Amazon Web Services</p>
+              <p class="text-gray-500 text-xs mt-1">Issued: September 2022 | Valid until: September 2025</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start space-x-4 p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition">
+            <div class="bg-orange-100 p-3 rounded-lg">
+              <i class="ph ph-first-aid-kit text-orange-600 text-xl"></i>
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between">
+                <h4 class="font-semibold text-gray-800">Bachelor of Science in Computer Science</h4>
+                <span class="badge badge-orange">Degree</span>
+              </div>
+              <p class="text-gray-600 text-sm mt-1">MIT</p>
+              <p class="text-gray-500 text-xs mt-1">Completed: May 2018 | GPA: 3.8/4.0</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Rewards Card -->
+      <div class="bg-white p-6 rounded-2xl shadow-lg card-hover gradient-border animate-fadeIn" style="animation-delay: 0.5s;">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-semibold text-indigo-700">Achievements & Recognition</h3>
+          <button id="viewAllRewards" class="text-indigo-600 hover:text-indigo-800 transition flex items-center space-x-1">
+            <i class="ph ph-trophy"></i>
+            <span>View All</span>
+          </button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="achievement-card bg-gradient-to-br from-yellow-50 to-amber-50 p-4 rounded-lg border border-amber-200">
+            <div class="flex items-center space-x-3">
+              <div class="bg-amber-100 p-2 rounded-full">
+                <i class="ph ph-trophy text-amber-600 text-xl"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-800">Best ML Model 2024</h4>
+                <p class="text-gray-600 text-sm">Awarded 2024</p>
+              </div>
+            </div>
+            <p class="text-gray-500 text-xs mt-2">For developing the highest accuracy disease prediction model in the organization.</p>
+          </div>
+          
+          <div class="achievement-card bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+            <div class="flex items-center space-x-3">
+              <div class="bg-blue-100 p-2 rounded-full">
+                <i class="ph ph-star text-blue-600 text-xl"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-800">Innovation Award</h4>
+                <p class="text-gray-600 text-sm">Awarded 2023</p>
+              </div>
+            </div>
+            <p class="text-gray-500 text-xs mt-2">For implementing NLP for automated medical record analysis.</p>
+          </div>
+          
+          <div class="achievement-card bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
+            <div class="flex items-center space-x-3">
+              <div class="bg-green-100 p-2 rounded-full">
+                <i class="ph ph-medal text-green-600 text-xl"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-800">Performance Excellence</h4>
+                <p class="text-gray-600 text-sm">Awarded 2022</p>
+              </div>
+            </div>
+            <p class="text-gray-500 text-xs mt-2">Achieved 40% improvement in model training efficiency.</p>
+          </div>
+          
+          <div class="achievement-card bg-gradient-to-br from-purple-50 to-violet-50 p-4 rounded-lg border border-purple-200">
+            <div class="flex items-center space-x-3">
+              <div class="bg-purple-100 p-2 rounded-full">
+                <i class="ph ph-award text-purple-600 text-xl"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-800">Research Publication</h4>
+                <p class="text-gray-600 text-sm">Published 2021</p>
+              </div>
+            </div>
+            <p class="text-gray-500 text-xs mt-2">Published paper on ML applications in early disease detection.</p>
+          </div>
+        </div>
+        
+        <div class="mt-4 flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-600">Total Awards: <span class="font-semibold text-indigo-700">8</span></p>
+          </div>
+          <div class="text-right">
+            <p class="text-sm text-gray-600">Latest: <span class="font-semibold text-indigo-700">Best ML Model 2024</span></p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Projects & Contributions Card -->
+      <div class="bg-white p-6 rounded-2xl shadow-lg card-hover gradient-border animate-fadeIn" style="animation-delay: 0.6s;">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-semibold text-indigo-700">Projects & Contributions</h3>
+          <button id="viewProjects" class="text-indigo-600 hover:text-indigo-800 transition flex items-center space-x-1">
+            <i class="ph ph-folder-open"></i>
+            <span>View All</span>
+          </button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div class="bg-gradient-to-br from-indigo-50 to-purple-50 p-4 rounded-lg text-center">
+            <div class="bg-indigo-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
+              <i class="ph ph-brain text-indigo-600 text-xl"></i>
+            </div>
+            <p class="text-2xl font-bold text-indigo-700">12</p>
+            <p class="text-gray-600 text-sm">Active Projects</p>
+          </div>
+          
+          <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg text-center">
+            <div class="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
+              <i class="ph ph-git-fork text-green-600 text-xl"></i>
+            </div>
+            <p class="text-2xl font-bold text-green-700">247</p>
+            <p class="text-gray-600 text-sm">Code Contributions</p>
+          </div>
+          
+          <div class="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-lg text-center">
+            <div class="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
+              <i class="ph ph-target text-blue-600 text-xl"></i>
+            </div>
+            <p class="text-2xl font-bold text-blue-700">88%</p>
+            <p class="text-gray-600 text-sm">Project Completion</p>
+          </div>
+        </div>
+        
+        <div class="mb-4">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-sm font-medium text-gray-700">Disease Prediction Model</span>
+            <span class="text-sm font-medium text-indigo-700">95% Complete</span>
+          </div>
+          <div class="progress-container">
+            <div class="progress-bar" style="width: 95%"></div>
+          </div>
+        </div>
+        
+        <div class="mb-4">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-sm font-medium text-gray-700">Treatment Optimization Algorithm</span>
+            <span class="text-sm font-medium text-indigo-700">70% Complete</span>
+          </div>
+          <div class="progress-container">
+            <div class="progress-bar" style="width: 70%"></div>
+          </div>
+        </div>
+        
+        <div class="flex justify-between items-center mt-6">
+          <div>
+            <p class="text-sm text-gray-600">Next Milestone: <span class="font-semibold text-indigo-700">Q3 2025</span></p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600">Team Size: <span class="font-semibold text-green-600">5 Members</span></p>
+          </div>
+        </div>
+        
+        <div class="mt-4 flex space-x-3">
+          <button id="addProject" class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition font-medium">
+            Add Project
+          </button>
+          <button id="viewProjectDetails" class="flex-1 py-2 border border-indigo-600 text-indigo-600 hover:bg-indigo-50 rounded-lg transition font-medium">
+            Details
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="space-y-6">
+      <!-- System Access Card -->
+      <div class="bg-white p-6 rounded-2xl shadow-lg card-hover gradient-border animate-fadeIn" style="animation-delay: 0.7s;">
+        <h3 class="text-xl font-semibold text-indigo-700 mb-4">System Access</h3>
+        
+        <div class="space-y-4">
+          <div class="flex justify-between items-center">
+            <span class="font-medium">ML Development Environment</span>
+            <span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">Full Access</span>
+          </div>
+          
+          <div class="flex justify-between items-center">
+            <span class="font-medium">Data Science Platform</span>
+            <span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">Full Access</span>
+          </div>
+          
+          <div class="flex justify-between items-center">
+            <span class="font-medium">Model Deployment</span>
+            <span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">Full Access</span>
+          </div>
+          
+          <div class="flex justify-between items-center">
+            <span class="font-medium">Patient Data (Anonymized)</span>
+            <span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">Full Access</span>
+          </div>
+          
+          <div class="flex justify-between items-center">
+            <span class="font-medium">Admin Panel</span>
+            <span class="bg-orange-100 text-orange-800 text-xs font-medium px-2 py-1 rounded-full">Limited</span>
+          </div>
+        </div>
+        
+        <button id="managePermissions" class="w-full mt-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition font-medium">
+          Manage Permissions
+        </button>
+      </div>
+      
+      <!-- Recent Activity Card -->
+      <div class="bg-white p-6 rounded-2xl shadow-lg card-hover gradient-border animate-fadeIn" style="animation-delay: 0.8s;">
+        <h3 class="text-xl font-semibold text-indigo-700 mb-4">Recent Activity</h3>
+        
+        <div class="space-y-4">
+          <div class="flex items-start space-x-3">
+            <div class="bg-blue-100 p-2 rounded-lg mt-1">
+              <i class="ph ph-brain text-blue-600"></i>
+            </div>
+            <div>
+              <p class="font-medium">Deployed new prediction model</p>
+              <p class="text-gray-500 text-sm">Today, 09:45 AM</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start space-x-3">
+            <div class="bg-green-100 p-2 rounded-lg mt-1">
+              <i class="ph ph-chart-line-up text-green-600"></i>
+            </div>
+            <div>
+              <p class="font-medium">Improved model accuracy to 94.2%</p>
+              <p class="text-gray-500 text-sm">Yesterday, 4:30 PM</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start space-x-3">
+            <div class="bg-purple-100 p-2 rounded-lg mt-1">
+              <i class="ph ph-code text-purple-600"></i>
+            </div>
+            <div>
+              <p class="font-medium">Code optimization completed</p>
+              <p class="text-gray-500 text-sm">April 26, 11:20 AM</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start space-x-3">
+            <div class="bg-orange-100 p-2 rounded-lg mt-1">
+              <i class="ph ph-user-circle text-orange-600"></i>
+            </div>
+            <div>
+              <p class="font-medium">Team training session conducted</p>
+              <p class="text-gray-500 text-sm">April 25, 2:15 PM</p>
+            </div>
+          </div>
+        </div>
+        
+        <button id="viewAllActivity" class="w-full mt-4 py-2 border border-indigo-600 text-indigo-600 hover:bg-indigo-50 rounded-lg transition font-medium">
+          View All Activity
+        </button>
+      </div>
+      
+      <!-- Skill Progress Card -->
+      <div class="bg-white p-6 rounded-2xl shadow-lg card-hover gradient-border animate-fadeIn" style="animation-delay: 0.9s;">
+        <h3 class="text-xl font-semibold text-indigo-700 mb-4">Skill Progress</h3>
+        
+        <div class="space-y-4">
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-sm font-medium text-gray-700">Deep Learning</span>
+              <span class="text-sm font-medium text-indigo-700">Expert</span>
+            </div>
+            <div class="progress-container">
+              <div class="progress-bar" style="width: 90%"></div>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">Advanced neural networks</p>
+          </div>
+          
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-sm font-medium text-gray-700">Natural Language Processing</span>
+              <span class="text-sm font-medium text-indigo-700">Advanced</span>
+            </div>
+            <div class="progress-container">
+              <div class="progress-bar" style="width: 80%"></div>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">Text analysis & generation</p>
+          </div>
+          
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-sm font-medium text-gray-700">Computer Vision</span>
+              <span class="text-sm font-medium text-indigo-700">Intermediate</span>
+            </div>
+            <div class="progress-container">
+              <div class="progress-bar" style="width: 70%"></div>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">Image recognition</p>
+          </div>
+        </div>
+        
+        <button id="viewProgressDetails" class="w-full mt-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition font-medium">
+          View Progress Details
+        </button>
+      </div>
+      
+      <!-- Profile Completion Card -->
+      <div class="bg-white p-6 rounded-2xl shadow-lg card-hover gradient-border animate-fadeIn" style="animation-delay: 1s;">
+        <h3 class="text-xl font-semibold text-indigo-700 mb-4">Profile Completion</h3>
+        
+        <div class="mb-4">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-sm font-medium text-gray-700">Overall Progress</span>
+            <span class="text-sm font-medium text-indigo-700">92%</span>
+          </div>
+          <div class="progress-container">
+            <div class="progress-bar" style="width: 92%"></div>
+          </div>
+        </div>
+        
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600">Personal Information</span>
+            <span class="text-sm font-medium text-green-600">100%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600">Professional Details</span>
+            <span class="text-sm font-medium text-green-600">100%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600">Technical Skills</span>
+            <span class="text-sm font-medium text-green-600">100%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600">Emergency Contact</span>
+            <span class="text-sm font-medium text-green-600">100%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600">Project Portfolio</span>
+            <span class="text-sm font-medium text-yellow-600">60%</span>
+          </div>
+        </div>
+        
+        <button id="completeProfile" class="w-full mt-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition font-medium">
+          Complete Profile
+        </button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Modals for different functions -->
+<!-- Edit Personal Info Modal -->
+<div id="editPersonalModal" class="modal">
+  <div class="modal-content">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-semibold text-indigo-700">Edit Personal Information</h3>
+      <button class="close-modal text-gray-500 hover:text-gray-700">
+        <i class="ph ph-x text-xl"></i>
+      </button>
+    </div>
+    <form id="personalInfoForm" class="space-y-4">
+      <div>
+        <label class="block text-gray-700 text-sm font-medium mb-1">Full Name</label>
+        <input type="text" class="form-input" value="Alex Chen">
+      </div>
+      <div>
+        <label class="block text-gray-700 text-sm font-medium mb-1">Date of Birth</label>
+        <input type="text" class="form-input" value="August 21, 1992">
+      </div>
+      <div>
+        <label class="block text-gray-700 text-sm font-medium mb-1">Gender</label>
+        <select class="form-input">
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-gray-700 text-sm font-medium mb-1">Phone Number</label>
+        <input type="text" class="form-input" value="+1 (555) 987-6543">
+      </div>
+      <div>
+        <label class="block text-gray-700 text-sm font-medium mb-1">Email Address</label>
+        <input type="email" class="form-input" value="alex.chen@shms-hospital.org">
+      </div>
+      <div>
+        <label class="block text-gray-700 text-sm font-medium mb-1">Address</label>
+        <textarea class="form-input" rows="3">456 Tech Park Drive, Innovation District, Cityville, State 12345</textarea>
+      </div>
+      <div class="flex justify-end space-x-3 pt-4">
+        <button type="button" class="close-modal px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Professional Info Modal -->
+<div id="editProfessionalModal" class="modal">
+  <div class="modal-content">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-semibold text-indigo-700">Edit Professional Information</h3>
+      <button class="close-modal text-gray-500 hover:text-gray-700">
+        <i class="ph ph-x text-xl"></i>
+      </button>
+    </div>
+    <form id="professionalInfoForm" class="space-y-4">
+      <div>
+        <label class="block text-gray-700 text-sm font-medium mb-1">Designation</label>
+        <input type="text" class="form-input" value="AI-ML Developer">
+      </div>
+      <div>
+        <label class="block text-gray-700 text-sm font-medium mb-1">Department</label>
+        <input type="text" class="form-input" value="AI Research & Development">
+      </div>
+      <div>
+        <label class="block text-gray-700 text-sm font-medium mb-1">Employee Type</label>
+        <select class="form-input">
+          <option>Full-time</option>
+          <option>Part-time</option>
+          <option>Contract</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-gray-700 text-sm font-medium mb-1">Join Date</label>
+        <input type="text" class="form-input" value="October 15, 2021">
+      </div>
+      <div>
+        <label class="block text-gray-700 text-sm font-medium mb-1">Responsibilities</label>
+        <textarea class="form-input" rows="4">Developing and deploying machine learning models for healthcare applications, including disease prediction, treatment optimization, and patient outcome forecasting. Maintaining and improving existing AI systems.</textarea>
+      </div>
+      <div class="flex justify-end space-x-3 pt-4">
+        <button type="button" class="close-modal px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Technical Skills Modal -->
+<div id="editSkillsModal" class="modal">
+  <div class="modal-content">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-semibold text-indigo-700">Edit Technical Skills</h3>
+      <button class="close-modal text-gray-500 hover:text-gray-700">
+        <i class="ph ph-x text-xl"></i>
+      </button>
+    </div>
+    <form id="skillsForm" class="space-y-4">
+      <div>
+        <label class="block text-gray-700 text-sm font-medium mb-1">Programming Languages</label>
+        <input type="text" class="form-input" value="Python, R, SQL, JavaScript">
+      </div>
+      <div>
+        <label class="block text-gray-700 text-sm font-medium mb-1">ML Frameworks</label>
+        <input type="text" class="form-input" value="TensorFlow, PyTorch, Scikit-learn, Keras">
+      </div>
+      <div>
+        <label class="block text-gray-700 text-sm font-medium mb-1">Data Science Tools</label>
+        <input type="text" class="form-input" value="Pandas, NumPy, Matplotlib, Seaborn">
+      </div>
+      <div>
+        <label class="block text-gray-700 text-sm font-medium mb-1">Specializations</label>
+        <input type="text" class="form-input" value="Deep Learning, NLP, Computer Vision, Predictive Analytics">
+      </div>
+      <div class="flex justify-end space-x-3 pt-4">
+        <button type="button" class="close-modal px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Emergency Contact Modal -->
+<div id="editEmergencyModal" class="modal">
+  <div class="modal-content">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-semibold text-indigo-700">Edit Emergency Contact</h3>
+      <button class="close-modal text-gray-500 hover:text-gray-700">
+        <i class="ph ph-x text-xl"></i>
+      </button>
+    </div>
+    <form id="emergencyContactForm" class="space-y-4">
+      <div>
+        <label class="block text-gray-700 text-sm font-medium mb-1">Contact Name</label>
+        <input type="text" class="form-input" value="Jennifer Chen">
+      </div>
+      <div>
+        <label class="block text-gray-700 text-sm font-medium mb-1">Relationship</label>
+        <select class="form-input">
+          <option>Spouse</option>
+          <option>Parent</option>
+          <option>Sibling</option>
+          <option>Friend</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-gray-700 text-sm font-medium mb-1">Phone Number</label>
+        <input type="text" class="form-input" value="+1 (555) 123-4567">
+      </div>
+      <div>
+        <label class="block text-gray-700 text-sm font-medium mb-1">Email Address</label>
+        <input type="email" class="form-input" value="jennifer.chen@email.com">
+      </div>
+      <div class="flex justify-end space-x-3 pt-4">
+        <button type="button" class="close-modal px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Degrees & Certificates Modal -->
+<div id="editDegreesModal" class="modal">
+  <div class="modal-content">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-semibold text-indigo-700">Edit Degrees & Certificates</h3>
+      <button class="close-modal text-gray-500 hover:text-gray-700">
+        <i class="ph ph-x text-xl"></i>
+      </button>
+    </div>
+    <form id="degreesForm" class="space-y-4">
+      <div>
+        <label class="block text-gray-700 text-sm font-medium mb-1">Degree/Certificate Name</label>
+        <input type="text" class="form-input" value="Master of Science in Artificial Intelligence">
+      </div>
+      <div>
+        <label class="block text-gray-700 text-sm font-medium mb-1">Institution</label>
+        <input type="text" class="form-input" value="Stanford University">
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-gray-700 text-sm font-medium mb-1">Completion Date</label>
+          <input type="text" class="form-input" value="June 2020">
+        </div>
+        <div>
+          <label class="block text-gray-700 text-sm font-medium mb-1">Type</label>
+          <select class="form-input">
+            <option>Degree</option>
+            <option>Certificate</option>
+            <option>License</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="block text-gray-700 text-sm font-medium mb-1">Additional Details</label>
+        <textarea class="form-input" rows="2">GPA: 3.9/4.0</textarea>
+      </div>
+      <div class="flex justify-end space-x-3 pt-4">
+        <button type="button" class="close-modal px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Project Details Modal -->
+<div id="projectDetailsModal" class="modal">
+  <div class="modal-content">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-semibold text-indigo-700">Project Details</h3>
+      <button class="close-modal text-gray-500 hover:text-gray-700">
+        <i class="ph ph-x text-xl"></i>
+      </button>
+    </div>
+    
+    <div class="space-y-4">
+      <div class="bg-indigo-50 p-4 rounded-lg">
+        <div class="flex justify-between items-center">
+          <span class="font-medium text-indigo-700">Active Projects</span>
+          <span class="text-xl font-bold text-indigo-700">12</span>
+        </div>
+      </div>
+      
+      <div>
+        <h4 class="font-medium text-gray-700 mb-2">Project Breakdown</h4>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600">Disease Prediction Models</span>
+            <span class="font-medium">4</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600">Treatment Optimization</span>
+            <span class="font-medium">3</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600">Medical Imaging Analysis</span>
+            <span class="font-medium">2</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600">NLP for Medical Records</span>
+            <span class="font-medium">3</span>
+          </div>
+        </div>
+      </div>
+      
+      <div>
+        <h4 class="font-medium text-gray-700 mb-2">Recent Project Activity</h4>
+        <div class="space-y-2">
+          <div class="flex justify-between items-center text-sm">
+            <span>Deployed cardiac disease prediction model</span>
+            <span class="text-green-600 font-medium">Completed</span>
+          </div>
+          <div class="flex justify-between items-center text-sm">
+            <span>Started work on treatment optimization algorithm</span>
+            <span class="text-blue-600 font-medium">In Progress</span>
+          </div>
+          <div class="flex justify-between items-center text-sm">
+            <span>Improved NLP model accuracy by 5%</span>
+            <span class="text-green-600 font-medium">Completed</span>
+          </div>
+          <div class="flex justify-between items-center text-sm">
+            <span>Research paper submitted for publication</span>
+            <span class="text-yellow-600 font-medium">Pending</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="flex justify-end space-x-3 pt-4">
+      <button type="button" class="close-modal px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Permission Management Modal -->
+<div id="permissionManagementModal" class="modal">
+  <div class="modal-content modal-large">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-semibold text-indigo-700">Permission Management</h3>
+      <button class="close-modal text-gray-500 hover:text-gray-700">
+        <i class="ph ph-x text-xl"></i>
+      </button>
+    </div>
+    
+    <div class="space-y-6">
+      <div>
+        <h4 class="font-medium text-gray-700 mb-3">User Permissions</h4>
+        <div class="overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>ML Development</th>
+                <th>Data Access</th>
+                <th>Model Deployment</th>
+                <th>Admin Panel</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Alex Chen</td>
+                <td>AI-ML Developer</td>
+                <td><span class="badge badge-green">Full</span></td>
+                <td><span class="badge badge-green">Full</span></td>
+                <td><span class="badge badge-green">Full</span></td>
+                <td><span class="badge badge-orange">Limited</span></td>
+                <td>
+                  <button class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">Edit</button>
+                </td>
+              </tr>
+              <tr>
+                <td>Dr. Michael Chen</td>
+                <td>Doctor</td>
+                <td><span class="badge badge-red">None</span></td>
+                <td><span class="badge badge-green">Full</span></td>
+                <td><span class="badge badge-red">None</span></td>
+                <td><span class="badge badge-red">None</span></td>
+                <td>
+                  <button class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">Edit</button>
+                </td>
+              </tr>
+              <tr>
+                <td>Data Scientist</td>
+                <td>Data Scientist</td>
+                <td><span class="badge badge-green">Full</span></td>
+                <td><span class="badge badge-green">Full</span></td>
+                <td><span class="badge badge-orange">Limited</span></td>
+                <td><span class="badge badge-red">None</span></td>
+                <td>
+                  <button class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">Edit</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div>
+        <h4 class="font-medium text-gray-700 mb-3">Role Permissions</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="border rounded-lg p-4">
+            <h5 class="font-medium text-gray-800 mb-2">AI-ML Developer</h5>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span>ML Development</span>
+                <span class="text-green-600 font-medium">Full Access</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Data Access</span>
+                <span class="text-green-600 font-medium">Full Access</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Model Deployment</span>
+                <span class="text-green-600 font-medium">Full Access</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Admin Panel</span>
+                <span class="text-orange-600 font-medium">Limited</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="border rounded-lg p-4">
+            <h5 class="font-medium text-gray-800 mb-2">Data Scientist</h5>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span>ML Development</span>
+                <span class="text-green-600 font-medium">Full Access</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Data Access</span>
+                <span class="text-green-600 font-medium">Full Access</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Model Deployment</span>
+                <span class="text-orange-600 font-medium">Limited</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Admin Panel</span>
+                <span class="text-red-600 font-medium">No Access</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="flex justify-end space-x-3 pt-4">
+      <button type="button" class="close-modal px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">Close</button>
+      <button type="button" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Full Activity Log Modal -->
+<div id="fullActivityModal" class="modal">
+  <div class="modal-content modal-large">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-semibold text-indigo-700">Full Activity Log</h3>
+      <button class="close-modal text-gray-500 hover:text-gray-700">
+        <i class="ph ph-x text-xl"></i>
+      </button>
+    </div>
+    
+    <div class="space-y-4">
+      <div class="flex justify-between">
+        <div class="flex space-x-2">
+          <button class="px-3 py-1 bg-indigo-600 text-white rounded-md text-sm">All</button>
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-sm">Today</button>
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-sm">This Week</button>
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-sm">This Month</button>
+        </div>
+        <div>
+          <input type="text" placeholder="Search activities..." class="form-input text-sm w-64">
+        </div>
+      </div>
+      
+      <div class="overflow-y-auto max-h-96">
+        <div class="space-y-4">
+          <!-- Activity items would be generated here -->
+          <div class="flex items-start space-x-3 p-3 border border-gray-100 rounded-lg">
+            <div class="bg-blue-100 p-2 rounded-lg mt-1">
+              <i class="ph ph-brain text-blue-600"></i>
+            </div>
+            <div class="flex-1">
+              <p class="font-medium">Deployed new cardiac disease prediction model v2.1</p>
+              <p class="text-gray-500 text-sm">Today, 09:45 AM</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start space-x-3 p-3 border border-gray-100 rounded-lg">
+            <div class="bg-green-100 p-2 rounded-lg mt-1">
+              <i class="ph ph-chart-line-up text-green-600"></i>
+            </div>
+            <div class="flex-1">
+              <p class="font-medium">Improved model accuracy to 94.2% through hyperparameter tuning</p>
+              <p class="text-gray-500 text-sm">Yesterday, 4:30 PM</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start space-x-3 p-3 border border-gray-100 rounded-lg">
+            <div class="bg-purple-100 p-2 rounded-lg mt-1">
+              <i class="ph ph-code text-purple-600"></i>
+            </div>
+            <div class="flex-1">
+              <p class="font-medium">Code optimization completed for data preprocessing pipeline</p>
+              <p class="text-gray-500 text-sm">April 26, 11:20 AM</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start space-x-3 p-3 border border-gray-100 rounded-lg">
+            <div class="bg-orange-100 p-2 rounded-lg mt-1">
+              <i class="ph ph-user-circle text-orange-600"></i>
+            </div>
+            <div class="flex-1">
+              <p class="font-medium">Team training session on new TensorFlow features</p>
+              <p class="text-gray-500 text-sm">April 25, 2:15 PM</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start space-x-3 p-3 border border-gray-100 rounded-lg">
+            <div class="bg-indigo-100 p-2 rounded-lg mt-1">
+              <i class="ph ph-file-text text-indigo-600"></i>
+            </div>
+            <div class="flex-1">
+              <p class="font-medium">Research paper submitted on ML applications in early disease detection</p>
+              <p class="text-gray-500 text-sm">April 23, 4:20 PM</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="flex justify-between items-center pt-4">
+      <div class="text-sm text-gray-600">Showing 5 of 89 activities</div>
+      <div class="flex space-x-2">
+        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm">Previous</button>
+        <button class="px-3 py-1 bg-indigo-600 text-white rounded-md text-sm">1</button>
+        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm">2</button>
+        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm">3</button>
+        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Progress Analytics Modal -->
+<div id="progressAnalyticsModal" class="modal">
+  <div class="modal-content modal-large">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-semibold text-indigo-700">Skill Analytics</h3>
+      <button class="close-modal text-gray-500 hover:text-gray-700">
+        <i class="ph ph-x text-xl"></i>
+      </button>
+    </div>
+    
+    <div class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-gradient-to-br from-indigo-50 to-purple-50 p-4 rounded-lg text-center">
+          <div class="bg-indigo-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
+            <i class="ph ph-trend-up text-indigo-600 text-xl"></i>
+          </div>
+          <p class="text-2xl font-bold text-indigo-700">92%</p>
+          <p class="text-gray-600 text-sm">Overall Skill Level</p>
+        </div>
+        
+        <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg text-center">
+          <div class="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
+            <i class="ph ph-graduation-cap text-green-600 text-xl"></i>
+          </div>
+          <p class="text-2xl font-bold text-green-700">12</p>
+          <p class="text-gray-600 text-sm">Certifications</p>
+        </div>
+        
+        <div class="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-lg text-center">
+          <div class="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
+            <i class="ph ph-target text-blue-600 text-xl"></i>
+          </div>
+          <p class="text-2xl font-bold text-blue-700">24</p>
+          <p class="text-gray-600 text-sm">Models Deployed</p>
+        </div>
+      </div>
+      
+      <div>
+        <h4 class="font-medium text-gray-700 mb-3">Skill Trends</h4>
+        <div class="bg-white border rounded-lg p-4">
+          <div class="flex justify-between mb-4">
+            <div>
+              <p class="text-sm text-gray-600">Last 6 Months</p>
+            </div>
+            <div class="flex space-x-2">
+              <button class="px-3 py-1 bg-indigo-600 text-white rounded-md text-sm">Technical Skills</button>
+              <button class="px-3 py-1 border border-gray-300 rounded-md text-sm">Projects</button>
+              <button class="px-3 py-1 border border-gray-300 rounded-md text-sm">Certifications</button>
+            </div>
+          </div>
+          
+          <!-- Placeholder for chart -->
+          <div class="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+            <p class="text-gray-500">Skill progression chart visualization would appear here</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <h4 class="font-medium text-gray-700 mb-3">Core Strengths</h4>
+          <div class="space-y-3">
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-sm font-medium text-gray-700">Deep Learning</span>
+                <span class="text-sm font-medium text-indigo-700">90%</span>
+              </div>
+              <div class="progress-container">
+                <div class="progress-bar" style="width: 90%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-sm font-medium text-gray-700">Natural Language Processing</span>
+                <span class="text-sm font-medium text-indigo-700">80%</span>
+              </div>
+              <div class="progress-container">
+                <div class="progress-bar" style="width: 80%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-sm font-medium text-gray-700">Python Programming</span>
+                <span class="text-sm font-medium text-indigo-700">95%</span>
+              </div>
+              <div class="progress-container">
+                <div class="progress-bar" style="width: 95%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <h4 class="font-medium text-gray-700 mb-3">Developing Skills</h4>
+          <div class="space-y-3">
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-sm font-medium text-gray-700">Computer Vision</span>
+                <span class="text-sm font-medium text-indigo-700">70%</span>
+              </div>
+              <div class="progress-container">
+                <div class="progress-bar" style="width: 70%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-sm font-medium text-gray-700">Reinforcement Learning</span>
+                <span class="text-sm font-medium text-indigo-700">60%</span>
+              </div>
+              <div class="progress-container">
+                <div class="progress-bar" style="width: 60%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-sm font-medium text-gray-700">Cloud ML Platforms</span>
+                <span class="text-sm font-medium text-indigo-700">75%</span>
+              </div>
+              <div class="progress-container">
+                <div class="progress-bar" style="width: 75%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="flex justify-end space-x-3 pt-4">
+      <button type="button" class="close-modal px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">Close</button>
+      <button type="button" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">Export Report</button>
+    </div>
+  </div>
+</div>
+
+<!-- Profile Completion Wizard Modal -->
+<div id="profileWizardModal" class="modal">
+  <div class="modal-content modal-large">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-semibold text-indigo-700">Complete Your Profile</h3>
+      <button class="close-modal text-gray-500 hover:text-gray-700">
+        <i class="ph ph-x text-xl"></i>
+      </button>
+    </div>
+    
+    <div class="wizard-progress">
+      <div class="wizard-progress-step completed">
+        <div class="step-number">1</div>
+        <div class="step-label">Personal Info</div>
+      </div>
+      <div class="wizard-progress-step completed">
+        <div class="step-number">2</div>
+        <div class="step-label">Professional</div>
+      </div>
+      <div class="wizard-progress-step completed">
+        <div class="step-number">3</div>
+        <div class="step-label">Technical Skills</div>
+      </div>
+      <div class="wizard-progress-step active">
+        <div class="step-number">4</div>
+        <div class="step-label">Project Portfolio</div>
+      </div>
+      <div class="wizard-progress-step">
+        <div class="step-number">5</div>
+        <div class="step-label">Review</div>
+      </div>
+    </div>
+    
+    <div class="wizard-steps">
+      <div class="wizard-step active">
+        <h4 class="font-medium text-gray-700 mb-4">Add Project Portfolio</h4>
+        <div class="space-y-4">
+          <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <i class="ph ph-cloud-arrow-up text-4xl text-gray-400 mb-2"></i>
+            <p class="text-gray-600 mb-2">Upload project documentation, code samples, or model details</p>
+            <p class="text-gray-500 text-sm">Supported formats: PDF, JPG, PNG, ZIP (Max 25MB each)</p>
+          </div>
+          
+          <div class="space-y-3">
+            <div class="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
+              <div class="flex items-center space-x-3">
+                <i class="ph ph-file-pdf text-red-500 text-xl"></i>
+                <div>
+                  <p class="font-medium">Disease_Prediction_Model.pdf</p>
+                  <p class="text-gray-500 text-sm">3.2 MB</p>
+                </div>
+              </div>
+              <div class="flex space-x-2">
+                <button class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">View</button>
+                <button class="text-red-600 hover:text-red-800 text-sm font-medium">Remove</button>
+              </div>
+            </div>
+            
+            <div class="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
+              <div class="flex items-center space-x-3">
+                <i class="ph ph-file-text text-blue-500 text-xl"></i>
+                <div>
+                  <p class="font-medium">NLP_Medical_Records.docx</p>
+                  <p class="text-gray-500 text-sm">1.8 MB</p>
+                </div>
+              </div>
+              <div class="flex space-x-2">
+                <button class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">View</button>
+                <button class="text-red-600 hover:text-red-800 text-sm font-medium">Remove</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="flex justify-between pt-4">
+      <button type="button" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">Previous</button>
+      <div class="flex space-x-3">
+        <button type="button" class="close-modal px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">Cancel</button>
+        <button type="button" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">Save & Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Full Projects Modal -->
+<div id="fullProjectsModal" class="modal">
+  <div class="modal-content modal-large">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-semibold text-indigo-700">Project Portfolio</h3>
+      <button class="close-modal text-gray-500 hover:text-gray-700">
+        <i class="ph ph-x text-xl"></i>
+      </button>
+    </div>
+    
+    <div class="space-y-4">
+      <div class="flex justify-between">
+        <div class="flex space-x-2">
+          <button class="px-3 py-1 bg-indigo-600 text-white rounded-md text-sm">All</button>
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-sm">Active</button>
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-sm">Completed</button>
+        </div>
+        <div>
+          <input type="text" placeholder="Search projects..." class="form-input text-sm w-64">
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="achievement-card bg-gradient-to-br from-yellow-50 to-amber-50 p-4 rounded-lg border border-amber-200">
+          <div class="flex items-center space-x-3">
+            <div class="bg-amber-100 p-2 rounded-full">
+              <i class="ph ph-heartbeat text-amber-600 text-xl"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-800">Cardiac Disease Prediction</h4>
+              <p class="text-gray-600 text-sm">Completed: March 2024</p>
+            </div>
+          </div>
+          <p class="text-gray-500 text-xs mt-2">Developed a deep learning model with 94.2% accuracy for early detection of cardiac diseases from patient data.</p>
+          <div class="flex justify-between items-center mt-3">
+            <span class="text-xs text-gray-500">TensorFlow, Python</span>
+            <span class="text-xs font-medium text-green-600">Live</span>
+          </div>
+        </div>
+        
+        <div class="achievement-card bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+          <div class="flex items-center space-x-3">
+            <div class="bg-blue-100 p-2 rounded-full">
+              <i class="ph ph-file-text text-blue-600 text-xl"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-800">Medical Record NLP</h4>
+              <p class="text-gray-600 text-sm">Completed: January 2024</p>
+            </div>
+          </div>
+          <p class="text-gray-500 text-xs mt-2">Implemented NLP pipeline to extract and categorize information from unstructured medical records.</p>
+          <div class="flex justify-between items-center mt-3">
+            <span class="text-xs text-gray-500">BERT, Python, SpaCy</span>
+            <span class="text-xs font-medium text-green-600">Live</span>
+          </div>
+        </div>
+        
+        <div class="achievement-card bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
+          <div class="flex items-center space-x-3">
+            <div class="bg-green-100 p-2 rounded-full">
+              <i class="ph ph-pill text-green-600 text-xl"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-800">Treatment Optimization</h4>
+              <p class="text-gray-600 text-sm">In Progress</p>
+            </div>
+          </div>
+          <p class="text-gray-500 text-xs mt-2">Developing reinforcement learning model to optimize treatment plans based on patient response and outcomes.</p>
+          <div class="flex justify-between items-center mt-3">
+            <span class="text-xs text-gray-500">PyTorch, Python</span>
+            <span class="text-xs font-medium text-blue-600">70% Complete</span>
+          </div>
+        </div>
+        
+        <div class="achievement-card bg-gradient-to-br from-purple-50 to-violet-50 p-4 rounded-lg border border-purple-200">
+          <div class="flex items-center space-x-3">
+            <div class="bg-purple-100 p-2 rounded-full">
+              <i class="ph ph-lungs text-purple-600 text-xl"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-800">Lung Cancer Detection</h4>
+              <p class="text-gray-600 text-sm">Completed: November 2023</p>
+            </div>
+          </div>
+          <p class="text-gray-500 text-xs mt-2">Created computer vision model for early detection of lung cancer from CT scans with 92% accuracy.</p>
+          <div class="flex justify-between items-center mt-3">
+            <span class="text-xs text-gray-500">CNN, TensorFlow, Python</span>
+            <span class="text-xs font-medium text-green-600">Live</span>
+          </div>
+        </div>
+        
+        <div class="achievement-card bg-gradient-to-br from-pink-50 to-rose-50 p-4 rounded-lg border border-pink-200">
+          <div class="flex items-center space-x-3">
+            <div class="bg-pink-100 p-2 rounded-full">
+              <i class="ph ph-brain text-pink-600 text-xl"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-800">Patient Readmission Prediction</h4>
+              <p class="text-gray-600 text-sm">Completed: August 2023</p>
+            </div>
+          </div>
+          <p class="text-gray-500 text-xs mt-2">Built predictive model to identify patients at high risk of readmission within 30 days of discharge.</p>
+          <div class="flex justify-between items-center mt-3">
+            <span class="text-xs text-gray-500">XGBoost, Python, Scikit-learn</span>
+            <span class="text-xs font-medium text-green-600">Live</span>
+          </div>
+        </div>
+        
+        <div class="achievement-card bg-gradient-to-br from-teal-50 to-cyan-50 p-4 rounded-lg border border-teal-200">
+          <div class="flex items-center space-x-3">
+            <div class="bg-teal-100 p-2 rounded-full">
+              <i class="ph ph-user text-teal-600 text-xl"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-800">Patient Outcome Forecasting</h4>
+              <p class="text-gray-600 text-sm">In Progress</p>
+            </div>
+          </div>
+          <p class="text-gray-500 text-xs mt-2">Developing time-series forecasting model to predict patient outcomes based on treatment history and vitals.</p>
+          <div class="flex justify-between items-center mt-3">
+            <span class="text-xs text-gray-500">LSTM, Python, TensorFlow</span>
+            <span class="text-xs font-medium text-blue-600">50% Complete</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="flex justify-between items-center pt-4">
+      <div class="text-sm text-gray-600">Showing 6 of 12 projects</div>
+      <div class="flex space-x-2">
+        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm">Previous</button>
+        <button class="px-3 py-1 bg-indigo-600 text-white rounded-md text-sm">1</button>
+        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm">2</button>
+        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Full Rewards History Modal -->
+<div id="fullRewardsModal" class="modal">
+  <div class="modal-content modal-large">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-semibold text-indigo-700">Achievements & Recognition</h3>
+      <button class="close-modal text-gray-500 hover:text-gray-700">
+        <i class="ph ph-x text-xl"></i>
+      </button>
+    </div>
+    
+    <div class="space-y-4">
+      <div class="flex justify-between">
+        <div class="flex space-x-2">
+          <button class="px-3 py-1 bg-indigo-600 text-white rounded-md text-sm">All</button>
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-sm">Awards</button>
+          <button class="px-3 py-1 border border-gray-300 rounded-md text-sm">Publications</button>
+        </div>
+        <div>
+          <input type="text" placeholder="Search achievements..." class="form-input text-sm w-64">
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="achievement-card bg-gradient-to-br from-yellow-50 to-amber-50 p-4 rounded-lg border border-amber-200">
+          <div class="flex items-center space-x-3">
+            <div class="bg-amber-100 p-2 rounded-full">
+              <i class="ph ph-trophy text-amber-600 text-xl"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-800">Best ML Model 2024</h4>
+              <p class="text-gray-600 text-sm">Awarded 2024</p>
+            </div>
+          </div>
+          <p class="text-gray-500 text-xs mt-2">For developing the highest accuracy disease prediction model in the organization.</p>
+        </div>
+        
+        <div class="achievement-card bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+          <div class="flex items-center space-x-3">
+            <div class="bg-blue-100 p-2 rounded-full">
+              <i class="ph ph-star text-blue-600 text-xl"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-800">Innovation Award</h4>
+              <p class="text-gray-600 text-sm">Awarded 2023</p>
+            </div>
+          </div>
+          <p class="text-gray-500 text-xs mt-2">For implementing NLP for automated medical record analysis.</p>
+        </div>
+        
+        <div class="achievement-card bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
+          <div class="flex items-center space-x-3">
+            <div class="bg-green-100 p-2 rounded-full">
+              <i class="ph ph-medal text-green-600 text-xl"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-800">Performance Excellence</h4>
+              <p class="text-gray-600 text-sm">Awarded 2022</p>
+            </div>
+          </div>
+          <p class="text-gray-500 text-xs mt-2">Achieved 40% improvement in model training efficiency.</p>
+        </div>
+        
+        <div class="achievement-card bg-gradient-to-br from-purple-50 to-violet-50 p-4 rounded-lg border border-purple-200">
+          <div class="flex items-center space-x-3">
+            <div class="bg-purple-100 p-2 rounded-full">
+              <i class="ph ph-award text-purple-600 text-xl"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-800">Research Publication</h4>
+              <p class="text-gray-600 text-sm">Published 2021</p>
+            </div>
+          </div>
+          <p class="text-gray-500 text-xs mt-2">Published paper on ML applications in early disease detection in Journal of Medical AI.</p>
+        </div>
+        
+        <div class="achievement-card bg-gradient-to-br from-pink-50 to-rose-50 p-4 rounded-lg border border-pink-200">
+          <div class="flex items-center space-x-3">
+            <div class="bg-pink-100 p-2 rounded-full">
+              <i class="ph ph-file-text text-pink-600 text-xl"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-800">Conference Presentation</h4>
+              <p class="text-gray-600 text-sm">Presented 2023</p>
+            </div>
+          </div>
+          <p class="text-gray-500 text-xs mt-2">Presented research at International Conference on Healthcare AI.</p>
+        </div>
+        
+        <div class="achievement-card bg-gradient-to-br from-teal-50 to-cyan-50 p-4 rounded-lg border border-teal-200">
+          <div class="flex items-center space-x-3">
+            <div class="bg-teal-100 p-2 rounded-full">
+              <i class="ph ph-lightbulb text-teal-600 text-xl"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-800">Patent Filed</h4>
+              <p class="text-gray-600 text-sm">Filed 2022</p>
+            </div>
+          </div>
+          <p class="text-gray-500 text-xs mt-2">Novel algorithm for medical image analysis.</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="flex justify-between items-center pt-4">
+      <div class="text-sm text-gray-600">Showing 6 of 8 achievements</div>
+      <div class="flex space-x-2">
+        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm">Previous</button>
+        <button class="px-3 py-1 bg-indigo-600 text-white rounded-md text-sm">1</button>
+        <button class="px-3 py-1 border border-gray-300 rounded-md text-sm">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="text-center py-6 bg-gradient-to-r from-indigo-700 to-indigo-600 text-white mt-8">
+  <div class="container mx-auto px-6">
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 mb-6">
+      <div class="flex items-center space-x-2">
+        <i class="ph ph-heartbeat text-2xl"></i>
+        <span class="font-semibold">Smart Healthcare Management System</span>
+      </div>
+      <div class="text-sm">
+        © 2025 SHMS | All Rights Reserved
+      </div>
+      <div class="flex items-center space-x-4">
+        <a href="#" class="hover:text-indigo-200 transition">
+          <i class="ph ph-info text-xl"></i>
+        </a>
+      </div>
+    </div>
+    
+    <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+      <div class="max-w-md text-center md:text-left">
+        <p class="text-sm">
+          Empowering hospitals through intelligent automation and connected care — making healthcare efficient, reliable, and data-driven.
+        </p>
+      </div>
+
+      <div class="flex space-x-5 text-white">
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-facebook-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-twitter-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-linkedin-logo text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-envelope text-2xl"></i></a>
+        <a href="#" class="hover:text-indigo-200 transition"><i class="ph ph-phone text-2xl"></i></a>
+      </div>
+    </div>
+
+    <div class="text-center text-sm text-indigo-200 mt-6 border-t border-indigo-700 pt-4">
+      © 2025 Smart Healthcare Management System | Designed for Intelligent Hospitals
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Toast notification function
+  function showToast(message, type = 'info', duration = 5000) {
+    const toastContainer = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type} animate-slideInRight`;
+    
+    // Set icon based on type
+    let icon = 'ph-info';
+    if (type === 'success') icon = 'ph-check-circle';
+    if (type === 'error') icon = 'ph-warning-circle';
+    if (type === 'warning') icon = 'ph-warning';
+    
+    toast.innerHTML = `
+      <i class="ph ${icon} text-xl"></i>
+      <span>${message}</span>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Show toast
+    setTimeout(() => {
+      toast.classList.add('show');
+    }, 100);
+    
+    // Auto hide after duration
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 300);
+    }, duration);
+  }
+
+  // Top menu toggle
+  const menuBtn = document.getElementById('menuBtn');
+  const menuDropdown = document.getElementById('menuDropdown');
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuDropdown.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+      menuDropdown.classList.add('hidden');
+    }
+  });
+
+  // Dropdown functionality
+  const dropdownButtons = document.querySelectorAll('.dropdownBtn');
+  let activeDropdown = null;
+
+  dropdownButtons.forEach(btn => {
+    const dropdown = btn.nextElementSibling;
+    if (!dropdown) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeDropdown && activeDropdown !== dropdown) {
+        activeDropdown.classList.remove('show');
+      }
+      if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        activeDropdown = null;
+      } else {
+        dropdown.classList.add('show');
+        activeDropdown = dropdown;
+      }
+    });
+
+    btn.addEventListener('mouseenter', () => dropdown.classList.add('show'));
+    btn.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!dropdown.matches(':hover')) {
+          dropdown.classList.remove('show');
+        }
+      }, 100);
+    });
+    
+    if (dropdown) {
+      dropdown.addEventListener('mouseleave', () => {
+        dropdown.classList.remove('show');
+        if (activeDropdown === dropdown) activeDropdown = null;
+      });
+    }
+  });
+
+  document.body.addEventListener('click', () => {
+    if (activeDropdown) {
+      activeDropdown.classList.remove('show');
+      activeDropdown = null;
+    }
+  });
+
+  // Hide/show navbar on scroll
+  let lastScroll = 0;
+  const featureNavbar = document.getElementById('featureNavbar');
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
+    if (currentScroll > lastScroll && currentScroll > 100) {
+      featureNavbar.style.transform = 'translateY(-100%)';
+    } else {
+      featureNavbar.style.transform = 'translateY(0)';
+    }
+    lastScroll = currentScroll;
+  });
+
+  // Modal functionality
+  const modals = document.querySelectorAll('.modal');
+  const closeModalButtons = document.querySelectorAll('.close-modal');
+  
+  // Function to open modal
+  function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+  }
+  
+  // Function to close modal
+  function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.style.display = 'none';
+      document.body.style.overflow = 'auto'; // Restore scrolling
+    }
+  }
+  
+  // Close modal when clicking on close button or outside the modal
+  closeModalButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const modal = button.closest('.modal');
+      closeModal(modal.id);
+    });
+  });
+  
+  // Close modal when clicking outside the modal content
+  modals.forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeModal(modal.id);
+      }
+    });
+  });
+  
+  // Edit Personal Info functionality
+  document.getElementById('editPersonalInfo').addEventListener('click', () => {
+    openModal('editPersonalModal');
+  });
+  
+  // Edit Professional Info functionality
+  document.getElementById('editProfessionalInfo').addEventListener('click', () => {
+    openModal('editProfessionalModal');
+  });
+  
+  // Edit Technical Skills functionality
+  document.getElementById('editSkills').addEventListener('click', () => {
+    openModal('editSkillsModal');
+  });
+  
+  // Edit Emergency Contact functionality
+  document.getElementById('editEmergencyContact').addEventListener('click', () => {
+    openModal('editEmergencyModal');
+  });
+  
+  // Edit Degrees & Certificates functionality
+  document.getElementById('editDegreesCertificates').addEventListener('click', () => {
+    openModal('editDegreesModal');
+  });
+  
+  // Manage Permissions functionality
+  document.getElementById('managePermissions').addEventListener('click', () => {
+    openModal('permissionManagementModal');
+  });
+  
+  // View All Activity functionality
+  document.getElementById('viewAllActivity').addEventListener('click', () => {
+    openModal('fullActivityModal');
+  });
+  
+  // View All Rewards functionality
+  document.getElementById('viewAllRewards').addEventListener('click', () => {
+    openModal('fullRewardsModal');
+  });
+  
+  // View All Projects functionality
+  document.getElementById('viewProjects').addEventListener('click', () => {
+    openModal('fullProjectsModal');
+  });
+  
+  // Add Project functionality
+  document.getElementById('addProject').addEventListener('click', () => {
+    showToast('New project creation form opened', 'info');
+  });
+  
+  // View Project Details functionality
+  document.getElementById('viewProjectDetails').addEventListener('click', () => {
+    openModal('projectDetailsModal');
+  });
+  
+  // View Progress Details functionality
+  document.getElementById('viewProgressDetails').addEventListener('click', () => {
+    openModal('progressAnalyticsModal');
+  });
+  
+  // Complete Profile functionality
+  document.getElementById('completeProfile').addEventListener('click', () => {
+    openModal('profileWizardModal');
+  });
+  
+  // Form submission handlers
+  document.getElementById('personalInfoForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    showToast('Personal information updated successfully!', 'success');
+    closeModal('editPersonalModal');
+  });
+  
+  document.getElementById('professionalInfoForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    showToast('Professional information updated successfully!', 'success');
+    closeModal('editProfessionalModal');
+  });
+  
+  document.getElementById('skillsForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    showToast('Technical skills updated successfully!', 'success');
+    closeModal('editSkillsModal');
+  });
+  
+  document.getElementById('emergencyContactForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    showToast('Emergency contact updated successfully!', 'success');
+    closeModal('editEmergencyModal');
+  });
+  
+  document.getElementById('degreesForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    showToast('Degrees and certificates updated successfully!', 'success');
+    closeModal('editDegreesModal');
+  });
+  
+  // Animate progress bars on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      const progressBars = document.querySelectorAll('.progress-bar');
+      progressBars.forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(() => {
+          bar.style.width = width;
+        }, 100);
+      });
+    }, 500);
+  });
+</script>
+</body>
+</html>
