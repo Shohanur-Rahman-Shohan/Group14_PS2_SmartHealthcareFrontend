@@ -1,0 +1,358 @@
+<!-- Current Time Display -->
+<div class="container mx-auto px-6 pt-4">
+  <div class="bg-gradient-to-r from-purple-900 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white rounded-lg shadow-md p-4 flex justify-between items-center transition-colors duration-300">
+    <div class="flex items-center space-x-4">
+      <div class="bg-purple-100 p-3 rounded-full">
+        <i class="ph ph-calendar-check text-purple-700 text-2xl"></i>
+      </div>
+      <div>
+        <p class="text-sm text-white/80">Doctor Dashboard</p>
+        <p id="currentDateTime" class="text-lg font-semibold text-white"></p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2">
+      <span class="relative flex h-3 w-3">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+      </span>
+      <span class="text-sm font-medium text-white/90">System Online</span>
+    </div>
+  </div>
+</div>
+
+<!-- Hero Section -->
+<section class="px-6 py-8 text-center animate-fadeIn">
+  <div class="max-w-4xl mx-auto">
+    <h2 class="text-4xl md:text-5xl font-bold gradient-text mb-4">
+      Welcome, Doctor!
+    </h2>
+    <p class="text-gray-700 text-lg max-w-3xl mx-auto leading-relaxed">
+      Manage your appointments, patient medical history, prescriptions, and leverage AI insights for better care.
+    </p>
+  </div>
+</section>
+
+<!-- Quick Stats Overview -->
+<section class="px-6 pb-4">
+  <div class="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-5 rounded-xl shadow-lg card-hover">
+      <div class="flex justify-between items-start mb-3">
+        <div>
+          <p class="text-blue-100 text-sm font-medium">Total Patients</p>
+          <p class="text-3xl font-bold stat-number mt-1">1,247</p>
+        </div>
+        <div class="bg-blue-400 bg-opacity-40 p-3 rounded-lg float-animation">
+          <i class="ph ph-users text-2xl"></i>
+        </div>
+      </div>
+      <div class="flex items-center text-sm">
+        <i class="ph ph-trend-up mr-1"></i>
+        <span>+12% from last month</span>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-green-500 to-green-600 text-white p-5 rounded-xl shadow-lg card-hover">
+      <div class="flex justify-between items-start mb-3">
+        <div>
+          <p class="text-green-100 text-sm font-medium">Today's Appointments</p>
+          <p class="text-3xl font-bold stat-number mt-1">43</p>
+        </div>
+        <div class="bg-green-400 bg-opacity-40 p-3 rounded-lg float-animation" style="animation-delay: 0.2s;">
+          <i class="ph ph-calendar-check text-2xl"></i>
+        </div>
+      </div>
+      <div class="flex items-center text-sm">
+        <i class="ph ph-clock mr-1"></i>
+        <span>8 pending confirmations</span>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-5 rounded-xl shadow-lg card-hover">
+      <div class="flex justify-between items-start mb-3">
+        <div>
+          <p class="text-purple-100 text-sm font-medium">Active Prescriptions</p>
+          <p class="text-3xl font-bold stat-number mt-1">87</p>
+        </div>
+        <div class="bg-purple-400 bg-opacity-40 p-3 rounded-lg float-animation" style="animation-delay: 0.4s;">
+          <i class="ph ph-prescription text-2xl"></i>
+        </div>
+      </div>
+      <div class="flex items-center text-sm">
+        <i class="ph ph-check-circle mr-1"></i>
+        <span>All active patients</span>
+      </div>
+    </div>
+
+    <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-5 rounded-xl shadow-lg card-hover">
+      <div class="flex justify-between items-start mb-3">
+        <div>
+          <p class="text-orange-100 text-sm font-medium">Avg. Consultation Time</p>
+          <p class="text-3xl font-bold stat-number mt-1">15 min</p>
+        </div>
+        <div class="bg-orange-400 bg-opacity-40 p-3 rounded-lg float-animation" style="animation-delay: 0.6s;">
+          <i class="ph ph-timer text-2xl"></i>
+        </div>
+      </div>
+      <div class="flex items-center text-sm">
+        <i class="ph ph-trend-up mr-1"></i>
+        <span>+1 min from yesterday</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Dashboard Cards -->
+<main class="px-6 py-4">
+  <div class="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="bg-white p-6 rounded-2xl shadow-lg card-hover cursor-pointer gradient-border" style="animation: fadeIn 0.6s ease-out 0.1s both;" data-route="/appointments">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-indigo-700">Upcoming Appointments</h3>
+        <div class="bg-indigo-100 p-2 rounded-lg">
+          <i class="ph ph-calendar-plus text-indigo-700 text-xl"></i>
+        </div>
+      </div>
+      <p class="text-gray-500 text-sm mb-4">Your next patient consultations</p>
+      <div class="space-y-3">
+        <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition">
+          <div class="flex items-center space-x-3">
+            <i class="ph ph-user text-blue-600 text-xl"></i>
+            <span class="text-gray-700 font-medium">John Doe</span>
+          </div>
+          <span class="text-sm font-medium text-blue-600">10:00 AM</span>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg hover:bg-green-100 transition">
+          <div class="flex items-center space-x-3">
+            <i class="ph ph-user text-green-600 text-xl"></i>
+            <span class="text-gray-700 font-medium">Jane Smith</span>
+          </div>
+          <span class="text-sm font-medium text-green-600">11:30 AM</span>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-purple-50 rounded-lg hover:bg-purple-100 transition">
+          <div class="flex items-center space-x-3">
+            <i class="ph ph-user text-purple-600 text-xl"></i>
+            <span class="text-gray-700 font-medium">Peter Jones</span>
+          </div>
+          <span class="text-sm font-medium text-purple-600">02:00 PM</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow-lg card-hover cursor-pointer gradient-border" style="animation: fadeIn 0.6s ease-out 0.2s both;">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-indigo-700">Patient Alerts</h3>
+        <div class="bg-purple-100 p-2 rounded-lg">
+          <i class="ph ph-bell-ringing text-purple-700 text-xl"></i>
+        </div>
+      </div>
+      <p class="text-gray-500 text-sm mb-4">Important notifications regarding your patients</p>
+      <div class="space-y-3">
+        <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg hover:bg-red-100 transition">
+          <div class="flex items-center space-x-3">
+            <span class="status-indicator status-error"></span>
+            <span class="text-gray-700 font-medium">Emergency Case</span>
+          </div>
+          <span class="text-sm font-medium text-red-600">Patient: A. Khan</span>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition">
+          <div class="flex items-center space-x-3">
+            <span class="status-indicator status-training"></span>
+            <span class="text-gray-700 font-medium">New Lab Results</span>
+          </div>
+          <span class="text-sm font-medium text-yellow-600">Patient: B. Rahman</span>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition">
+          <div class="flex items-center space-x-3">
+            <span class="status-indicator status-idle"></span>
+            <span class="text-gray-700 font-medium">Follow-up Due</span>
+          </div>
+          <span class="text-sm font-medium text-blue-600">Patient: C. Islam</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow-lg card-hover cursor-pointer gradient-border" style="animation: fadeIn 0.6s ease-out 0.3s both;">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-indigo-700">Recent Prescriptions</h3>
+        <div class="bg-green-100 p-2 rounded-lg">
+          <i class="ph ph-prescription text-green-700 text-xl"></i>
+        </div>
+      </div>
+      <p class="text-gray-500 text-sm mb-4">Recently issued medications</p>
+      <div class="space-y-3">
+        <div class="flex items-center justify-between p-3 bg-teal-50 rounded-lg hover:bg-teal-100 transition">
+          <div class="flex items-center space-x-3">
+            <i class="ph ph-pill text-teal-600 text-xl"></i>
+            <span class="text-gray-700 font-medium">Amoxicillin</span>
+          </div>
+          <span class="text-sm font-medium text-teal-600">Patient: D. Haque</span>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition">
+          <div class="flex items-center space-x-3">
+            <i class="ph ph-pill text-blue-600 text-xl"></i>
+            <span class="text-gray-700 font-medium">Metformin</span>
+          </div>
+          <span class="text-sm font-medium text-blue-600">Patient: E. Begum</span>
+        </div>
+        <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg hover:bg-green-100 transition">
+          <div class="flex items-center space-x-3">
+            <i class="ph ph-pill text-green-600 text-xl"></i>
+            <span class="text-gray-700 font-medium">Lisinopril</span>
+          </div>
+          <span class="text-sm font-medium text-green-600">Patient: F. Ahmed</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Recent Activity Log -->
+<section class="px-6 py-8">
+  <div class="container mx-auto">
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden" style="animation: fadeIn 0.8s ease-out 0.4s both;">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center space-x-3">
+            <div class="bg-indigo-100 p-2 rounded-lg">
+              <i class="ph ph-activity text-indigo-700 text-2xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-indigo-700">Recent Activity Log</h3>
+          </div>
+          <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition flex items-center space-x-2">
+            <i class="ph ph-arrow-clockwise"></i>
+            <span>Refresh</span>
+          </button>
+        </div>
+        
+        <div class="space-y-4">
+          <!-- Activity 1 -->
+          <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+            <div class="flex items-center space-x-4">
+              <div class="bg-blue-100 p-3 rounded-lg">
+                <i class="ph ph-calendar-plus text-blue-700 text-xl"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-blue-700">New Appointment Booked</h4>
+                <p class="text-sm text-gray-600">Patient John Doe for 10:00 AM today</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-sm font-medium text-gray-600">5 min ago</span>
+            </div>
+          </div>
+          
+          <!-- Activity 2 -->
+          <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+            <div class="flex items-center space-x-4">
+              <div class="bg-green-100 p-3 rounded-lg">
+                <i class="ph ph-prescription text-green-700 text-xl"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-green-700">Prescription Issued</h4>
+                <p class="text-sm text-gray-600">Amoxicillin for Patient D. Haque</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-sm font-medium text-gray-600">15 min ago</span>
+            </div>
+          </div>
+          
+          <!-- Activity 3 -->
+          <div class="flex items-center justify-between p-4 bg-orange-50 rounded-lg">
+            <div class="flex items-center space-x-4">
+              <div class="bg-orange-100 p-3 rounded-lg">
+                <i class="ph ph-file-text text-orange-700 text-xl"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-orange-700">New Lab Report</h4>
+                <p class="text-sm text-gray-600">Patient B. Rahman's blood test results</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-sm font-medium text-gray-600">30 min ago</span>
+            </div>
+          </div>
+          
+          <!-- Activity 4 -->
+          <div class="flex items-center justify-between p-4 bg-purple-50 rounded-lg">
+            <div class="flex items-center space-x-4">
+              <div class="bg-purple-100 p-3 rounded-lg">
+                <i class="ph ph-brain text-purple-700 text-xl"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-purple-700">AI Recommendation Generated</h4>
+                <p class="text-sm text-gray-600">For Patient C. Islam: Annual preventive screening</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-sm font-medium text-gray-600">1 hour ago</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Analytics Section -->
+<section class="px-6 py-6">
+  <div class="container mx-auto" style="animation: fadeIn 0.8s ease-out 0.5s both;">
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center space-x-3">
+        <div class="bg-indigo-100 p-3 rounded-lg">
+          <i class="ph ph-chart-line-up text-indigo-700 text-2xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-indigo-700">Doctor Performance Analytics</h3>
+      </div>
+      <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition flex items-center space-x-2">
+        <i class="ph ph-download-simple"></i>
+        <span>Export Data</span>
+      </button>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Appointment Trends -->
+      <div class="bg-white p-6 rounded-2xl shadow-lg card-hover">
+        <div class="flex items-center justify-between mb-4">
+          <h4 class="text-lg font-semibold text-indigo-700 flex items-center space-x-2">
+            <i class="ph ph-trend-up"></i>
+            <span>Appointment Trend (Last 6 Months)</span>
+          </h4>
+          <span class="text-sm text-gray-500">Total Appointments</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="appointmentTrendChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Patient Demographics -->
+      <div class="bg-white p-6 rounded-2xl shadow-lg card-hover">
+        <div class="flex items-center justify-between mb-4">
+          <h4 class="text-lg font-semibold text-indigo-700 flex items-center space-x-2">
+            <i class="ph ph-chart-pie"></i>
+            <span>Patient Demographics (Age Groups)</span>
+          </h4>
+          <span class="text-sm text-gray-500">Active Patients</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="patientDemographicsChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Prescription Trends -->
+      <div class="md:col-span-2 bg-white p-6 rounded-2xl shadow-lg card-hover">
+        <div class="flex items-center justify-between mb-4">
+          <h4 class="text-lg font-semibold text-indigo-700 flex items-center space-x-2">
+            <i class="ph ph-prescription"></i>
+            <span>Prescription Trends (Top 5 Medications)</span>
+          </h4>
+          <span class="text-sm text-gray-500">Last 30 days</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="prescriptionTrendChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

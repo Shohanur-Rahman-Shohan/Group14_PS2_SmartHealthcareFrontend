@@ -1,76 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Investigation Reports | Doctor Portal</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 min-h-screen p-8">
-    <div class="container mx-auto bg-white p-6 rounded-lg shadow-md">
-        <h1 class="text-4xl font-bold text-indigo-700 mb-6 text-center">Investigation Reports</h1>
-        
-        <div class="mb-6 flex justify-between items-center">
-            <h2 class="text-2xl font-semibold text-gray-800">All Patient Reports</h2>
-            <button class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Upload New Report</button>
-        </div>
-
-        <div class="overflow-x-auto">
-            <table class="min-w-full bg-white border border-gray-200 rounded-lg">
-                <thead>
-                    <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
-                        <th class="py-3 px-6 text-left">Report ID</th>
-                        <th class="py-3 px-6 text-left">Patient Name</th>
-                        <th class="py-3 px-6 text-left">Test Type</th>
-                        <th class="py-3 px-6 text-left">Date</th>
-                        <th class="py-3 px-6 text-left">Status</th>
-                        <th class="py-3 px-6 text-center">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="text-gray-600 text-sm font-light">
-                    <tr class="border-b border-gray-200 hover:bg-gray-100">
-                        <td class="py-3 px-6 text-left whitespace-nowrap">INV001</td>
-                        <td class="py-3 px-6 text-left">John Doe</td>
-                        <td class="py-3 px-6 text-left">Blood Test</td>
-                        <td class="py-3 px-6 text-left">2025-11-12</td>
-                        <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">Completed</span></td>
-                        <td class="py-3 px-6 text-center">
-                            <div class="flex item-center justify-center">
-                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"><i class="ph ph-download-simple"></i></button>
-                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"><i class="ph ph-eye"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr class="border-b border-gray-200 hover:bg-gray-100">
-                        <td class="py-3 px-6 text-left whitespace-nowrap">INV002</td>
-                        <td class="py-3 px-6 text-left">Jane Smith</td>
-                        <td class="py-3 px-6 text-left">X-Ray</td>
-                        <td class="py-3 px-6 text-left">2025-11-10</td>
-                        <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">Completed</span></td>
-                        <td class="py-3 px-6 text-center">
-                            <div class="flex item-center justify-center">
-                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"><i class="ph ph-download-simple"></i></button>
-                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"><i class="ph ph-eye"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr class="border-b border-gray-200 hover:bg-gray-100">
-                        <td class="py-3 px-6 text-left whitespace-nowrap">INV003</td>
-                        <td class="py-3 px-6 text-left">Peter Jones</td>
-                        <td class="py-3 px-6 text-left">MRI Scan</td>
-                        <td class="py-3 px-6 text-left">2025-11-07</td>
-                        <td class="py-3 px-6 text-left"><span class="bg-yellow-200 text-yellow-600 py-1 px-3 rounded-full text-xs">Pending Review</span></td>
-                        <td class="py-3 px-6 text-center">
-                            <div class="flex item-center justify-center">
-                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"><i class="ph ph-download-simple"></i></button>
-                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"><i class="ph ph-eye"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <a href="Home.html" class="mt-6 inline-block bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 transition">Go to Dashboard</a>
+<div class="container mx-auto bg-white p-6 rounded-lg shadow-md">
+    <h1 class="text-4xl font-bold text-indigo-700 mb-6 text-center">Investigation Reports</h1>
+    
+    <div class="mb-6 flex justify-between items-center">
+        <h2 class="text-2xl font-semibold text-gray-800">All Patient Reports</h2>
+        <button class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Upload New Report</button>
     </div>
-</body>
-</html>
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+            <thead>
+                <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                    <th class="py-3 px-6 text-left">Report ID</th>
+                    <th class="py-3 px-6 text-left">Patient Name</th>
+                    <th class="py-3 px-6 text-left">Test Type</th>
+                    <th class="py-3 px-6 text-left">Date</th>
+                    <th class="py-3 px-6 text-left">Status</th>
+                    <th class="py-3 px-6 text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-600 text-sm font-light">
+                <tr class="border-b border-gray-200 hover:bg-gray-100">
+                    <td class="py-3 px-6 text-left whitespace-nowrap">INV001</td>
+                    <td class="py-3 px-6 text-left">John Doe</td>
+                    <td class="py-3 px-6 text-left">Blood Test</td>
+                    <td class="py-3 px-6 text-left">2025-11-12</td>
+                    <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">Completed</span></td>
+                    <td class="py-3 px-6 text-center">
+                        <div class="flex item-center justify-center">
+                            <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"><i class="ph ph-download-simple"></i></button>
+                            <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"><i class="ph ph-eye"></i></button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="border-b border-gray-200 hover:bg-gray-100">
+                    <td class="py-3 px-6 text-left whitespace-nowrap">INV002</td>
+                    <td class="py-3 px-6 text-left">Jane Smith</td>
+                    <td class="py-3 px-6 text-left">X-Ray</td>
+                    <td class="py-3 px-6 text-left">2025-11-10</td>
+                    <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">Completed</span></td>
+                    <td class="py-3 px-6 text-center">
+                        <div class="flex item-center justify-center">
+                            <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"><i class="ph ph-download-simple"></i></button>
+                            <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"><i class="ph ph-eye"></i></button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="border-b border-gray-200 hover:bg-gray-100">
+                    <td class="py-3 px-6 text-left whitespace-nowrap">INV003</td>
+                    <td class="py-3 px-6 text-left">Peter Jones</td>
+                    <td class="py-3 px-6 text-left">MRI Scan</td>
+                    <td class="py-3 px-6 text-left">2025-11-07</td>
+                    <td class="py-3 px-6 text-left"><span class="bg-yellow-200 text-yellow-600 py-1 px-3 rounded-full text-xs">Pending Review</span></td>
+                    <td class="py-3 px-6 text-center">
+                        <div class="flex item-center justify-center">
+                            <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"><i class="ph ph-download-simple"></i></button>
+                            <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"><i class="ph ph-eye"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <a href="#/dashboard" data-route="/dashboard" class="mt-6 inline-block bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 transition">Go to Dashboard</a>
+</div>

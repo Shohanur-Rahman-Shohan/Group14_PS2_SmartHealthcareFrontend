@@ -1,37 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Prescription | Doctor Portal</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 min-h-screen p-8">
-    <div class="container mx-auto bg-white p-6 rounded-lg shadow-md max-w-2xl">
-        <h1 class="text-4xl font-bold text-indigo-700 mb-6 text-center">Create New Prescription</h1>
-        
-        <form class="space-y-4">
-            <div>
-                <label for="patientName" class="block text-gray-700 text-sm font-bold mb-2">Patient Name:</label>
-                <input type="text" id="patientName" name="patientName" placeholder="Enter patient's name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-            </div>
-            <div>
-                <label for="medication" class="block text-gray-700 text-sm font-bold mb-2">Medication:</label>
-                <input type="text" id="medication" name="medication" placeholder="e.g., Amoxicillin" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-            </div>
-            <div>
-                <label for="dosage" class="block text-gray-700 text-sm font-bold mb-2">Dosage:</label>
-                <input type="text" id="dosage" name="dosage" placeholder="e.g., 250mg, twice daily" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-            </div>
-            <div>
-                <label for="instructions" class="block text-gray-700 text-sm font-bold mb-2">Instructions:</label>
-                <textarea id="instructions" name="instructions" rows="4" placeholder="Provide detailed instructions for the patient" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
-            </div>
-            <div class="flex items-center justify-between">
-                <button type="submit" class="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 transition focus:outline-none focus:shadow-outline">Issue Prescription</button>
-                <a href="Home.html" class="inline-block bg-gray-300 text-gray-800 px-6 py-3 rounded-md hover:bg-gray-400 transition">Cancel</a>
-            </div>
-        </form>
-    </div>
-</body>
-</html>
+<div class="container mx-auto bg-white p-6 rounded-lg shadow-md max-w-2xl">
+    <h1 class="text-4xl font-bold text-indigo-700 mb-6 text-center">Create New Prescription</h1>
+    
+    <form class="space-y-4">
+        <div>
+            <label for="patientName" class="block text-gray-700 text-sm font-bold mb-2">Patient Name:</label>
+            <input type="text" id="patientName" name="patientName" placeholder="Enter patient's name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+        <div>
+            <label for="medication" class="block text-gray-700 text-sm font-bold mb-2">Medication:</label>
+            <input type="text" id="medication" name="medication" placeholder="e.g., Amoxicillin" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+        <div>
+            <label for="dosage" class="block text-gray-700 text-sm font-bold mb-2">Dosage:</label>
+            <input type="text" id="dosage" name="dosage" placeholder="e.g., 250mg, twice daily" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+        <div>
+            <label for="instructions" class="block text-gray-700 text-sm font-bold mb-2">Instructions:</label>
+            <textarea id="instructions" name="instructions" rows="4" placeholder="Provide detailed instructions for the patient" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+        </div>
+        <div class="flex items-center justify-between">
+            <button type="submit" class="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 transition focus:outline-none focus:shadow-outline">Issue Prescription</button>
+            <a href="#/dashboard" data-route="/dashboard" class="inline-block bg-gray-300 text-gray-800 px-6 py-3 rounded-md hover:bg-gray-400 transition">Cancel</a>
+        </div>
+    </form>
+</div>
