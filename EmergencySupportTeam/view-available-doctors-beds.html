@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Available Doctors / Beds | Smart Healthcare</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/phosphor-icons"></script>
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #eef6ff, #f7fbff);
+    }
+
+    .nav-btn { transition: 0.3s; }
+    .nav-btn:hover { background: rgba(255,255,255,0.25); transform: scale(1.03); }
+
+    .card { transition: 0.3s; border-radius: 15px; box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.12); }
+
+    .status-badge {
+      padding: 5px 12px;
+      border-radius: 12px;
+      font-weight: 500;
+      font-size: 13px;
+      color: white;
+      position: relative;
+      cursor: default;
+    }
+
+    .available { background-color: #2ecc71; }
+    .busy { background-color: #e74c3c; }
+    .occupied { background-color: #f39c12; }
+
+    .status-badge:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0a3d62;
+      color: white;
+      padding: 4px 8px;
+      font-size: 11px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    table th, table td { padding: 12px 15px; }
+    table tr:nth-child(even) { background-color: #f7faff; }
+    table tr:hover { background-color: #e1f0ff; }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="flex items-center justify-between px-6 py-4 shadow-md bg-[#0a3d62] text-white">
+    <h1 class="text-2xl font-bold tracking-wide">Smart Healthcare — Emergency Support Team</h1>
+    <div class="flex gap-3">
+      <a href="dashboard.html" class="px-4 py-2 rounded-xl nav-btn">Dashboard</a>
+      <a href="emergency-patient-list.html" class="px-4 py-2 rounded-xl nav-btn">Emergency Patient List</a>
+      <a href="assign-ambulance.html" class="px-4 py-2 rounded-xl nav-btn">Assign Ambulance / Respond</a>
+      <a href="update-patient-condition.html" class="px-4 py-2 rounded-xl nav-btn">Update Patient Condition</a>
+      <a href="notify-doctor-admin.html" class="px-4 py-2 rounded-xl nav-btn">Notify Doctor / Admin</a>
+      <a href="emergency-reports.html" class="px-4 py-2 rounded-xl nav-btn">Emergency Reports</a>
+      <a href="view-available-doctors-beds.html" class="px-4 py-2 rounded-xl nav-btn bg-white text-[#0a3d62] font-semibold">View Available Doctors / Beds</a>
+      <a href="logout.html" class="px-4 py-2 rounded-xl nav-btn">Logout</a>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <section class="p-8">
+    <h2 class="text-3xl font-bold text-[#0a3d62]">Available Doctors / Beds</h2>
+    <p class="text-gray-600 mt-1">Check real-time availability for doctors and hospital beds with detailed info.</p>
+
+    <!-- SEARCH + FILTER -->
+    <div class="mt-6 flex flex-col md:flex-row justify-between gap-4">
+      <input type="text" placeholder="Search Doctor or Bed..." class="w-full md:w-1/2 px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0a3d62] outline-none"/>
+      <select class="w-full md:w-1/4 px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0a3d62]">
+        <option value="">Filter by Status</option>
+        <option value="available">Available</option>
+        <option value="busy">Busy</option>
+        <option value="occupied">Occupied</option>
+      </select>
+    </div>
+
+    <!-- DOCTORS TABLE -->
+    <div class="mt-8 bg-white p-6 card">
+      <h3 class="text-xl font-semibold text-[#0a3d62] mb-4">Doctors Availability</h3>
+      <table class="w-full border-collapse text-left">
+        <thead>
+          <tr class="bg-[#0a3d62] text-white rounded-lg">
+            <th>Doctor ID</th>
+            <th>Name</th>
+            <th>Specialty</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>D-101</td>
+            <td>Dr. Arif Hasan</td>
+            <td>Cardiology</td>
+            <td><span class="status-badge available" data-tooltip="Available for consultation">Available</span></td>
+          </tr>
+          <tr>
+            <td>D-202</td>
+            <td>Dr. Marufa Khan</td>
+            <td>Neurology</td>
+            <td><span class="status-badge busy" data-tooltip="Currently attending patients">Busy</span></td>
+          </tr>
+          <tr>
+            <td>D-303</td>
+            <td>Dr. Sakib Al Mamun</td>
+            <td>General Surgery</td>
+            <td><span class="status-badge available" data-tooltip="Available for consultation">Available</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- BEDS TABLE -->
+    <div class="mt-8 bg-white p-6 card">
+      <h3 class="text-xl font-semibold text-[#0a3d62] mb-4">Beds Availability</h3>
+      <table class="w-full border-collapse text-left">
+        <thead>
+          <tr class="bg-[#0a3d62] text-white rounded-lg">
+            <th>Bed ID</th>
+            <th>Ward</th>
+            <th>Type</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>B-101</td>
+            <td>ICU</td>
+            <td>Critical</td>
+            <td><span class="status-badge available" data-tooltip="Ready for patient">Available</span></td>
+          </tr>
+          <tr>
+            <td>B-102</td>
+            <td>General</td>
+            <td>Standard</td>
+            <td><span class="status-badge occupied" data-tooltip="Currently occupied">Occupied</span></td>
+          </tr>
+          <tr>
+            <td>B-103</td>
+            <td>Emergency</td>
+            <td>High Dependency</td>
+            <td><span class="status-badge busy" data-tooltip="Being cleaned/prepared">Busy</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+</body>
+</html>

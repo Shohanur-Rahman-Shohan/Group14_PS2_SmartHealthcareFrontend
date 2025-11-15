@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Assign Ambulance | Smart Healthcare</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/phosphor-icons"></script>
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #e9f2ff, #f7fbff);
+    }
+
+    .nav-btn {
+      transition: 0.3s;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255,255,255,0.25);
+      transform: scale(1.03);
+    }
+
+    .card {
+      transition: 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+    }
+
+    .status-badge {
+      padding: 4px 10px;
+      border-radius: 8px;
+      color: white;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .assigned { background-color: #2ecc71; }
+    .pending { background-color: #f39c12; }
+    .busy { background-color: #e74c3c; }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="flex items-center justify-between px-6 py-4 shadow-md bg-[#0a3d62] text-white">
+    <h1 class="text-2xl font-bold tracking-wide">Smart Healthcare — Emergency Support Team</h1>
+
+    <div class="flex gap-3">
+      <a href="dashboard.html" class="px-4 py-2 rounded-xl nav-btn">Dashboard</a>
+      <a href="emergency-patient-list.html" class="px-4 py-2 rounded-xl nav-btn">Emergency Patient List</a>
+      <a href="assign-ambulance.html" class="px-4 py-2 rounded-xl nav-btn bg-white text-[#0a3d62] font-semibold">Assign Ambulance / Respond</a>
+      <a href="update-patient-condition.html" class="px-4 py-2 rounded-xl nav-btn">Update Patient Condition</a>
+      <a href="notify-doctor-admin.html" class="px-4 py-2 rounded-xl nav-btn">Notify Doctor / Admin</a>
+      <a href="emergency-reports.html" class="px-4 py-2 rounded-xl nav-btn">Emergency Reports</a>
+      <a href="view-available-doctors-beds.html" class="px-4 py-2 rounded-xl nav-btn">View Available Doctors / Beds</a>
+      <a href="logout.html" class="px-4 py-2 rounded-xl nav-btn">Logout</a>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <section class="p-8">
+    <h2 class="text-3xl font-bold text-[#0a3d62]">Assign Ambulance / Respond</h2>
+    <p class="text-gray-600 mt-1">Manage ambulance dispatch for emergency patients.</p>
+
+    <!-- SEARCH + FILTER -->
+    <div class="mt-6 bg-white p-5 rounded-2xl shadow card">
+      <div class="flex justify-between items-center">
+        
+        <!-- Search -->
+        <div class="flex items-center gap-3 w-1/2">
+          <i class="ph ph-magnifying-glass text-xl text-gray-600"></i>
+          <input 
+            type="text" 
+            placeholder="Search Patient by Name or ID..." 
+            class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-[#0a3d62] outline-none"
+          />
+        </div>
+
+        <!-- Filter -->
+        <select class="px-4 py-2 border rounded-xl focus:ring-[#0a3d62]">
+          <option value="">Filter by Ambulance Status</option>
+          <option value="assigned">Assigned</option>
+          <option value="pending">Pending</option>
+          <option value="busy">Busy</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ASSIGNMENT TABLE -->
+    <div class="mt-8 bg-white p-6 rounded-2xl shadow card">
+      <table class="w-full border-collapse">
+        <thead>
+          <tr class="bg-[#0a3d62] text-white">
+            <th class="p-3 text-left">Patient ID</th>
+            <th class="p-3 text-left">Name</th>
+            <th class="p-3 text-left">Issue</th>
+            <th class="p-3 text-left">Ambulance</th>
+            <th class="p-3 text-left">Status</th>
+            <th class="p-3 text-left">Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr class="border-b hover:bg-gray-50 transition">
+            <td class="p-3 font-semibold text-gray-700">P-101</td>
+            <td class="p-3">Arif Hasan</td>
+            <td class="p-3">Severe Chest Pain</td>
+            <td class="p-3">A-102</td>
+            <td class="p-3">
+              <span class="status-badge assigned">Assigned</span>
+            </td>
+            <td class="p-3">
+              <a href="#" class="px-3 py-1 bg-[#0a3d62] text-white rounded-lg">View</a>
+            </td>
+          </tr>
+
+          <tr class="border-b hover:bg-gray-50 transition">
+            <td class="p-3 font-semibold text-gray-700">P-202</td>
+            <td class="p-3">Marufa Khan</td>
+            <td class="p-3">Accident Injury</td>
+            <td class="p-3">A-087</td>
+            <td class="p-3">
+              <span class="status-badge pending">Pending</span>
+            </td>
+            <td class="p-3">
+              <a href="#" class="px-3 py-1 bg-[#0a3d62] text-white rounded-lg">Assign</a>
+            </td>
+          </tr>
+
+          <tr class="hover:bg-gray-50 transition">
+            <td class="p-3 font-semibold text-gray-700">P-303</td>
+            <td class="p-3">Sakib Al Mamun</td>
+            <td class="p-3">High Fever</td>
+            <td class="p-3">—</td>
+            <td class="p-3">
+              <span class="status-badge busy">Busy</span>
+            </td>
+            <td class="p-3">
+              <a href="#" class="px-3 py-1 bg-[#0a3d62] text-white rounded-lg">Assign</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+</body>
+</html>

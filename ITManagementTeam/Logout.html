@@ -1,16 +1,95 @@
-<section id="logout" style="background: linear-gradient(135deg, #fdfdfd, #e9f9ff); padding: 60px 35px; border-radius: 15px; box-shadow: 0 6px 18px rgba(0,0,0,0.1); margin: 50px auto; max-width: 700px; font-family: 'Poppins', sans-serif; text-align: center;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Logout | Smart Healthcare</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/phosphor-icons"></script>
+  <style>
+    a, .card { transition: all 0.3s ease; }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
+    .menu-enter { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+    .menu-open { max-height: 500px; }
+  </style>
+</head>
 
-  <h2 style="color: #0a3d62; font-weight: 700; font-size: 28px; margin-bottom: 20px;">
-    🚪 Logout Successful
-  </h2>
+<body class="bg-gray-100 text-gray-800 min-h-screen">
 
-  <p style="color: #333; font-size: 17px; line-height: 1.8; margin-bottom: 30px;">
-    You have successfully logged out of the IT Management Dashboard. For security reasons, please close your browser or ensure your account is protected when leaving this device.
-  </p>
+  <!-- Navbar -->
+  <nav class="bg-gradient-to-r from-blue-700 to-blue-500 text-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <h1 class="text-2xl font-semibold flex items-center gap-2">
+        <i class="ph ph-sign-out text-white"></i> IT Management Team
+      </h1>
 
-  <a href="it-dashboard.html" 
-     style="display: inline-block; background-color: #0a3d62; color: white; padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: 500; text-decoration: none; box-shadow: 0 4px 10px rgba(10,61,98,0.3); transition: 0.3s;">
-    🔄 Login Again
-  </a>
+      <!-- Mobile Toggle -->
+      <button id="menuBtn" class="sm:hidden text-2xl focus:outline-none">
+        <i class="ph ph-list"></i>
+      </button>
 
-</section>
+      <!-- Desktop Nav -->
+      <div class="hidden sm:flex flex-wrap justify-center items-center space-x-2">
+        <a href="dashboard.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-gauge"></i> Dashboard</a>
+        <a href="system_monitoring.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-display"></i> System Monitoring</a>
+        <a href="user_accounts.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-user-circle"></i> User Accounts</a>
+        <a href="backup_recovery.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-database"></i> Backup & Recovery</a>
+        <a href="security_settings.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-shield-check"></i> Security Settings</a>
+        <a href="access_permissions.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-key"></i> Access Permissions</a>
+        <a href="maintenance_logs.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-file-text"></i> Maintenance Logs</a>
+        <a href="incident_reports.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-warning-circle"></i> Incident Reports</a>
+        <a href="network_status.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-wifi-high"></i> Network Status</a>
+        <a href="emergency_support.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-first-aid-kit"></i> Emergency IT Support</a>
+        <a href="logout.html" class="px-3 py-2 rounded bg-blue-700 flex items-center gap-2 font-medium"><i class="ph ph-sign-out"></i> Logout</a>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="menu-enter sm:hidden bg-blue-600">
+      <a href="dashboard.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-gauge"></i> Dashboard</a>
+      <a href="system_monitoring.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-display"></i> System Monitoring</a>
+      <a href="user_accounts.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-user-circle"></i> User Accounts</a>
+      <a href="backup_recovery.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-database"></i> Backup & Recovery</a>
+      <a href="security_settings.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-shield-check"></i> Security Settings</a>
+      <a href="access_permissions.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-key"></i> Access Permissions</a>
+      <a href="maintenance_logs.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-file-text"></i> Maintenance Logs</a>
+      <a href="incident_reports.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-warning-circle"></i> Incident Reports</a>
+      <a href="network_status.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-wifi-high"></i> Network Status</a>
+      <a href="emergency_support.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-first-aid-kit"></i> Emergency IT Support</a>
+      <a href="logout.html" class="block px-4 py-2 bg-blue-700"><i class="ph ph-sign-out"></i> Logout</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-10 text-center">
+
+    <h1 class="text-4xl font-bold text-blue-700 mb-4 flex justify-center items-center gap-2">
+      <i class="ph ph-sign-out"></i> You are logging out
+    </h1>
+    <p class="text-gray-600 mb-8">Thank you for using the Smart Healthcare IT Management System. You will be redirected to the login page shortly.</p>
+
+    <div class="inline-block">
+      <a href="login.html" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">Go to Login</a>
+    </div>
+
+  </main>
+
+  <footer class="mt-16 text-center py-4 text-gray-500">
+    © 2025 Smart Healthcare IT Management Division. All Rights Reserved.
+  </footer>
+
+  <script>
+    const menuBtn = document.getElementById("menuBtn");
+    const mobileMenu = document.getElementById("mobileMenu");
+    menuBtn.addEventListener("click", () => {
+      mobileMenu.classList.toggle("menu-open");
+    });
+
+    // Optional auto-redirect to login page after 3 seconds
+    setTimeout(() => {
+      window.location.href = "login.html";
+    }, 3000);
+  </script>
+
+</body>
+</html>

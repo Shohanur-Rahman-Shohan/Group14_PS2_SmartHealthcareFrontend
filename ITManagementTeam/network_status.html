@@ -3,26 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IT Management Dashboard | Smart Healthcare</title>
+  <title>Network & Server Status | Smart Healthcare</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/phosphor-icons"></script>
   <style>
     /* Smooth transitions */
-    a, .card {
-      transition: all 0.3s ease;
-    }
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-    }
-    .menu-enter {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.4s ease;
-    }
-    .menu-open {
-      max-height: 500px;
-    }
+    a, .card { transition: all 0.3s ease; }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
+    .menu-enter { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+    .menu-open { max-height: 500px; }
   </style>
 </head>
 
@@ -42,7 +31,7 @@
 
       <!-- Desktop Nav -->
       <div class="hidden sm:flex flex-wrap justify-center items-center space-x-2">
-        <a href="dashboard.html" class="px-3 py-2 rounded bg-blue-500 flex items-center gap-2 font-medium"><i class="ph ph-gauge"></i> Dashboard</a>
+        <a href="dashboard.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-gauge"></i> Dashboard</a>
         <a href="system_monitoring.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-display"></i> System Monitoring</a>
         <a href="user_accounts.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-user-circle"></i> User Accounts</a>
         <a href="backup_recovery.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-database"></i> Backup & Recovery</a>
@@ -50,7 +39,7 @@
         <a href="access_permissions.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-key"></i> Access Permissions</a>
         <a href="maintenance_logs.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-file-text"></i> Maintenance Logs</a>
         <a href="incident_reports.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-warning-circle"></i> Incident Reports</a>
-        <a href="network_status.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-wifi-high"></i> Network Status</a>
+        <a href="network_status.html" class="px-3 py-2 rounded bg-blue-500 flex items-center gap-2 font-medium"><i class="ph ph-wifi-high"></i> Network Status</a>
         <a href="emergency_support.html" class="px-3 py-2 rounded hover:bg-blue-500 flex items-center gap-2"><i class="ph ph-first-aid-kit"></i> Emergency IT Support</a>
         <a href="logout.html" class="px-3 py-2 rounded hover:bg-blue-700 flex items-center gap-2"><i class="ph ph-sign-out"></i> Logout</a>
       </div>
@@ -58,7 +47,7 @@
 
     <!-- Mobile Menu -->
     <div id="mobileMenu" class="menu-enter sm:hidden bg-blue-600">
-      <a href="dashboard.html" class="block px-4 py-2 bg-blue-500"><i class="ph ph-gauge"></i> Dashboard</a>
+      <a href="dashboard.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-gauge"></i> Dashboard</a>
       <a href="system_monitoring.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-display"></i> System Monitoring</a>
       <a href="user_accounts.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-user-circle"></i> User Accounts</a>
       <a href="backup_recovery.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-database"></i> Backup & Recovery</a>
@@ -66,7 +55,7 @@
       <a href="access_permissions.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-key"></i> Access Permissions</a>
       <a href="maintenance_logs.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-file-text"></i> Maintenance Logs</a>
       <a href="incident_reports.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-warning-circle"></i> Incident Reports</a>
-      <a href="network_status.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-wifi-high"></i> Network Status</a>
+      <a href="network_status.html" class="block px-4 py-2 bg-blue-500"><i class="ph ph-wifi-high"></i> Network Status</a>
       <a href="emergency_support.html" class="block px-4 py-2 hover:bg-blue-500"><i class="ph ph-first-aid-kit"></i> Emergency IT Support</a>
       <a href="logout.html" class="block px-4 py-2 hover:bg-blue-700"><i class="ph ph-sign-out"></i> Logout</a>
     </div>
@@ -74,86 +63,75 @@
 
   <!-- Main Content -->
   <main class="container mx-auto px-4 py-10">
-    <!-- Title -->
+
+    <!-- Page Header -->
     <div class="mb-8 text-center">
       <h1 class="text-4xl font-bold text-blue-700 mb-2 flex justify-center items-center gap-2">
-        <i class="ph ph-gauge"></i> IT Management Dashboard
+        <i class="ph ph-wifi-high"></i> Network & Server Status
       </h1>
-      <p class="text-gray-600">Overview of system status, user activity, backups, and network health.</p>
+      <p class="text-gray-600">Monitor the real-time status of servers, network devices, and connectivity across the IT infrastructure.</p>
     </div>
 
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+    <!-- Network Overview Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
       <div class="card bg-white p-5 rounded-lg shadow text-center">
-        <i class="ph ph-display text-blue-600 text-3xl mb-2"></i>
-        <h3 class="text-xl font-semibold">5</h3>
-        <p class="text-gray-600">Active Servers</p>
-      </div>
-      <div class="card bg-white p-5 rounded-lg shadow text-center">
-        <i class="ph ph-user-circle text-blue-600 text-3xl mb-2"></i>
-        <h3 class="text-xl font-semibold">120</h3>
-        <p class="text-gray-600">Active Users</p>
-      </div>
-      <div class="card bg-white p-5 rounded-lg shadow text-center">
-        <i class="ph ph-database text-blue-600 text-3xl mb-2"></i>
+        <i class="ph ph-server text-blue-600 text-3xl mb-2"></i>
         <h3 class="text-xl font-semibold">8</h3>
-        <p class="text-gray-600">Pending Backups</p>
+        <p class="text-gray-600">Servers Online</p>
       </div>
       <div class="card bg-white p-5 rounded-lg shadow text-center">
-        <i class="ph ph-wifi-high text-blue-600 text-3xl mb-2"></i>
-        <h3 class="text-xl font-semibold">99%</h3>
-        <p class="text-gray-600">Network Uptime</p>
+        <i class="ph ph-wifi text-blue-600 text-3xl mb-2"></i>
+        <h3 class="text-xl font-semibold">12</h3>
+        <p class="text-gray-600">Active Network Devices</p>
+      </div>
+      <div class="card bg-white p-5 rounded-lg shadow text-center">
+        <i class="ph ph-warning text-blue-600 text-3xl mb-2"></i>
+        <h3 class="text-xl font-semibold">2</h3>
+        <p class="text-gray-600">Issues Detected</p>
       </div>
     </div>
 
-    <!-- System Activity Table -->
+    <!-- Server Status Table -->
     <div class="bg-white p-6 rounded-lg shadow mb-10 overflow-x-auto">
       <h2 class="text-2xl font-semibold text-blue-700 mb-4 flex items-center gap-2">
-        <i class="ph ph-activity"></i> Recent System Activities
+        <i class="ph ph-server"></i> Server & Network Device Status
       </h2>
       <table class="w-full text-left border-collapse min-w-[600px]">
         <thead>
           <tr class="bg-blue-100 text-blue-700">
-            <th class="px-4 py-2">Time</th>
-            <th class="px-4 py-2">User</th>
-            <th class="px-4 py-2">Action</th>
+            <th class="px-4 py-2">Device Name</th>
+            <th class="px-4 py-2">Type</th>
+            <th class="px-4 py-2">IP Address</th>
             <th class="px-4 py-2">Status</th>
+            <th class="px-4 py-2">Last Checked</th>
           </tr>
         </thead>
         <tbody>
           <tr class="border-b hover:bg-gray-50 transition">
+            <td class="px-4 py-2">Server-01</td>
+            <td class="px-4 py-2">Application Server</td>
+            <td class="px-4 py-2">192.168.1.10</td>
+            <td class="px-4 py-2 text-green-600 font-medium">Online</td>
             <td class="px-4 py-2">10:15 AM</td>
-            <td class="px-4 py-2">John Doe</td>
-            <td class="px-4 py-2">Updated User Permissions</td>
-            <td class="px-4 py-2 text-green-600 font-medium">Success</td>
           </tr>
           <tr class="border-b hover:bg-gray-50 transition">
-            <td class="px-4 py-2">09:50 AM</td>
-            <td class="px-4 py-2">System</td>
-            <td class="px-4 py-2">Backup Completed</td>
-            <td class="px-4 py-2 text-green-600 font-medium">Success</td>
+            <td class="px-4 py-2">Router-02</td>
+            <td class="px-4 py-2">Network Router</td>
+            <td class="px-4 py-2">192.168.1.1</td>
+            <td class="px-4 py-2 text-red-600 font-medium">Offline</td>
+            <td class="px-4 py-2">10:05 AM</td>
+          </tr>
+          <tr class="border-b hover:bg-gray-50 transition">
+            <td class="px-4 py-2">Switch-03</td>
+            <td class="px-4 py-2">Network Switch</td>
+            <td class="px-4 py-2">192.168.1.20</td>
+            <td class="px-4 py-2 text-green-600 font-medium">Online</td>
+            <td class="px-4 py-2">10:10 AM</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Quick Info Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="card bg-white p-5 rounded-lg shadow">
-        <h2 class="text-xl font-semibold mb-2 flex items-center gap-2 text-blue-700"><i class="ph ph-clock"></i> Maintenance</h2>
-        <p class="text-gray-600 mb-2">Next scheduled maintenance: <span class="font-semibold">Tomorrow 02:00 AM</span>.</p>
-        <a href="maintenance_logs.html" class="text-blue-600 font-medium hover:underline">View Logs →</a>
-      </div>
-      <div class="card bg-white p-5 rounded-lg shadow">
-        <h2 class="text-xl font-semibold mb-2 flex items-center gap-2 text-blue-700"><i class="ph ph-database"></i> Backups</h2>
-        <p class="text-gray-600 mb-2">8 backups are pending verification.</p>
-        <a href="backup_recovery.html" class="text-blue-600 font-medium hover:underline">Check Backups →</a>
-      </div>
-      <div class="card bg-white p-5 rounded-lg shadow">
-        <h2 class="text-xl font-semibold mb-2 flex items-center gap-2 text-blue-700"><i class="ph ph-shield-check"></i> Security</h2>
-        <p class="text-gray-600">No critical alerts. All security systems operational.</p>
-      </div>
-    </div>
   </main>
 
   <footer class="mt-16 text-center py-4 text-gray-500">

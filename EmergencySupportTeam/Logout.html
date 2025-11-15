@@ -1,101 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Logout | Smart Healthcare</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/phosphor-icons"></script>
+
   <style>
     body {
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #fff5f5, #ffeaea);
-      margin: 0;
-      height: 100vh;
+      background: linear-gradient(135deg, #eef6ff, #f7fbff);
       display: flex;
-      align-items: center;
-      justify-content: center;
+      flex-direction: column;
+      min-height: 100vh;
     }
 
-    .logout-container {
-      background: #fff;
-      padding: 40px 50px;
+    .nav-btn { transition: 0.3s; }
+    .nav-btn:hover { background: rgba(255,255,255,0.25); transform: scale(1.03); }
+
+    .logout-card {
+      max-width: 500px;
+      margin: auto;
+      margin-top: 12vh;
+      background: linear-gradient(135deg, #0a3d62, #3c6382);
+      color: white;
+      padding: 40px 30px;
       border-radius: 20px;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
       text-align: center;
-      max-width: 450px;
-      animation: fadeIn 1s ease;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      transition: transform 0.3s, box-shadow 0.3s;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
+    .logout-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.25);
     }
 
     .logout-icon {
-      font-size: 60px;
-      color: #e74c3c;
-      margin-bottom: 15px;
-      animation: pulse 2s infinite;
+      font-size: 70px;
+      margin-bottom: 20px;
+      color: #f1c40f;
     }
 
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
-    }
-
-    h1 {
-      font-size: 26px;
+    .logout-btn {
+      background-color: #f1c40f;
       color: #0a3d62;
-      margin-bottom: 10px;
-    }
-
-    p {
-      color: #555;
-      font-size: 15px;
-      margin-bottom: 25px;
-    }
-
-    .btn {
-      background: #e74c3c;
-      color: white;
-      border: none;
-      padding: 12px 25px;
-      font-size: 15px;
       font-weight: 600;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      display: inline-block;
+      padding: 12px 25px;
+      border-radius: 12px;
+      transition: 0.3s;
     }
 
-    .btn:hover {
-      background: #c0392b;
-      transform: translateY(-2px);
-    }
-
-    footer {
-      text-align: center;
-      position: absolute;
-      bottom: 20px;
-      font-size: 14px;
-      color: #888;
-      width: 100%;
+    .logout-btn:hover {
+      background-color: #d4ac0d;
+      transform: scale(1.05);
     }
   </style>
 </head>
+
 <body>
 
-  <div class="logout-container">
-    <div class="logout-icon">🚪</div>
-    <h1>You’ve Been Logged Out</h1>
-    <p>Thank you for your service, Emergency Support Team member.<br>Your session has ended securely.</p>
-    <a href="login.html" class="btn">Login Again</a>
-  </div>
+  <!-- NAVBAR -->
+  <nav class="flex items-center justify-between px-6 py-4 shadow-md bg-[#0a3d62] text-white">
+    <h1 class="text-2xl font-bold tracking-wide">Smart Healthcare — Emergency Support Team</h1>
+    <div class="flex gap-3">
+      <a href="dashboard.html" class="px-4 py-2 rounded-xl nav-btn">Dashboard</a>
+      <a href="emergency-patient-list.html" class="px-4 py-2 rounded-xl nav-btn">Emergency Patient List</a>
+      <a href="assign-ambulance.html" class="px-4 py-2 rounded-xl nav-btn">Assign Ambulance / Respond</a>
+      <a href="update-patient-condition.html" class="px-4 py-2 rounded-xl nav-btn">Update Patient Condition</a>
+      <a href="notify-doctor-admin.html" class="px-4 py-2 rounded-xl nav-btn">Notify Doctor / Admin</a>
+      <a href="emergency-reports.html" class="px-4 py-2 rounded-xl nav-btn">Emergency Reports</a>
+      <a href="view-available-doctors-beds.html" class="px-4 py-2 rounded-xl nav-btn">View Available Doctors / Beds</a>
+      <a href="logout.html" class="px-4 py-2 rounded-xl nav-btn bg-white text-[#0a3d62] font-semibold">Logout</a>
+    </div>
+  </nav>
 
-  <footer>
-    © 2025 Smart Healthcare System | Emergency Support Team
-  </footer>
+  <!-- LOGOUT CARD -->
+  <section class="flex-1 flex items-center justify-center">
+    <div class="logout-card">
+      <i class="ph ph-sign-out logout-icon"></i>
+      <h2 class="text-3xl font-bold mb-3">You Have Successfully Logged Out</h2>
+      <p class="text-gray-200 mb-6">Thank you for using Smart Healthcare Emergency System. Stay safe!</p>
+      <a href="login.html" class="logout-btn">Login Again</a>
+    </div>
+  </section>
 
 </body>
 </html>

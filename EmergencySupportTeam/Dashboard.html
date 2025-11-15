@@ -3,168 +3,152 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Emergency Support Team | Smart Healthcare</title>
+  <title>Emergency Dashboard | Smart Healthcare</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/phosphor-icons"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    /* Smooth transitions */
-    a, .card {
-      transition: all 0.3s ease;
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #cfe4ff, #eaf4ff);
     }
+
+    .nav-btn { transition: 0.3s; }
+    .nav-btn:hover {
+      background-color: #0a3d62;
+      color: white !important;
+      transform: translateY(-3px);
+    }
+
+    .card {
+      transition: 0.35s ease;
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.85);
+    }
+
     .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+      transform: translateY(-6px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
     }
-    .menu-enter {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.4s ease;
+
+    .fade {
+      animation: fadeIn 1s ease-in-out;
     }
-    .menu-open {
-      max-height: 500px;
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 
-<body class="bg-gray-100 text-gray-800 min-h-screen">
+<body class="min-h-screen">
 
-  <!-- Navbar -->
-  <nav class="bg-gradient-to-r from-red-700 to-orange-600 text-white shadow-md sticky top-0 z-50">
-    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-      <h1 class="text-2xl font-semibold flex items-center gap-2">
-        <i class="ph ph-first-aid-kit text-white"></i> Emergency Support Team
-      </h1>
+  <!-- NAVBAR -->
+  <nav class="bg-[#0a3d62] text-white px-8 py-5 shadow-xl flex flex-wrap justify-between items-center sticky top-0 z-50">
+    <h1 class="text-3xl font-bold tracking-wide">⚡ Emergency Support Team</h1>
 
-      <!-- Mobile Toggle -->
-      <button id="menuBtn" class="sm:hidden text-2xl focus:outline-none">
-        <i class="ph ph-list"></i>
-      </button>
-
-      <!-- Desktop Nav -->
-      <div class="hidden sm:flex flex-wrap justify-center items-center space-x-2">
-        <a href="emergency-dashboard.html" class="px-3 py-2 rounded bg-red-500 flex items-center gap-2 font-medium"><i class="ph ph-gauge"></i> Dashboard</a>
-        <a href="emergency-patient-list.html" class="px-3 py-2 rounded hover:bg-red-500 flex items-center gap-2"><i class="ph ph-notebook"></i> Emergency Patient List</a>
-        <a href="assign-ambulance.html" class="px-3 py-2 rounded hover:bg-red-500 flex items-center gap-2"><i class="ph ph-truck"></i> Assign Ambulance / Respond</a>
-        <a href="update-condition.html" class="px-3 py-2 rounded hover:bg-red-500 flex items-center gap-2"><i class="ph ph-heartbeat"></i> Update Patient Condition</a>
-        <a href="notify-doctor.html" class="px-3 py-2 rounded hover:bg-red-500 flex items-center gap-2"><i class="ph ph-bell"></i> Notify Doctor / Admin</a>
-        <a href="emergency-reports.html" class="px-3 py-2 rounded hover:bg-red-500 flex items-center gap-2"><i class="ph ph-clipboard-text"></i> Emergency Reports</a>
-        <a href="available-doctors.html" class="px-3 py-2 rounded hover:bg-red-500 flex items-center gap-2"><i class="ph ph-stethoscope"></i> View Available Doctors / Beds</a>
-        <a href="logout.html" class="px-3 py-2 rounded hover:bg-red-700 flex items-center gap-2"><i class="ph ph-sign-out"></i> Logout</a>
-      </div>
-    </div>
-
-    <!-- Mobile Menu -->
-    <div id="mobileMenu" class="menu-enter sm:hidden bg-red-600">
-      <a href="emergency-dashboard.html" class="block px-4 py-2 bg-red-500"><i class="ph ph-gauge"></i> Dashboard</a>
-      <a href="emergency-patient-list.html" class="block px-4 py-2 hover:bg-red-500"><i class="ph ph-notebook"></i> Emergency Patient List</a>
-      <a href="assign-ambulance.html" class="block px-4 py-2 hover:bg-red-500"><i class="ph ph-truck"></i> Assign Ambulance / Respond</a>
-      <a href="update-condition.html" class="block px-4 py-2 hover:bg-red-500"><i class="ph ph-heartbeat"></i> Update Patient Condition</a>
-      <a href="notify-doctor.html" class="block px-4 py-2 hover:bg-red-500"><i class="ph ph-bell"></i> Notify Doctor / Admin</a>
-      <a href="emergency-reports.html" class="block px-4 py-2 hover:bg-red-500"><i class="ph ph-clipboard-text"></i> Emergency Reports</a>
-      <a href="available-doctors.html" class="block px-4 py-2 hover:bg-red-500"><i class="ph ph-stethoscope"></i> View Available Doctors / Beds</a>
-      <a href="logout.html" class="block px-4 py-2 hover:bg-red-700"><i class="ph ph-sign-out"></i> Logout</a>
+    <div class="flex flex-wrap gap-3 mt-4 md:mt-0">
+      <a href="dashboard.html" class="nav-btn px-4 py-2 rounded-lg bg-white text-[#0a3d62] font-semibold shadow-md">Dashboard</a>
+      <a href="emergency-patient-list.html" class="nav-btn px-4 py-2 rounded-lg font-medium">Emergency Patient List</a>
+      <a href="assign-ambulance.html" class="nav-btn px-4 py-2 rounded-lg font-medium">Assign Ambulance / Respond</a>
+      <a href="update-patient-condition.html" class="nav-btn px-4 py-2 rounded-lg font-medium">Update Patient Condition</a>
+      <a href="notify-doctor-admin.html" class="nav-btn px-4 py-2 rounded-lg font-medium">Notify Doctor / Admin</a>
+      <a href="emergency-reports.html" class="nav-btn px-4 py-2 rounded-lg font-medium">Emergency Reports</a>
+      <a href="view-available-doctors-beds.html" class="nav-btn px-4 py-2 rounded-lg font-medium">View Available Doctors / Beds</a>
+      <a href="logout.html" class="nav-btn px-4 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 shadow-md">Logout</a>
     </div>
   </nav>
 
-  <!-- Main Content -->
-  <main class="container mx-auto px-4 py-10">
-    <!-- Title -->
-    <div class="mb-8 text-center">
-      <h1 class="text-4xl font-bold text-red-700 mb-2 flex justify-center items-center gap-2">
-        <i class="ph ph-gauge"></i> Emergency Dashboard
-      </h1>
-      <p class="text-gray-600">Real-time overview of emergency activities, patients, and response operations.</p>
-    </div>
+  <!-- HEADER -->
+  <header class="px-10 pt-10 fade">
+    <h2 class="text-4xl font-bold text-[#0a3d62] mb-2">Dashboard Overview</h2>
+    <p class="text-gray-600 text-lg">Real-time emergency support statistics & system activity.</p>
+  </header>
 
-    <!-- Overview Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-10">
-      <div class="card bg-white p-5 rounded-lg shadow text-center">
-        <i class="ph ph-user-circle text-red-600 text-3xl mb-2"></i>
-        <h3 class="text-xl font-semibold">15</h3>
-        <p class="text-gray-600">Active Emergency Patients</p>
-      </div>
-      <div class="card bg-white p-5 rounded-lg shadow text-center">
-        <i class="ph ph-truck text-red-600 text-3xl mb-2"></i>
-        <h3 class="text-xl font-semibold">6</h3>
-        <p class="text-gray-600">Ambulances in Transit</p>
-      </div>
-      <div class="card bg-white p-5 rounded-lg shadow text-center">
-        <i class="ph ph-stethoscope text-red-600 text-3xl mb-2"></i>
-        <h3 class="text-xl font-semibold">12</h3>
-        <p class="text-gray-600">Doctors on Duty</p>
-      </div>
-      <div class="card bg-white p-5 rounded-lg shadow text-center">
-        <i class="ph ph-bed text-red-600 text-3xl mb-2"></i>
-        <h3 class="text-xl font-semibold">28</h3>
-        <p class="text-gray-600">Beds Available</p>
-      </div>
-    </div>
+  <!-- STAT CARDS -->
+  <section class="p-10 fade">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
 
-    <!-- Emergency Activity Table -->
-    <div class="bg-white p-6 rounded-lg shadow mb-10 overflow-x-auto">
-      <h2 class="text-2xl font-semibold text-red-700 mb-4 flex items-center gap-2">
-        <i class="ph ph-activity"></i> Recent Emergency Activities
-      </h2>
-      <table class="w-full text-left border-collapse min-w-[600px]">
-        <thead>
-          <tr class="bg-red-100 text-red-700">
-            <th class="px-4 py-2">Time</th>
-            <th class="px-4 py-2">Patient</th>
-            <th class="px-4 py-2">Condition</th>
-            <th class="px-4 py-2">Action Taken</th>
-            <th class="px-4 py-2">Status</th>
+      <div class="card shadow-xl p-7 rounded-2xl border border-gray-200">
+        <h3 class="text-xl font-semibold text-[#0a3d62]">Total Emergency Patients</h3>
+        <p class="text-5xl font-bold mt-3 text-gray-700 counter">12</p>
+        <span class="text-sm text-green-600 font-medium">● Stable</span>
+      </div>
+
+      <div class="card shadow-xl p-7 rounded-2xl border border-gray-200">
+        <h3 class="text-xl font-semibold text-[#0a3d62]">Ambulances Active</h3>
+        <p class="text-5xl font-bold mt-3 text-gray-700 counter">5</p>
+        <span class="text-sm text-yellow-600 font-medium">● Busy</span>
+      </div>
+
+      <div class="card shadow-xl p-7 rounded-2xl border border-gray-200">
+        <h3 class="text-xl font-semibold text-[#0a3d62]">Critical Patients</h3>
+        <p class="text-5xl font-bold mt-3 text-gray-700 counter">3</p>
+        <span class="text-sm text-red-500 font-medium">● High Priority</span>
+      </div>
+
+      <div class="card shadow-xl p-7 rounded-2xl border border-gray-200">
+        <h3 class="text-xl font-semibold text-[#0a3d62]">Bed Availability</h3>
+        <p class="text-5xl font-bold mt-3 text-gray-700 counter">27</p>
+        <span class="text-sm text-green-600 font-medium">● Available</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- QUICK ACTIONS -->
+  <section class="px-10 fade">
+    <h3 class="text-2xl font-semibold text-[#0a3d62] mb-4">Quick Actions</h3>
+
+    <div class="flex flex-wrap gap-5">
+      <a href="assign-ambulance.html" class="px-6 py-3 rounded-xl bg-blue-600 text-white font-medium shadow-lg hover:bg-blue-700">🚑 Dispatch Ambulance</a>
+      <a href="notify-doctor-admin.html" class="px-6 py-3 rounded-xl bg-green-600 text-white font-medium shadow-lg hover:bg-green-700">📢 Notify Doctor</a>
+      <a href="emergency-reports.html" class="px-6 py-3 rounded-xl bg-purple-600 text-white font-medium shadow-lg hover:bg-purple-700">📊 Generate Report</a>
+    </div>
+  </section>
+
+  <!-- RECENT CASES TABLE -->
+  <section class="px-10 py-10 fade">
+    <h3 class="text-2xl font-semibold text-[#0a3d62] mb-4">Recent Emergency Cases</h3>
+
+    <div class="overflow-auto rounded-xl shadow-xl">
+      <table class="w-full bg-white rounded-xl">
+        <thead class="bg-[#0a3d62] text-white">
+          <tr>
+            <th class="px-6 py-3 text-left">Patient</th>
+            <th class="px-6 py-3 text-left">Condition</th>
+            <th class="px-6 py-3 text-left">Ambulance</th>
+            <th class="px-6 py-3 text-left">Status</th>
           </tr>
         </thead>
+
         <tbody>
-          <tr class="border-b hover:bg-gray-50 transition">
-            <td class="px-4 py-2">10:32 AM</td>
-            <td class="px-4 py-2">Rahim Uddin</td>
-            <td class="px-4 py-2">Cardiac Arrest</td>
-            <td class="px-4 py-2">Ambulance Dispatched</td>
-            <td class="px-4 py-2 text-yellow-600 font-medium">In Transit</td>
+          <tr class="border-b">
+            <td class="px-6 py-4">Rahim Uddin</td>
+            <td class="px-6 py-4 text-red-600 font-semibold">Critical</td>
+            <td class="px-6 py-4">A-102</td>
+            <td class="px-6 py-4"><span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm">High Priority</span></td>
           </tr>
-          <tr class="border-b hover:bg-gray-50 transition">
-            <td class="px-4 py-2">9:45 AM</td>
-            <td class="px-4 py-2">Mita Akter</td>
-            <td class="px-4 py-2">Severe Injury</td>
-            <td class="px-4 py-2">Doctor Notified</td>
-            <td class="px-4 py-2 text-green-600 font-medium">Under Treatment</td>
+
+          <tr class="border-b">
+            <td class="px-6 py-4">Mizanur Rahman</td>
+            <td class="px-6 py-4 text-yellow-600 font-semibold">Moderate</td>
+            <td class="px-6 py-4">A-087</td>
+            <td class="px-6 py-4"><span class="bg-yellow-100 text-yellow-600 px-3 py-1 rounded-full text-sm">In Treatment</span></td>
+          </tr>
+
+          <tr>
+            <td class="px-6 py-4">Hasina Khatun</td>
+            <td class="px-6 py-4 text-green-700 font-semibold">Stable</td>
+            <td class="px-6 py-4">—</td>
+            <td class="px-6 py-4"><span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">Recovered</span></td>
           </tr>
         </tbody>
+
       </table>
     </div>
+  </section>
 
-    <!-- Quick Info Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="card bg-white p-5 rounded-lg shadow">
-        <h2 class="text-xl font-semibold mb-2 flex items-center gap-2 text-red-700"><i class="ph ph-clock"></i> Response Time</h2>
-        <p class="text-gray-600 mb-2">Average emergency response time: <span class="font-semibold">6.5 minutes</span>.</p>
-        <a href="emergency-reports.html" class="text-red-600 font-medium hover:underline">View Details →</a>
-      </div>
-      <div class="card bg-white p-5 rounded-lg shadow">
-        <h2 class="text-xl font-semibold mb-2 flex items-center gap-2 text-red-700"><i class="ph ph-map-pin"></i> Ambulance Tracking</h2>
-        <p class="text-gray-600 mb-2">All active ambulances are currently on route. Click below for live tracking.</p>
-        <a href="assign-ambulance.html" class="text-red-600 font-medium hover:underline">Track Now →</a>
-      </div>
-      <div class="card bg-white p-5 rounded-lg shadow">
-        <h2 class="text-xl font-semibold mb-2 flex items-center gap-2 text-red-700"><i class="ph ph-warning-circle"></i> Alerts</h2>
-        <p class="text-gray-600">2 new critical alerts. Immediate response required.</p>
-      </div>
-    </div>
-  </main>
-
-  <footer class="mt-16 text-center py-4 text-gray-500">
-    © 2025 Smart Healthcare Emergency Response Division. All Rights Reserved.
-  </footer>
-
-  <script>
-    const menuBtn = document.getElementById("menuBtn");
-    const mobileMenu = document.getElementById("mobileMenu");
-
-    menuBtn.addEventListener("click", () => {
-      mobileMenu.classList.toggle("menu-open");
-    });
-  </script>
 </body>
 </html>
