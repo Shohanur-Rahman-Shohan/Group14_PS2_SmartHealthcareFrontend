@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,20 +9,30 @@
   <script src="https://unpkg.com/phosphor-icons"></script>
 
   <style>
-    a, .card, button {
+    a,
+    .card,
+    button {
       transition: all 0.3s ease;
     }
+
     .card:hover {
       transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
     }
+
     .menu-enter {
       max-height: 0;
       overflow: hidden;
       transition: max-height 0.4s ease;
     }
+
     .menu-open {
       max-height: 500px;
+    }
+
+    .gradient-bg {
+      background: linear-gradient(135deg, #e0f2ff, #b3e5ff, #99dbff);
+      background-attachment: fixed;
     }
 
     /* ✅ Toast with animation + no click block */
@@ -34,13 +45,15 @@
       padding: 12px 20px;
       border-radius: 8px;
       font-weight: 500;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       opacity: 0;
       transform: translateY(-20px);
       transition: all 0.4s ease;
       z-index: 50;
-      pointer-events: none; /* 🩵 prevent blocking clicks */
+      pointer-events: none;
+      /* 🩵 prevent blocking clicks */
     }
+
     .toast.show {
       opacity: 1;
       transform: translateY(0);
@@ -49,7 +62,7 @@
   </style>
 </head>
 
-<body class="bg-gray-100 text-gray-800 min-h-screen">
+<body class="gradient-bg text-gray-800 min-h-screen">
 
   <!-- Navbar -->
   <nav class="bg-sky-700 text-white shadow-md sticky top-0 z-40">
@@ -65,25 +78,39 @@
 
       <!-- Desktop Nav -->
       <div class="hidden sm:flex flex-wrap justify-center items-center space-x-2">
-        <a href="dashboard.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-gauge"></i> Dashboard</a>
-        <a href="book-appointment.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-calendar-check"></i> Book Appointment</a>
-        <a href="my-doctors.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-stethoscope"></i> My Doctors</a>
-        <a href="my-prescriptions.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-pill"></i> My Prescriptions</a>
-        <a href="test-reports.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-flask"></i> My Test Reports</a>
-        <a href="billing.html" class="px-3 py-2 rounded bg-sky-500 flex items-center gap-2 font-medium"><i class="ph ph-credit-card"></i> Billing & Insurance</a>
-        <a href="notifications.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-bell"></i> Notifications</a>
+        <a href="dashboard.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i
+            class="ph ph-gauge"></i> Dashboard</a>
+        <a href="book-appointment.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i
+            class="ph ph-calendar-check"></i> Book Appointment</a>
+        <a href="my-doctors.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i
+            class="ph ph-stethoscope"></i> My Doctors</a>
+        <a href="my-prescriptions.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i
+            class="ph ph-pill"></i> My Prescriptions</a>
+        <a href="test-reports.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i
+            class="ph ph-flask"></i> My Test Reports</a>
+        <a href="billing.html" class="px-3 py-2 rounded bg-sky-500 flex items-center gap-2 font-medium"><i
+            class="ph ph-credit-card"></i> Billing & Insurance</a>
+        <a href="notifications.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i
+            class="ph ph-bell"></i> Notifications</a>
+        <a href="logout.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i
+            class="ph ph-sign-out"></i> Logout</a>
       </div>
     </div>
 
     <!-- Mobile Menu -->
     <div id="mobileMenu" class="menu-enter sm:hidden bg-sky-600">
       <a href="dashboard.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-gauge"></i> Dashboard</a>
-      <a href="book-appointment.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-calendar-check"></i> Book Appointment</a>
-      <a href="my-doctors.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-stethoscope"></i> My Doctors</a>
-      <a href="my-prescriptions.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-pill"></i> My Prescriptions</a>
-      <a href="test-reports.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-flask"></i> My Test Reports</a>
+      <a href="book-appointment.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-calendar-check"></i> Book
+        Appointment</a>
+      <a href="my-doctors.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-stethoscope"></i> My
+        Doctors</a>
+      <a href="my-prescriptions.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-pill"></i> My
+        Prescriptions</a>
+      <a href="test-reports.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-flask"></i> My Test
+        Reports</a>
       <a href="billing.html" class="block px-4 py-2 bg-sky-500"><i class="ph ph-credit-card"></i> Billing</a>
       <a href="notifications.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-bell"></i> Notifications</a>
+      <a href="logout.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-sign-out"></i> Logout</a>
     </div>
   </nav>
 
@@ -148,7 +175,8 @@
 
     <!-- Payment Action -->
     <div class="text-center">
-      <button id="payBtn" class="bg-sky-600 hover:bg-sky-700 text-white px-6 py-3 rounded-lg text-lg font-semibold flex items-center justify-center gap-2 mx-auto">
+      <button id="payBtn"
+        class="bg-sky-600 hover:bg-sky-700 text-white px-6 py-3 rounded-lg text-lg font-semibold flex items-center justify-center gap-2 mx-auto">
         <i class="ph ph-check-circle"></i> Pay Bill
       </button>
     </div>
@@ -180,4 +208,5 @@
     });
   </script>
 </body>
+
 </html>

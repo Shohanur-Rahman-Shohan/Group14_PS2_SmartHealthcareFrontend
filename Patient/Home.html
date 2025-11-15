@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,25 +10,35 @@
 
   <style>
     /* Smooth transitions */
-    a, .card {
+    a,
+    .card {
       transition: all 0.3s ease;
     }
+
     .card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
     }
+
     .menu-enter {
       max-height: 0;
       overflow: hidden;
       transition: max-height 0.4s ease;
     }
+
     .menu-open {
-      max-height: 500px; /* enough space for links */
+      max-height: 500px;
+      /* enough space for links */
+    }
+
+    .gradient-bg {
+      background: linear-gradient(135deg, #e0f2ff, #b3e5ff, #99dbff);
+      background-attachment: fixed;
     }
   </style>
 </head>
 
-<body class="bg-gray-100 text-gray-800 min-h-screen">
+<body class="gradient-bg text-gray-800 min-h-screen">
 
   <!-- Navbar -->
   <nav class="bg-sky-700 text-white shadow-md sticky top-0 z-50">
@@ -43,24 +54,38 @@
 
       <!-- Nav Links (Desktop) -->
       <div class="hidden sm:flex flex-wrap justify-center items-center space-x-2">
-        <a href="dashboard.html" class="px-3 py-2 rounded bg-sky-500 flex items-center gap-2 font-medium"><i class="ph ph-gauge"></i> Dashboard</a>
-        <a href="book-appointment.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-calendar-check"></i> Book Appointment</a>
-        <a href="my-doctors.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-stethoscope"></i> My Doctors</a>
-        <a href="my-prescriptions.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-pill"></i> My Prescriptions</a>
-        <a href="test-reports.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-flask"></i> My Test Reports</a>
-        <a href="billing.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-credit-card"></i> Billing & Insurance</a>
-        <a href="notifications.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i class="ph ph-bell"></i> Notifications</a>
+        <a href="dashboard.html" class="px-3 py-2 rounded bg-sky-500 flex items-center gap-2 font-medium"><i
+            class="ph ph-gauge"></i> Dashboard</a>
+        <a href="book-appointment.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i
+            class="ph ph-calendar-check"></i> Book Appointment</a>
+        <a href="my-doctors.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i
+            class="ph ph-stethoscope"></i> My Doctors</a>
+        <a href="my-prescriptions.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i
+            class="ph ph-pill"></i> My Prescriptions</a>
+        <a href="test-reports.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i
+            class="ph ph-flask"></i> My Test Reports</a>
+        <a href="billing.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i
+            class="ph ph-credit-card"></i> Billing & Insurance</a>
+        <a href="notifications.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i
+            class="ph ph-bell"></i> Notifications</a>
+            <a href="logout.html" class="px-3 py-2 rounded hover:bg-sky-500 flex items-center gap-2"><i
+            class="ph ph-sign-out"></i> Logout</a>
       </div>
     </div>
 
     <!-- Mobile Menu -->
     <div id="mobileMenu" class="menu-enter sm:hidden bg-sky-600">
       <a href="dashboard.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-gauge"></i> Dashboard</a>
-      <a href="book-appointment.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-calendar-check"></i> Book Appointments</a>
-      <a href="my-doctors.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-stethoscope"></i> My Doctors</a>
-      <a href="my-prescriptions.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-pill"></i> My Prescriptions</a>
-      <a href="test-reports.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-flask"></i> My Test Reports</a>
-      <a href="billing.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-credit-card"></i> Billing & Insurance</a>
+      <a href="book-appointment.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-calendar-check"></i> Book
+        Appointments</a>
+      <a href="my-doctors.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-stethoscope"></i> My
+        Doctors</a>
+      <a href="my-prescriptions.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-pill"></i> My
+        Prescriptions</a>
+      <a href="test-reports.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-flask"></i> My Test
+        Reports</a>
+      <a href="billing.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-credit-card"></i> Billing &
+        Insurance</a>
       <a href="notifications.html" class="block px-4 py-2 hover:bg-sky-500"><i class="ph ph-bell"></i> Notifications</a>
     </div>
   </nav>
@@ -69,7 +94,8 @@
   <main class="container mx-auto px-4 py-10">
     <!-- Title -->
     <div class="mb-8 text-center">
-      <h1 class="text-4xl font-bold text-sky-700 mb-2 flex justify-center items-center gap-2"><i class="ph ph-gauge"></i> Patient Dashboard</h1>
+      <h1 class="text-4xl font-bold text-sky-700 mb-2 flex justify-center items-center gap-2"><i
+          class="ph ph-gauge"></i> Patient Dashboard</h1>
       <p class="text-gray-600">Welcome back! Here’s an overview of your health activity.</p>
     </div>
 
@@ -99,7 +125,8 @@
 
     <!-- Upcoming Appointments -->
     <div class="bg-white p-6 rounded-lg shadow mb-10 overflow-x-auto">
-      <h2 class="text-2xl font-semibold text-sky-700 mb-4 flex items-center gap-2"><i class="ph ph-calendar"></i> Upcoming Appointments</h2>
+      <h2 class="text-2xl font-semibold text-sky-700 mb-4 flex items-center gap-2"><i class="ph ph-calendar"></i>
+        Upcoming Appointments</h2>
       <table class="w-full text-left border-collapse min-w-[600px]">
         <thead>
           <tr class="bg-sky-100 text-sky-700">
@@ -132,7 +159,8 @@
     <!-- Health Insights -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div class="card bg-white p-5 rounded-lg shadow">
-        <h2 class="text-xl font-semibold mb-2 flex items-center gap-2 text-sky-700"><i class="ph ph-heartbeat"></i> Health Summary</h2>
+        <h2 class="text-xl font-semibold mb-2 flex items-center gap-2 text-sky-700"><i class="ph ph-heartbeat"></i>
+          Health Summary</h2>
         <ul class="text-gray-600 space-y-1">
           <li>💓 Heart Rate: <span class="font-medium">76 bpm</span></li>
           <li>🩸 Blood Pressure: <span class="font-medium">118/78 mmHg</span></li>
@@ -140,13 +168,16 @@
         </ul>
       </div>
       <div class="card bg-white p-5 rounded-lg shadow">
-        <h2 class="text-xl font-semibold mb-2 flex items-center gap-2 text-sky-700"><i class="ph ph-flask"></i> Latest Test Reports</h2>
+        <h2 class="text-xl font-semibold mb-2 flex items-center gap-2 text-sky-700"><i class="ph ph-flask"></i> Latest
+          Test Reports</h2>
         <p class="text-gray-600 mb-2">Your recent blood test and ECG results are available.</p>
         <a href="test-reports.html" class="text-sky-600 font-medium hover:underline">View Reports →</a>
       </div>
       <div class="card bg-white p-5 rounded-lg shadow">
-        <h2 class="text-xl font-semibold mb-2 flex items-center gap-2 text-sky-700"><i class="ph ph-brain"></i> Smart Health Tip</h2>
-        <p class="text-gray-600">Drink at least 2L of water daily and get 7–8 hours of sleep for optimal heart health ❤️</p>
+        <h2 class="text-xl font-semibold mb-2 flex items-center gap-2 text-sky-700"><i class="ph ph-brain"></i> Smart
+          Health Tip</h2>
+        <p class="text-gray-600">Drink at least 2L of water daily and get 7–8 hours of sleep for optimal heart health ❤️
+        </p>
       </div>
     </div>
   </main>
@@ -164,4 +195,5 @@
     });
   </script>
 </body>
+
 </html>
